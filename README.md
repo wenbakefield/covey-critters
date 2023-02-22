@@ -11,5 +11,5 @@ As we are implementing a game with a carnival theme, we have to give a prize to 
 2. As a player I want to be able to play a carnival type game (examples: turn the wheel, spacebar game - make it look like strength test games) so that I can win a pet based on my score
 3. As a player I want to see the score, after I played a carnival type game (or space bar game)
 ## Design Implementation
-![UML](documentation/documentation/CS4530Group205UML.svg)
+![UML](https://github.com/neu-cs4530/spring-23-team-205/blob/main/documentation/CS4530Group205UML.svg)
 
