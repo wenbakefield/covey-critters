@@ -520,32 +520,22 @@
                  "y":1056.00016666667
                 }, 
                 {
-                 "type":"ConversationArea",
+                 "type":"PosterSessionArea",
                  "height":224,
                  "id":31,
                  "name":"Basement Dining Table 2",
+                 "properties":[
+                     {
+                      "name":"poster",
+                      "type":"string",
+                      "value":"",
+                      "stars": 0
+                     }],
                  "rotation":0,
                  "visible":true,
                  "width":164.667,
                  "x":3482.99983333333,
                  "y":1058.66666666667
-                }, 
-                {
-                 "type":"ViewingArea",
-                 "height":123.333333333333,
-                 "id":35,
-                 "name":"Fish tank",
-                 "properties":[
-                        {
-                         "name":"video",
-                         "type":"string",
-                         "value":"https:\/\/www.youtube.com\/watch?v=l40Ef1dg-6s"
-                        }],
-                 "rotation":0,
-                 "visible":true,
-                 "width":141.666666666667,
-                 "x":3248.33333333333,
-                 "y":868.333333333333
                 }, 
                 {
                  "type":"ViewingArea",

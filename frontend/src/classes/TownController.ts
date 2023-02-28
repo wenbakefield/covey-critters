@@ -6,6 +6,7 @@ import { io } from 'socket.io-client';
 import TypedEmitter from 'typed-emitter';
 import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
+import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
 import { TownsService, TownsServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
@@ -15,11 +16,13 @@ import {
   PlayerLocation,
   TownSettingsUpdate,
   ViewingArea as ViewingAreaModel,
+  PosterSessionArea as PosterSessionAreaModel,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isViewingArea } from '../types/TypeUtils';
+import { isConversationArea, isViewingArea, isPosterSessionArea } from '../types/TypeUtils';
 import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
+import PosterSessionAreaController from './PosterSessionAreaController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY = 300;
 
@@ -69,6 +72,11 @@ export type TownEvents = {
    * the town controller's record of viewing areas.
    */
   viewingAreasChanged: (newViewingAreas: ViewingAreaController[]) => void;
+  /**
+   * An event that indicates that the set of poster session areas has changed. This event is emitted after updating
+   * the town controller's record of poster session areas.
+   */
+  posterSessionAreasChanged: (newPosterSessionAreas: PosterSessionAreaController[]) => void;
   /**
    * An event that indicates that a new chat message has been received, which is the parameter passed to the listener
    */
@@ -190,6 +198,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   private _viewingAreas: ViewingAreaController[] = [];
 
+  private _posterSessionAreas: PosterSessionAreaController[] = [];
+
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
     super();
     this._townID = townID;
@@ -309,6 +319,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this.emit('viewingAreasChanged', newViewingAreas);
   }
 
+  public get posterSessionAreas() {
+    return this._posterSessionAreas;
+  }
+
+  public set posterSessionAreas(newPosterSessionAreas: PosterSessionAreaController[]) {
+    this._posterSessionAreas = newPosterSessionAreas;
+    this.emit('posterSessionAreasChanged', newPosterSessionAreas);
+  }
+
   /**
    * Begin interacting with an interactable object. Emits an event to all listeners.
    * @param interactedObj
@@ -401,32 +420,37 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     /**
      * When an interactable's state changes, push that update into the relevant controller, which is assumed
-     * to be either a Viewing Area or a Conversation Area, and which is assumed to already be represented by a
-     * ViewingAreaController or ConversationAreaController that this TownController has.
+     * to be either a Viewing Area, a Poster Session Area, or a Conversation Area, and which is assumed to already
+     * be represented by a ViewingAreaController, PosterSessionAreaController or ConversationAreaController that this TownController has.
      *
      * If a conversation area transitions from empty to occupied (or occupied to empty), this handler will emit
      * a conversationAreasChagned event to listeners of this TownController.
      *
      * If the update changes properties of the interactable, the interactable is also expected to emit its own
-     * events (@see ViewingAreaController and @see ConversationAreaController)
+     * events (@see ViewingAreaController and @see ConversationAreaController and @see PosterSessionAreaController)
      */
     this._socket.on('interactableUpdate', interactable => {
       if (isConversationArea(interactable)) {
-        const updatedConversationArea = this.conversationAreas.find(c => c.id === interactable.id);
-        if (updatedConversationArea) {
-          const emptyNow = updatedConversationArea.isEmpty();
-          updatedConversationArea.topic = interactable.topic;
-          updatedConversationArea.occupants = this._playersByIDs(interactable.occupantsByID);
-          const emptyAfterChange = updatedConversationArea.isEmpty();
-          if (emptyNow !== emptyAfterChange) {
+        const relArea = this.conversationAreas.find(area => area.id == interactable.id);
+        if (relArea) {
+          const startsEmpty = relArea.isEmpty();
+          // do the update
+          relArea.topic = interactable.topic;
+          relArea.occupants = this._playersByIDs(interactable.occupantsByID);
+          if (startsEmpty != relArea.isEmpty()) {
             this.emit('conversationAreasChanged', this._conversationAreasInternal);
           }
         }
       } else if (isViewingArea(interactable)) {
-        const updatedViewingArea = this._viewingAreas.find(
-          eachArea => eachArea.id === interactable.id,
-        );
-        updatedViewingArea?.updateFrom(interactable);
+        const relArea = this.viewingAreas.find(area => area.id == interactable.id);
+        if (relArea) {
+          relArea.updateFrom(interactable);
+        }
+      } else if (isPosterSessionArea(interactable)) {
+        const relArea = this.posterSessionAreas.find(area => area.id == interactable.id);
+        if (relArea) {
+          relArea.updateFrom(interactable);
+        }
       }
     });
   }
@@ -509,6 +533,19 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
+   * Create a new poster session area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new poster session area - it will be
+   * updated once the townService creates the area and emits an interactableUpdate
+   *
+   * @param newArea
+   */
+  async createPosterSessionArea(newArea: PosterSessionAreaModel) {
+    // TODO catch the error if the file type is invalid
+    console.warn('Intermediate poster session: ' + JSON.stringify(newArea, null, 4));
+    await this._townsService.createPosterSessionArea(this.townID, this.sessionToken, newArea);
+  }
+
+  /**
    * Disconnect from the town, notifying the townService that we are leaving and returning
    * to the login page
    */
@@ -540,6 +577,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
         this._conversationAreas = [];
         this._viewingAreas = [];
+        this._posterSessionAreas = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
             this._conversationAreasInternal.push(
@@ -550,6 +588,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             );
           } else if (isViewingArea(eachInteractable)) {
             this._viewingAreas.push(new ViewingAreaController(eachInteractable));
+          } else if (isPosterSessionArea(eachInteractable)) {
+            this._posterSessionAreas.push(new PosterSessionAreaController(eachInteractable));
           }
         });
         this._userID = initialData.userID;
@@ -588,12 +628,77 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
+   * Retrieve the poster session area controller that corresponds to a posterSessionAreaModel, creating one if necessary
+   *
+   * @param posterSessionArea
+   * @returns
+   */
+  public getPosterSessionAreaController(
+    posterSessionArea: PosterSesssionArea,
+  ): PosterSessionAreaController {
+    const existingController = this._posterSessionAreas.find(
+      eachExistingArea => eachExistingArea.id === posterSessionArea.name,
+    );
+    if (existingController) {
+      return existingController;
+    } else {
+      const newController = new PosterSessionAreaController({
+        id: posterSessionArea.name,
+        title: posterSessionArea.defaultTitle,
+        stars: 0,
+        imageContents: undefined,
+      });
+      this._posterSessionAreas.push(newController);
+      return newController;
+    }
+  }
+
+  /**
    * Emit a viewing area update to the townService
    * @param viewingArea The Viewing Area Controller that is updated and should be emitted
    *    with the event
    */
   public emitViewingAreaUpdate(viewingArea: ViewingAreaController) {
     this._socket.emit('interactableUpdate', viewingArea.viewingAreaModel());
+  }
+
+  /**
+   * Emit a poster session area update to the townService
+   * @param posterSessionArea The Poster Session Area Controller that is updated and should be emitted
+   *    with the event
+   */
+  public emitPosterSessionAreaUpdate(posterSessionArea: PosterSessionAreaController) {
+    this._socket.emit('interactableUpdate', posterSessionArea.posterSessionAreaModel());
+  }
+
+  /**
+   * Get the image contents for a specified poster session area (specified via poster session area controller)
+   * @param posterSessionArea the poster session area controller
+   * @returns a promise wrapping the contents of the poster session area's image (i.e. the string)
+   */
+  public async getPosterSessionAreaImageContents(
+    posterSessionArea: PosterSessionAreaController,
+  ): Promise<string> {
+    return this._townsService.getPosterAreaImageContents(
+      this.townID,
+      posterSessionArea.id,
+      this.sessionToken,
+    );
+  }
+
+  /**
+   * Increment the number of stars for a specified poster session area (specified via poster session area controller)
+   * @param posterSessionArea the poster session area controller
+   * @returns a promise wrapping the new number of stars the poster has
+   */
+  public async incrementPosterSessionAreaStars(
+    posterSessionArea: PosterSessionAreaController,
+  ): Promise<number> {
+    return this._townsService.incrementPosterAreaStars(
+      this.townID,
+      posterSessionArea.id,
+      this.sessionToken,
+    );
   }
 
   /**
@@ -629,50 +734,28 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
  * @returns an object with the properties "friendlyName" and "isPubliclyListed",
  *  representing the current settings of the current town
  */
-export function useTownSettings() {
+export function useTownSettings(): { friendlyName: string; isPubliclyListed: boolean } {
   const townController = useTownController();
-  const [friendlyName, setFriendlyName] = useState<string>(townController.friendlyName);
-  const [isPubliclyListed, setIsPubliclyListed] = useState<boolean>(
-    townController.townIsPubliclyListed,
-  );
+  const [name, setName] = useState<string>(townController.friendlyName);
+  const [listed, setListed] = useState<boolean>(townController.townIsPubliclyListed);
   useEffect(() => {
-    const updateTownSettings = (update: TownSettingsUpdate) => {
-      const newName = update.friendlyName;
-      const newPublicSetting = update.isPubliclyListed;
-      if (newName !== undefined) {
-        setFriendlyName(newName);
+    const settingsUpdater = (upt: TownSettingsUpdate) => {
+      const uptname = upt.friendlyName;
+      const uptlisted = upt.isPubliclyListed;
+      // might only be updating one setting; dont update if undefined
+      if (uptname) {
+        setName(uptname);
       }
-      if (newPublicSetting !== undefined) {
-        setIsPubliclyListed(newPublicSetting);
+      if (uptlisted != undefined) {
+        setListed(uptlisted);
       }
     };
-    townController.addListener('townSettingsUpdated', updateTownSettings);
+    townController.addListener('townSettingsUpdated', settingsUpdater);
     return () => {
-      townController.removeListener('townSettingsUpdated', updateTownSettings);
+      townController.removeListener('townSettingsUpdated', settingsUpdater);
     };
   }, [townController]);
-  return { friendlyName, isPubliclyListed };
-}
-
-/**
- * A react hook to retrieve a viewing area controller.
- *
- * This function will throw an error if the viewing area controller does not exist.
- *
- * This hook relies on the TownControllerContext.
- *
- * @param viewingAreaID The ID of the viewing area to retrieve the controller for
- *
- * @throws Error if there is no viewing area controller matching the specifeid ID
- */
-export function useViewingAreaController(viewingAreaID: string): ViewingAreaController {
-  const townController = useTownController();
-
-  const viewingArea = townController.viewingAreas.find(eachArea => eachArea.id == viewingAreaID);
-  if (!viewingArea) {
-    throw new Error(`Requested viewing area ${viewingAreaID} does not exist`);
-  }
-  return viewingArea;
+  return { friendlyName: name, isPubliclyListed: listed };
 }
 
 /**
@@ -687,17 +770,19 @@ export function useViewingAreaController(viewingAreaID: string): ViewingAreaCont
 export function useActiveConversationAreas(): ConversationAreaController[] {
   const townController = useTownController();
   const [conversationAreas, setConversationAreas] = useState<ConversationAreaController[]>(
-    townController.conversationAreas.filter(eachArea => !eachArea.isEmpty()),
+    townController.conversationAreas.filter(area => !area.isEmpty()),
   );
+
   useEffect(() => {
-    const updater = (allAreas: ConversationAreaController[]) => {
-      setConversationAreas(allAreas.filter(eachArea => !eachArea.isEmpty()));
+    const activeSetter = (areas: ConversationAreaController[]) => {
+      setConversationAreas(areas.filter(area => !area.isEmpty()));
     };
-    townController.addListener('conversationAreasChanged', updater);
+    townController.addListener('conversationAreasChanged', activeSetter);
     return () => {
-      townController.removeListener('conversationAreasChanged', updater);
+      townController.removeListener('conversationAreasChanged', activeSetter);
     };
   }, [townController, setConversationAreas]);
+
   return conversationAreas;
 }
 
@@ -716,12 +801,57 @@ export function usePlayers(): PlayerController[] {
   const townController = useTownController();
   const [players, setPlayers] = useState<PlayerController[]>(townController.players);
   useEffect(() => {
+    // no listener for 'playerMoved'
     townController.addListener('playersChanged', setPlayers);
     return () => {
       townController.removeListener('playersChanged', setPlayers);
     };
   }, [townController, setPlayers]);
   return players;
+}
+
+/**
+ * A react hook to retrieve a viewing area controller.
+ *
+ * This function will throw an error if the viewing area controller does not exist.
+ *
+ * This hook relies on the TownControllerContext.
+ *
+ * @param viewingAreaID The ID of the viewing area to retrieve the controller for
+ *
+ * @throws Error if there is no viewing area controller matching the specifeid ID
+ */
+export function useViewingAreaController(viewingAreaID: string): ViewingAreaController {
+  const townController = useTownController();
+  const ret = townController.viewingAreas.find(eachArea => eachArea.id === viewingAreaID);
+  if (!ret) {
+    throw new Error(`Unable to locate viewing area id ${viewingAreaID}`);
+  }
+  return ret;
+}
+
+/**
+ * A react hook to retrieve a poster session area controller.
+ *
+ * This function will throw an error if the poster session area controller does not exist.
+ *
+ * This hook relies on the TownControllerContext.
+ *
+ * @param posterSessionAreaID The ID of the viewing area to retrieve the controller for
+ *
+ * @throws Error if there is no poster session area controller matching the specifeid ID
+ */
+export function usePosterSessionAreaController(
+  posterSessionAreaID: string,
+): PosterSessionAreaController {
+  const townController = useTownController();
+  const ret = townController.posterSessionAreas.find(
+    eachArea => eachArea.id === posterSessionAreaID,
+  );
+  if (!ret) {
+    throw new Error(`Unable to locate poster session area id ${posterSessionAreaID}`);
+  }
+  return ret;
 }
 
 function samePlayers(a1: PlayerController[], a2: PlayerController[]) {

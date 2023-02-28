@@ -22,6 +22,7 @@ import {
   ServerToClientEvents,
   SocketData,
   ViewingArea,
+  PosterSessionArea,
 } from './types/CoveyTownSocket';
 
 /**
@@ -197,6 +198,10 @@ export function expectArraysToContainSameMembers<T>(actual: T[], expected: T[]):
 
 export function isViewingArea(interactable: Interactable): interactable is ViewingArea {
   return 'isPlaying' in interactable;
+}
+
+export function isPosterSessionArea(interactable: Interactable): interactable is PosterSessionArea {
+  return 'stars' in interactable;
 }
 
 export function isConversationArea(interactable: Interactable): interactable is ConversationArea {

@@ -2,6 +2,7 @@ import { mock, mockClear, MockProxy } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { LoginController } from '../contexts/LoginControllerContext';
 import { ViewingArea } from '../generated/client';
+import { PosterSessionArea } from '../generated/client';
 import {
   EventNames,
   getEventListener,
@@ -17,8 +18,9 @@ import {
   ServerToClientEvents,
   TownJoinResponse,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isViewingArea } from '../types/TypeUtils';
+import { isConversationArea, isPosterSessionArea, isViewingArea } from '../types/TypeUtils';
 import PlayerController from './PlayerController';
+import PosterSessionAreaController from './PosterSessionAreaController';
 import TownController, { TownEvents } from './TownController';
 import ViewingAreaController from './ViewingAreaController';
 
@@ -400,6 +402,64 @@ describe('TownController', () => {
           viewingArea.video = nanoid();
           eventListener(viewingArea);
           expect(listener).toBeCalledWith(viewingArea.video);
+        });
+      });
+      describe('[REE1] PosterSessionAreaController Poster Session Area updates', () => {
+        function posterSessionAreaOnTown() {
+          return {
+            ...(townJoinResponse.interactables.find(eachInteractable =>
+              isPosterSessionArea(eachInteractable),
+            ) as PosterSessionArea),
+          };
+        }
+        let posterSessionArea: PosterSessionArea;
+        let posterSessionAreaController: PosterSessionAreaController;
+        let eventListener: (update: PosterSessionArea) => void;
+        beforeEach(() => {
+          posterSessionArea = posterSessionAreaOnTown();
+          const controller = testController.posterSessionAreas.find(
+            eachArea => eachArea.id === posterSessionArea.id,
+          );
+          if (!controller) {
+            fail(
+              `Could not find postersession area controller for poster session area ${posterSessionArea.id}`,
+            );
+          }
+          posterSessionAreaController = controller;
+          eventListener = getEventListener(mockSocket, 'interactableUpdate');
+        });
+        it('[REE1] interactableUpdate and poster hooks Updates the poster session area model', () => {
+          posterSessionArea.imageContents = nanoid();
+          posterSessionArea.stars++;
+          posterSessionArea.title = 'New Title';
+
+          eventListener(posterSessionArea);
+
+          expect(posterSessionAreaController.posterSessionAreaModel()).toEqual(posterSessionArea);
+        });
+        it('[REE1] interactableUpdate and poster hooks Emits a posterStarChange event if the number of stars changes', () => {
+          const listener = jest.fn();
+          posterSessionAreaController.addListener('posterStarChange', listener);
+
+          posterSessionArea.stars++;
+          eventListener(posterSessionArea);
+          expect(listener).toBeCalledWith(posterSessionArea.stars);
+        });
+        it('[REE1] interactableUpdate and poster hooks Emits a posterTitleEvent event if the title changes', () => {
+          const listener = jest.fn();
+          posterSessionAreaController.addListener('posterTitleChange', listener);
+
+          posterSessionArea.title = nanoid();
+          eventListener(posterSessionArea);
+          expect(listener).toBeCalledWith(posterSessionArea.title);
+        });
+        it('[REE1] interactableUpdate and poster hooks Emits a posterImageContentsChange event if the image contents changes', () => {
+          const listener = jest.fn();
+          posterSessionAreaController.addListener('posterImageContentsChange', listener);
+
+          posterSessionArea.imageContents = nanoid();
+          eventListener(posterSessionArea);
+          expect(listener).toBeCalledWith(posterSessionArea.imageContents);
         });
       });
     });

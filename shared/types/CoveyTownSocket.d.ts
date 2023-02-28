@@ -1,3 +1,9 @@
+export interface SBGame {
+  playerId: string,
+  score: number,
+  isOver: boolean,
+  timeLimit: number;
+};
 export type TownJoinResponse = {
   /** Unique ID that represents this player * */
   userID: string;
@@ -17,7 +23,7 @@ export type TownJoinResponse = {
   interactables: Interactable[];
 }
 
-export type Interactable = ViewingArea | ConversationArea;
+export type Interactable = ViewingArea | ConversationArea | PosterSessionArea;
 
 export type TownSettingsUpdate = {
   friendlyName?: string;
@@ -48,18 +54,13 @@ export type ChatMessage = {
   sid: string;
   body: string;
   dateCreated: Date;
+  interactableId?: string;
 };
 
 export interface ConversationArea {
   id: string;
   topic?: string;
   occupantsByID: string[];
-};
-export interface SBGame {
-  playerId: string,
-  score: number,
-  isOver: boolean,
-  timeLimit: number;
 };
 export interface BoundingBox {
   x: number;
@@ -73,6 +74,13 @@ export interface ViewingArea {
   video?: string;
   isPlaying: boolean;
   elapsedTimeSec: number;
+}
+
+export interface PosterSessionArea {
+  id: string;
+  stars: number;
+  imageContents?: string;
+  title?: string;
 }
 
 export interface ServerToClientEvents {

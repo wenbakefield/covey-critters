@@ -44,7 +44,7 @@
         "*.{js,css,md}": "prettier --write"
     },
     "engines": {
-        "node": "18.x.x",
+        "node": "16.x.x",
         "npm": "8.x.x"
     },
     "dependencies": {

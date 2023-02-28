@@ -204,6 +204,48 @@ const testingMaps: TestMapDict = {
       },
     ],
   },
+  twoPosters: {
+    tiledversion: '1.9.0',
+    tileheight: 32,
+    tilesets: [],
+    tilewidth: 32,
+    type: 'map',
+    layers: [
+      {
+        id: 4,
+        name: 'Objects',
+        objects: [
+          {
+            type: 'PosterSessionArea',
+            height: 237,
+            id: 39,
+            name: 'Name1',
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 40,
+            y: 120,
+          },
+          {
+            type: 'PosterSessionArea',
+            height: 266,
+            id: 43,
+            name: 'Name2',
+            rotation: 0,
+            visible: true,
+            width: 467,
+            x: 612,
+            y: 120,
+          },
+        ],
+        opacity: 1,
+        type: 'objectgroup',
+        visible: true,
+        x: 0,
+        y: 0,
+      },
+    ],
+  },
   twoConvOneViewing: {
     tiledversion: '1.9.0',
     tileheight: 32,
@@ -247,6 +289,71 @@ const testingMaps: TestMapDict = {
                 name: 'video',
                 type: 'string',
                 value: 'someURL',
+              },
+            ],
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 155,
+            y: 566,
+          },
+        ],
+        opacity: 1,
+        type: 'objectgroup',
+        visible: true,
+        x: 0,
+        y: 0,
+      },
+    ],
+  },
+  twoConvOnePoster: {
+    tiledversion: '1.9.0',
+    tileheight: 32,
+    tilesets: [],
+    tilewidth: 32,
+    type: 'map',
+    layers: [
+      {
+        id: 4,
+        name: 'Objects',
+        objects: [
+          {
+            type: 'ConversationArea',
+            height: 237,
+            id: 39,
+            name: 'Name1',
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 40,
+            y: 120,
+          },
+          {
+            type: 'ConversationArea',
+            height: 266,
+            id: 43,
+            name: 'Name2',
+            rotation: 0,
+            visible: true,
+            width: 467,
+            x: 612,
+            y: 120,
+          },
+          {
+            type: 'PosterSessionArea',
+            height: 237,
+            id: 54,
+            name: 'Name3',
+            properties: [
+              {
+                name: 'imageContents',
+                type: 'string',
+                value: 'placeholder file contents',
+              },
+              {
+                name: 'title',
+                type: 'string',
+                value: 'test title',
               },
             ],
             rotation: 0,
@@ -566,19 +673,36 @@ describe('Town', () => {
         expect(interactable?.toModel()).toEqual(update);
       });
     });
-    it('Forwards chat messages to all players in the same town', async () => {
+    it('[OMG1 chatMessage] Forwards chat messages to players with the same ID as the message ID', async () => {
       const chatHandler = getEventListener(playerTestData.socket, 'chatMessage');
       const chatMessage: ChatMessage = {
         author: player.id,
         body: 'Test message',
         dateCreated: new Date(),
         sid: 'test message id',
+        interactableId: player.location?.interactableID,
       };
 
       chatHandler(chatMessage);
 
-      const emittedMessage = getLastEmittedEvent(townEmitter, 'chatMessage');
+      const emittedMessage = getLastEmittedEvent(playerTestData.socket, 'chatMessage');
       expect(emittedMessage).toEqual(chatMessage);
+    });
+    it('Does not forward chat messages to players if the message ID doesnt match the player area', async () => {
+      const chatHandler = getEventListener(playerTestData.socket, 'chatMessage');
+      const chatMessage: ChatMessage = {
+        author: player.id,
+        body: 'Test message',
+        dateCreated: new Date(),
+        sid: 'test message id',
+        interactableId: 'random id',
+      };
+
+      chatHandler(chatMessage);
+
+      expect(() => {
+        getLastEmittedEvent(playerTestData.socket, 'chatMessage');
+      }).toThrowError();
     });
   });
   describe('addConversationArea', () => {
@@ -696,7 +820,7 @@ describe('Town', () => {
       expect(playerTestData.socket.disconnect).toBeCalledWith(true);
     });
   });
-  describe('initializeFromMap', () => {
+  describe('[OMG4 initializeFromMap]', () => {
     const expectInitializingFromMapToThrowError = (map: ITiledMap) => {
       expect(() => town.initializeFromMap(map)).toThrowError();
     };
@@ -729,9 +853,19 @@ describe('Town', () => {
       expect(viewingArea2.boundingBox).toEqual({ x: 612, y: 120, height: 266, width: 467 });
       expect(town.interactables.length).toBe(2);
     });
+    it('Creates a PosterSessionArea instance for each region on the map', async () => {
+      town.initializeFromMap(testingMaps.twoPosters);
+      const posterSessionArea1 = town.getInteractable('Name1');
+      const posterSessionArea2 = town.getInteractable('Name2');
+      expect(posterSessionArea1.id).toEqual('Name1');
+      expect(posterSessionArea1.boundingBox).toEqual({ x: 40, y: 120, height: 237, width: 326 });
+      expect(posterSessionArea2.id).toEqual('Name2');
+      expect(posterSessionArea2.boundingBox).toEqual({ x: 612, y: 120, height: 266, width: 467 });
+      expect(town.interactables.length).toBe(2);
+    });
     describe('Updating interactable state in playerMovements', () => {
       beforeEach(async () => {
-        town.initializeFromMap(testingMaps.twoConvOneViewing);
+        town.initializeFromMap(testingMaps.twoConvOnePoster);
         playerTestData.moveTo(51, 121);
         expect(town.addConversationArea({ id: 'Name1', topic: 'test', occupantsByID: [] })).toBe(
           true,

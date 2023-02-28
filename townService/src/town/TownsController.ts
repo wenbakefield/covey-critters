@@ -22,8 +22,11 @@ import {
   CoveyTownSocket,
   TownSettingsUpdate,
   ViewingArea,
-  SBGame,
+  PosterSessionArea,
 } from '../types/CoveyTownSocket';
+import PosterSessionAreaReal from './PosterSessionArea';
+import { isPosterSessionArea } from '../TestUtils';
+import SBGame from './SBGame';
 
 /**
  * This is the town route
@@ -160,6 +163,115 @@ export class TownsController extends Controller {
     if (!success) {
       throw new InvalidParametersError('Invalid values specified');
     }
+  }
+
+  /**
+   * Creates a poster session area in a given town
+   *
+   * @param townID ID of the town in which to create the new poster session area
+   * @param sessionToken session token of the player making the request, must
+   *        match the session token returned when the player joined the town
+   * @param requestBody The new poster session area to create
+   *
+   * @throws InvalidParametersError if the session token is not valid, or if the
+   *          poster session area could not be created
+   */
+  @Post('{townID}/posterSessionArea')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async createPosterSessionArea(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+    @Body() requestBody: PosterSessionArea,
+  ): Promise<void> {
+    // download file here TODO
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    if (!curTown.getPlayerBySessionToken(sessionToken)) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    // add viewing area to the town, throw error if it fails
+    if (!curTown.addPosterSessionArea(requestBody)) {
+      throw new InvalidParametersError('Invalid poster session area');
+    }
+  }
+
+  /**
+   * Gets the image contents of a given poster session area in a given town
+   *
+   * @param townID ID of the town in which to get the poster session area image contents
+   * @param posterSessionId interactable ID of the poster session
+   * @param sessionToken session token of the player making the request, must
+   *        match the session token returned when the player joined the town
+   *
+   * @throws InvalidParametersError if the session token is not valid, or if the
+   *          poster session specified does not exist
+   */
+  @Patch('{townID}/{posterSessionId}/imageContents')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async getPosterAreaImageContents(
+    @Path() townID: string,
+    @Path() posterSessionId: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<string | undefined> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    if (!curTown.getPlayerBySessionToken(sessionToken)) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const posterSessionArea = curTown.getInteractable(posterSessionId);
+    if (!posterSessionArea || !isPosterSessionArea(posterSessionArea)) {
+      throw new InvalidParametersError('Invalid poster session ID');
+    }
+    return posterSessionArea.imageContents;
+  }
+
+  /**
+   * Increment the stars of a given poster session area in a given town, as long as there is
+   * a poster image. Returns the new number of stars.
+   *
+   * @param townID ID of the town in which to get the poster session area image contents
+   * @param posterSessionId interactable ID of the poster session
+   * @param sessionToken session token of the player making the request, must
+   *        match the session token returned when the player joined the town
+   *
+   * @throws InvalidParametersError if the session token is not valid, or if the
+   *          poster session specified does not exist, or if the poster session specified
+   *          does not have an image
+   */
+  @Patch('{townID}/{posterSessionId}/incStars')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async incrementPosterAreaStars(
+    @Path() townID: string,
+    @Path() posterSessionId: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<number> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    if (!curTown.getPlayerBySessionToken(sessionToken)) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const posterSessionArea = curTown.getInteractable(posterSessionId);
+    if (!posterSessionArea || !isPosterSessionArea(posterSessionArea)) {
+      throw new InvalidParametersError('Invalid poster session ID');
+    }
+    if (!posterSessionArea.imageContents) {
+      throw new InvalidParametersError('Cant star a poster with no image');
+    }
+    const newStars = posterSessionArea.stars + 1;
+    const updatedPosterSessionArea = {
+      id: posterSessionArea.id,
+      imageContents: posterSessionArea.imageContents,
+      title: posterSessionArea.title,
+      stars: newStars, // increment stars
+    };
+    (<PosterSessionAreaReal>posterSessionArea).updateModel(updatedPosterSessionArea);
+    return newStars;
   }
 
   /**

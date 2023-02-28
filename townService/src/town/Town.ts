@@ -4,7 +4,7 @@ import { BroadcastOperator } from 'socket.io';
 import IVideoClient from '../lib/IVideoClient';
 import Player from '../lib/Player';
 import TwilioVideo from '../lib/TwilioVideo';
-import { isViewingArea } from '../TestUtils';
+import { isPosterSessionArea, isViewingArea } from '../TestUtils';
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
@@ -14,10 +14,12 @@ import {
   ServerToClientEvents,
   SocketData,
   ViewingArea as ViewingAreaModel,
+  PosterSessionArea as PosterSessionAreaModel,
 } from '../types/CoveyTownSocket';
 import ConversationArea from './ConversationArea';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
+import PosterSessionArea from './PosterSessionArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -128,9 +130,14 @@ export default class Town {
       this._connectedSockets.delete(socket);
     });
 
-    // Set up a listener to forward all chat messages to all clients in the town
+    // Set up a listener to forward all chat messages to all clients in the same interactableArea as the player,
+    // and only if the message has the same interactable id as the player
     socket.on('chatMessage', (message: ChatMessage) => {
-      this._broadcastEmitter.emit('chatMessage', message);
+      const messageId = message.interactableId;
+      const playerId = newPlayer.location?.interactableID;
+      if (messageId === playerId)
+        this._connectedSockets.forEach(c => c.emit('chatMessage', message));
+      // this._broadcastEmitter.emit('chatMessage', message);
     });
 
     // Register an event listener for the client socket: if the client updates their
@@ -140,11 +147,12 @@ export default class Town {
     });
 
     // Set up a listener to process updates to interactables.
-    // Currently only knows how to process updates for ViewingArea's, and
+    // Currently only knows how to process updates for ViewingAreas and PosterSessionAreas, and
     // ignores any other updates for any other kind of interactable.
-    // For ViewingArea's: dispatches an updateModel call to the viewingArea that
-    // corresponds to the interactable being updated. Does not throw an error if
-    // the specified viewing area does not exist.
+    // For ViewingAreas and PosterSessionAreas: Uses the 'newPlayer' object's 'towmEmitter' to forward
+    // the interactableUpdate to the other players in the town. Also dispatches an
+    // updateModel call to the viewingArea or posterSessionArea that corresponds to the interactable being
+    // updated. Does not throw an error if the specified viewing area or poster session area does not exist.
     socket.on('interactableUpdate', (update: Interactable) => {
       if (isViewingArea(update)) {
         newPlayer.townEmitter.emit('interactableUpdate', update);
@@ -153,6 +161,19 @@ export default class Town {
         );
         if (viewingArea) {
           (viewingArea as ViewingArea).updateModel(update);
+        }
+      } else if (isPosterSessionArea(update)) {
+        // forward interactableUpdate
+        newPlayer.townEmitter.emit('interactableUpdate', update);
+        // find an existing poster session area with the same ID
+        const existingPosterSessionAreaArea = <PosterSessionArea>(
+          this._interactables.find(
+            area => area.id === update.id && area instanceof PosterSessionArea,
+          )
+        );
+        // updatemodel if theres an existing poster session area with the same ID
+        if (existingPosterSessionAreaArea) {
+          existingPosterSessionAreaArea.updateModel(update);
         }
       }
     });
@@ -284,6 +305,49 @@ export default class Town {
   }
 
   /**
+   * Creates a new poster session area in this town if there is not currently an active
+   * poster session area with the same ID. The poster session area ID must match the name of a
+   * poster session area that exists in this town's map, and the poster session area must not
+   * already have a poster image set.
+   *
+   * If successful creating the poster session area, this method:
+   *    Adds any players who are in the region defined by the poster session area to it
+   *    Notifies all players in the town that the poster session area has been updated by
+   *      emitting an interactableUpdate event
+   *
+   * @param posterSessionArea Information describing the poster session area to create.
+   *
+   * @returns True if the poster session area was created or false if there is no known
+   * poster session area with the specified ID or if there is already an active poster session area
+   * with the specified ID or if there is no poster image and title specified
+   */
+  public addPosterSessionArea(posterSessionArea: PosterSessionAreaModel): boolean {
+    // if there's no title or image specified
+    if (!posterSessionArea.imageContents || !posterSessionArea.title) {
+      return false;
+    }
+    // find an existing poster session area with the same ID
+    const existingPosterSessionArea = <PosterSessionArea>(
+      this._interactables.find(
+        area => area.id === posterSessionArea.id && area instanceof PosterSessionArea,
+      )
+    );
+    // if the id does not match an existing area, or if it does but the existing area
+    // already has an image and title
+    if (
+      !existingPosterSessionArea ||
+      (existingPosterSessionArea.title && existingPosterSessionArea.imageContents)
+    ) {
+      return false;
+    }
+    // we've reached here -- it's a valid update
+    existingPosterSessionArea.updateModel(posterSessionArea);
+    existingPosterSessionArea.addPlayersWithinBounds(this._players);
+    this._broadcastEmitter.emit('interactableUpdate', existingPosterSessionArea.toModel());
+    return true;
+  }
+
+  /**
    * Fetch a player's session based on the provided session token. Returns undefined if the
    * session token is not valid.
    *
@@ -352,7 +416,14 @@ export default class Town {
         ConversationArea.fromMapObject(eachConvAreaObj, this._broadcastEmitter),
       );
 
-    this._interactables = this._interactables.concat(viewingAreas).concat(conversationAreas);
+    const posterSessionAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'PosterSessionArea')
+      .map(eachPSAreaObj => PosterSessionArea.fromMapObject(eachPSAreaObj, this._broadcastEmitter));
+
+    this._interactables = this._interactables
+      .concat(viewingAreas)
+      .concat(conversationAreas)
+      .concat(posterSessionAreas);
     this._validateInteractables();
   }
 

@@ -1,10 +1,11 @@
 import { ReservedOrUserListener } from '@socket.io/component-emitter';
-import { mock, MockProxy } from 'jest-mock-extended';
+import { mockDeep, MockProxy } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import ConversationAreaController from './classes/ConversationAreaController';
 import PlayerController from './classes/PlayerController';
 import TownController, { TownEvents } from './classes/TownController';
 import ViewingAreaController from './classes/ViewingAreaController';
+import PosterSessionAreaController from './classes/PosterSessionAreaController';
 import { TownsService } from './generated/client';
 import { CoveyTownSocket, ServerToClientEvents, TownJoinResponse } from './types/CoveyTownSocket';
 
@@ -85,6 +86,7 @@ type MockedTownControllerProperties = {
   players?: PlayerController[];
   conversationAreas?: ConversationAreaController[];
   viewingAreas?: ViewingAreaController[];
+  posterSessionAreas?: PosterSessionAreaController[];
 };
 export function mockTownController({
   friendlyName,
@@ -95,8 +97,9 @@ export function mockTownController({
   players,
   conversationAreas,
   viewingAreas,
+  posterSessionAreas,
 }: MockedTownControllerProperties) {
-  const mockedController = mock<TownController>();
+  const mockedController = mockDeep<TownController>();
   if (friendlyName) {
     Object.defineProperty(mockedController, 'friendlyName', { value: friendlyName });
   }
@@ -122,6 +125,19 @@ export function mockTownController({
   }
   if (viewingAreas) {
     Object.defineProperty(mockedController, 'viewingAreas', { value: viewingAreas });
+  }
+  if (posterSessionAreas) {
+    Object.defineProperty(mockedController, 'posterSessionAreas', { value: posterSessionAreas });
+    mockedController.getPosterSessionAreaImageContents.mockImplementation(
+      async (posterSessionArea: PosterSessionAreaController) => {
+        return posterSessionArea.imageContents || 'fail';
+      },
+    );
+    mockedController.incrementPosterSessionAreaStars.mockImplementation(
+      async (posterSessionArea: PosterSessionAreaController) => {
+        return ++posterSessionArea.stars;
+      },
+    );
   }
   return mockedController;
 }
@@ -182,6 +198,12 @@ export async function mockTownControllerConnection(
         video: nanoid(),
         elapsedTimeSec: 0,
         isPlaying: false,
+      });
+      responseToSendController.interactables.push({
+        id: nanoid(),
+        title: nanoid(),
+        imageContents: nanoid(),
+        stars: 0,
       });
     }
   }

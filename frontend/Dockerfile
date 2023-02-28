@@ -1,4 +1,4 @@
-FROM node:16-buster-slim
+FROM node:18-buster-slim
 RUN apt-get update || : && apt-get install python build-essential -y && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

@@ -521,10 +521,17 @@
                  "y":1056.00016666667
                 }, 
                 {
-                 "type":"ConversationArea",
+                 "type":"PosterSessionArea",
                  "height":224,
                  "id":31,
                  "name":"Basement Dining Table 2",
+                 "properties":[
+                     {
+                      "name":"poster",
+                      "type":"string",
+                      "value":"",
+                      "stars": 0
+                     }],                 
                  "rotation":0,
                  "visible":true,
                  "width":164.667,
