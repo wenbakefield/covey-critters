@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: Interactable[];
 }
 
-export type Interactable = ViewingArea | ConversationArea | PosterSessionArea;
+export type Interactable = ViewingArea | ConversationArea | PosterSessionArea | CarnivalGameArea;
 
 export type TownSettingsUpdate = {
   friendlyName?: string;
@@ -51,6 +51,16 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
+export type Pet = {
+  // TODO
+}
+
+export type PetRule = {
+  percentileRangeMin: number; 
+  percentileRangeMax: number;
+  petSelection: Pet[]
+}
+
 export interface ConversationArea {
   id: string;
   topic?: string;
@@ -76,6 +86,12 @@ export interface PosterSessionArea {
   imageContents?: string;
   title?: string;
 }
+
+export interface CarnivalGameArea {
+  id: string;
+  petRule: PetRule[];
+}
+
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
