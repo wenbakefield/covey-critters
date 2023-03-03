@@ -20,6 +20,7 @@ import ConversationArea from './ConversationArea';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
 import PosterSessionArea from './PosterSessionArea';
+import SingletonScoreboardFactory from './Scoreboard';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -90,6 +91,8 @@ export default class Town {
 
   private _connectedSockets: Set<CoveyTownSocket> = new Set();
 
+  private scoreboard1 = SingletonScoreboardFactory.instance();
+
   constructor(
     friendlyName: string,
     isPubliclyListed: boolean,
@@ -126,6 +129,7 @@ export default class Town {
     // clean up our listener adapter, and then let the CoveyTownController know that the
     // player's session is disconnected
     socket.on('disconnect', () => {
+      this.scoreboard1.removePlayerScore(newPlayer)
       this._removePlayer(newPlayer);
       this._connectedSockets.delete(socket);
     });
