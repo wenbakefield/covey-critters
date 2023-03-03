@@ -360,21 +360,21 @@ export default class Town {
   }
 
   /**
-   * Creates a new viewing area in this town if there is not currently an active
-   * viewing area with the same ID. The viewing area ID must match the name of a
-   * viewing area that exists in this town's map, and the viewing area must not
+   * Creates a new carnival game area in this town if there is not currently an active
+   * carnival game area with the same ID. The carnival area ID must match the name of a
+   * carnival game area that exists in this town's map, and the carnival game area must not
    * already have a video set.
    *
-   * If successful creating the viewing area, this method:
-   *    Adds any players who are in the region defined by the viewing area to it
-   *    Notifies all players in the town that the viewing area has been updated by
+   * If successful creating the carnival game area, this method:
+   *    Adds any players who are in the region defined by the carnival game area to it
+   *    Notifies all players in the town that the carnival game area has been updated by
    *      emitting an interactableUpdate event
    *
-   * @param viewingArea Information describing the viewing area to create.
+   * @param viewingArea Information describing the carnival game area to create.
    *
-   * @returns True if the viewing area was created or false if there is no known
-   * viewing area with the specified ID or if there is already an active viewing area
-   * with the specified ID or if there is no video URL specified
+   * @returns True if the carnival game area was created or false if there is no known
+   * carnival game area with the specified ID or if there is already an active carnival game area
+   * with the specified ID or if there is no pet rule specify
    */
   public addCarnivalGameArea(carnivalGameArea: CarnivalGameAreaModel): boolean {
     const area = this._interactables.find(

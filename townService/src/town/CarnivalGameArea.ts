@@ -7,11 +7,11 @@ import {
   PetRule,
   TownEmitter,
   CarnivalGameArea as CarnivalGameAreaModel,
-  Pet,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
 import Scoreboard from './ScoreBoard';
 import SpaceBarGame from './SpaceBarGame';
+import IPet from '../lib/IPet';
 
 export default class CarnivalGameArea extends InteractableArea {
   private _scoreboard: Scoreboard;
@@ -97,8 +97,8 @@ export default class CarnivalGameArea extends InteractableArea {
    * @param playerId Represent the player that will get a new pet
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public assignPetToPlayer(playerId: string, petName: string) {
-    const pet: Pet = this._randomizePet(playerId);
+  public assignPetToPlayer(playerId: string, petName: string): IPet {
+    const pet: IPet = this._randomizePet(playerId);
     const player = this._occupants.find(players => players.id === playerId);
     if (!player) {
       throw Error(`Player with id ${playerId} cannot be found within this CarnivalGameArea`);
@@ -107,6 +107,7 @@ export default class CarnivalGameArea extends InteractableArea {
       // TODO
       petName.at(0);
     }
+    return pet;
   }
 
   /**
@@ -128,7 +129,7 @@ export default class CarnivalGameArea extends InteractableArea {
     );
   }
 
-  private _randomizePet(playerid: string): Pet {
+  private _randomizePet(playerid: string): IPet {
     const playerScore: number = this._getPlayerScore(playerid);
     for (let i = 0; i < this._petRule.length; i++) {
       const petRule = this._petRule[i];
