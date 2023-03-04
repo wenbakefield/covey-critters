@@ -9,12 +9,13 @@ import {
   CarnivalGameArea as CarnivalGameAreaModel,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import Scoreboard from './ScoreBoard';
+import IScoreBoard from '../lib/IScoreBoard';
+import SingletonScoreboardFactory from './ScoreBoard';
 import SpaceBarGame from './SpaceBarGame';
 import IPet from '../lib/IPet';
 
 export default class CarnivalGameArea extends InteractableArea {
-  private _scoreboard: Scoreboard;
+  private _scoreboard: IScoreBoard;
 
   private _gameSession: IGameSession[];
 
@@ -35,13 +36,13 @@ export default class CarnivalGameArea extends InteractableArea {
     townEmitter: TownEmitter,
   ) {
     super(id, coordinates, townEmitter);
-    this._scoreboard = new Scoreboard(); // Required a singleton Pattern to instantiate scoreboard
+    this._scoreboard = SingletonScoreboardFactory.instance();
     this._gameSession = [];
     this._petRule = petRule;
     this._townEmiiter = townEmitter;
   }
 
-  public get scoreBoard(): Scoreboard {
+  public get scoreBoard(): IScoreBoard {
     return this._scoreboard;
   }
 
@@ -130,21 +131,24 @@ export default class CarnivalGameArea extends InteractableArea {
   }
 
   private _randomizePet(playerid: string): IPet {
-    const playerScore: number = this._getPlayerScore(playerid);
+    const playerPecentile: number = this._getPlayerPercentile(playerid) * 100;
     for (let i = 0; i < this._petRule.length; i++) {
       const petRule = this._petRule[i];
-      if (petRule.percentileRangeMin <= playerScore && playerScore < petRule.percentileRangeMax) {
+      if (
+        petRule.percentileRangeMin <= playerPecentile &&
+        playerPecentile < petRule.percentileRangeMax
+      ) {
         const randomPet =
           petRule.petSelection[Math.floor(Math.random() * petRule.petSelection.length)];
         return randomPet;
       }
     }
     throw new Error(
-      `Player id ${playerid} has scored ${playerScore}, however no corresponding Pet is found`,
+      `Player id ${playerid} has scored ${playerPecentile} percentile, however no corresponding Pet is found`,
     );
   }
 
-  private _getPlayerScore(playerId: string): number {
+  private _getPlayerPercentile(playerId: string): number {
     const player = this._occupants.find(players => players.id === playerId);
     if (!player) {
       throw Error(`Player with id ${playerId} cannot be found within this CarnivalGameArea`);
@@ -152,7 +156,8 @@ export default class CarnivalGameArea extends InteractableArea {
       const gameSession = this.getGame(playerId);
       if (gameSession.isOver()) {
         const score = gameSession.getScore();
-        return score;
+        const percentile = this._scoreboard.calculatedPercentile(score);
+        return percentile;
       }
     }
     return 0;
