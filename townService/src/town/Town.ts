@@ -91,7 +91,7 @@ export default class Town {
 
   private _connectedSockets: Set<CoveyTownSocket> = new Set();
 
-  private scoreboard1 = SingletonScoreboardFactory.instance();
+  private _scoreboard = SingletonScoreboardFactory.instance();
 
   constructor(
     friendlyName: string,
@@ -129,7 +129,7 @@ export default class Town {
     // clean up our listener adapter, and then let the CoveyTownController know that the
     // player's session is disconnected
     socket.on('disconnect', () => {
-      this.scoreboard1.removePlayerScore(newPlayer)
+      this._scoreboard.removePlayerScore(newPlayer)
       this._removePlayer(newPlayer);
       this._connectedSockets.delete(socket);
     });
