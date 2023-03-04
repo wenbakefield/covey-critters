@@ -80,13 +80,13 @@ class Scoreboard implements IScoreBoard  {
 }
 
 export default class SingletonScoreboardFactory {
-  private static _theScoreBoard: BoardInterface | undefined;
+  private static _theScoreBoard: IScoreBoard | undefined;
 
   private constructor() {
     SingletonScoreboardFactory._theScoreBoard = undefined;
   }
 
-  public static instance(): BoardInterface {
+  public static instance(): IScoreBoard {
     if (SingletonScoreboardFactory._theScoreBoard === undefined) {
       SingletonScoreboardFactory._theScoreBoard = new Scoreboard();
     }
