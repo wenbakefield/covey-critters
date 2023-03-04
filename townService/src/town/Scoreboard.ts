@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import Player from '../lib/Player';
-import BoardInterface from './BoardInterface';
+import IScoreBoard  from './IScoreBoard ';
 
 // uses observer and singleton Patterns
-class Scoreboard implements BoardInterface {
+class Scoreboard implements IScoreBoard  {
   // list of tuples that each tuple is holding Player-score pair
   private _usernamesAndScores: [Player, number][] = [];
 

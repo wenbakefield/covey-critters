@@ -1,6 +1,6 @@
 import Player from '../lib/Player';
 
-export default interface BoardInterface {
+export default interface IScoreBoard  {
   notifyScoreBoard(player: Player, score: number): void;
   getTopX(depth: number): [Player, number][];
   getAllScores(): [Player, number][];
