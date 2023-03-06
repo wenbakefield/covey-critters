@@ -29,6 +29,7 @@ export interface Player {
   id: string;
   userName: string;
   location: PlayerLocation;
+  pet: IPet;
 };
 
 export type XY = { x: number, y: number };
@@ -51,9 +52,13 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export type Pet = {
-  // TODO
-}
+export type IPet = {
+  id: string;
+  name: string;
+  species: string;
+  x_offset: number;
+  y_offset: number;
+} | undefined;
 
 export type PetRule = {
   percentileRangeMin: number; 
