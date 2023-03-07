@@ -22,6 +22,7 @@ import {
   CoveyTownSocket,
   TownSettingsUpdate,
   ViewingArea,
+  SBGame,
 } from '../types/CoveyTownSocket';
 
 /**
@@ -157,6 +158,22 @@ export class TownsController extends Controller {
     }
     const success = town.addViewingArea(requestBody);
     if (!success) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+  }
+
+  /**
+   * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
+   * @param requestBody The new viewing area to create
+   */
+  @Patch('{townID}/CarnivalGameArea/timeLimitReach/{playerId}')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async timeLimitReached(
+    @Path() townID: string,
+    @Body() requestBody: SBGame,
+  ): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
       throw new InvalidParametersError('Invalid values specified');
     }
   }
