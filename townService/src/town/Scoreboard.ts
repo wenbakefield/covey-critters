@@ -1,81 +1,80 @@
 /* eslint-disable max-classes-per-file */
-import Player from '../lib/Player';
-import IScoreBoard  from './IScoreBoard ';
+import { Player as PlayerModel } from '../types/CoveyTownSocket';
+import IScoreBoard from './IScoreBoard';
 
 // uses observer and singleton Patterns
-class Scoreboard implements IScoreBoard  {
+class Scoreboard implements IScoreBoard {
   // list of tuples that each tuple is holding Player-score pair
-  private _usernamesAndScores: [Player, number][] = [];
+  private _playersAndScores: [PlayerModel, number][] = [];
 
   // adds the new player score tuple to the scoreboard
-  notifyScoreBoard(player: Player, score: number): void {
-    const newPair: [Player, number] = [player, score];
+  notifyScoreBoard(player: PlayerModel, score: number): void {
+    const newPair: [PlayerModel, number] = [player, score];
     // if the list is empty just add it to the list
-    if (this._usernamesAndScores.length === 0) {
-      this._usernamesAndScores.push(newPair);
+    if (this._playersAndScores.length === 0) {
+      this._playersAndScores.push(newPair);
     } else {
       let ifPlaced = false;
-      const copyOfScoreBoard: [Player, number][] = [];
+      const copyOfScoreBoard: [PlayerModel, number][] = [];
       // go over the scoreboard and if you can find a score that is lower than new score
       // add the new score between higher and lower scores
-      for (let index = 0; index < this._usernamesAndScores.length; index++) {
-        if (this._usernamesAndScores[index][1] < score && !ifPlaced) {
+      for (let index = 0; index < this._playersAndScores.length; index++) {
+        if (this._playersAndScores[index][1] < score && !ifPlaced) {
           copyOfScoreBoard.push(newPair);
           ifPlaced = true;
         }
-        copyOfScoreBoard.push(this._usernamesAndScores[index]);
+        copyOfScoreBoard.push(this._playersAndScores[index]);
       }
       // if it is the lowest score just place it at the end
       if (!ifPlaced) {
         copyOfScoreBoard.push(newPair);
       }
-      this._usernamesAndScores = copyOfScoreBoard;
+      this._playersAndScores = copyOfScoreBoard;
     }
   }
 
-  // call this in socket.on('disconnect', () => { of Town.ts!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // remove a player-score tuple. This gets called by Town.ts when a player exits the town.
-  public removePlayerScore(player: Player) {
-    const filteredList = this._usernamesAndScores.filter(tuple => tuple[0] !== player);
-    this._usernamesAndScores = filteredList;
+  public removePlayerScore(player: PlayerModel) {
+    const filteredList = this._playersAndScores.filter(tuple => tuple[0].id !== player.id);
+    this._playersAndScores = filteredList;
   }
 
   // return all player-score pairs
-  public getAllScores(): [Player, number][] {
-    const scoreBoardList: [Player, number][] = [];
-    this._usernamesAndScores.forEach(tuple => {
+  public getAllScores(): [PlayerModel, number][] {
+    const scoreBoardList: [PlayerModel, number][] = [];
+    this._playersAndScores.forEach(tuple => {
       scoreBoardList.push(tuple);
     });
     return scoreBoardList;
   }
 
   // return top X player-score pairs
-  public getTopX(depth: number): [Player, number][] {
+  public getTopX(depth: number): [PlayerModel, number][] {
     if (depth < 1) {
       return [];
     }
-    if (this._usernamesAndScores.length < depth) {
-      return this._usernamesAndScores;
+    if (this._playersAndScores.length < depth) {
+      return this._playersAndScores;
     }
-    const topXOfScoreBoard: [Player, number][] = [];
+    const topXOfScoreBoard: [PlayerModel, number][] = [];
     for (let i = 0; i < depth; i++) {
-      topXOfScoreBoard.push(this._usernamesAndScores[i]);
+      topXOfScoreBoard.push(this._playersAndScores[i]);
     }
     return topXOfScoreBoard;
   }
 
   // return the calculatedPercentile
   public calculatedPercentile(givenScore: number) {
-    if (this._usernamesAndScores.length === 0) {
+    if (this._playersAndScores.length === 0) {
       return 0;
     }
     let betterScoreCount = 0;
-    this._usernamesAndScores.forEach(tuple => {
+    this._playersAndScores.forEach(tuple => {
       if (tuple[1] > givenScore) {
         betterScoreCount += 1;
       }
     });
-    return betterScoreCount / this._usernamesAndScores.length;
+    return betterScoreCount / this._playersAndScores.length;
   }
 }
 

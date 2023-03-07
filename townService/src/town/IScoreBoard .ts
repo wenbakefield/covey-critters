@@ -1,9 +1,9 @@
-import Player from '../lib/Player';
+import { Player as PlayerModel } from '../types/CoveyTownSocket';
 
 export default interface IScoreBoard  {
-  notifyScoreBoard(player: Player, score: number): void;
-  getTopX(depth: number): [Player, number][];
-  getAllScores(): [Player, number][];
+  notifyScoreBoard(player: PlayerModel, score: number): void;
+  getTopX(depth: number): [PlayerModel, number][];
+  getAllScores(): [PlayerModel, number][];
   calculatedPercentile(givenScore: number): number;
-  removePlayerScore(player: Player): void;
+  removePlayerScore(player: PlayerModel): void;
 }
