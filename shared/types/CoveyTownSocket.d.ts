@@ -52,12 +52,29 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export type IPet = {
+export enum MovementType {
+  OffsetPlayer = 'offsetPlayer',
+  OrbitPlayer = 'orbitPlayer',
+}
+
+export enum Species {
+  dog = 'dog',
+  cat = 'cat',
+  hamster = 'hamster',
+  gecko = 'gecko',
+  turtle = 'turtle',
+  parrot = 'parrot',
+  dragon = 'dragon',
+  ghoul = 'ghoul',
+}
+
+export type Pet = {
   id: string;
   name: string;
-  species: string;
-  x_offset: number;
-  y_offset: number;
+  species: Species;
+  movemetType: MovementType;
+  x: number;
+  y: number;
 } | undefined;
 
 export type PetRule = {
