@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import { IPet, Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
+import { Pet as PetModel, Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
@@ -23,7 +23,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   public gameObjects?: PlayerGameObjects;
 
-  private _pet?: IPet;
+  private _pet?: PetModel;
 
   constructor(id: string, userName: string, location: PlayerLocation) {
     super();
@@ -50,11 +50,11 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
     return this._id;
   }
 
-  set pet(value: IPet | undefined) {
+  set pet(value: PetModel | undefined) {
     this._pet = value;
   }
 
-  get pet(): IPet | undefined {
+  get pet(): PetModel | undefined {
     return this._pet;
   }
 
@@ -71,18 +71,12 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       label.setX(this.location.x);
       label.setY(this.location.y - 20);
 
-      let petOffsetX = 0;
-      let petOffsetY = 0;
-
-      if (this.pet) {
-        petOffsetX = this.pet.x_offset;
-        petOffsetY = this.pet.y_offset;
+      if (this.pet !== undefined) {
+        petSprite.setX(this.pet.x);
+        petSprite.setY(this.pet.y);
+        petLabel.setX(this.pet.x);
+        petLabel.setY(this.pet.y + 20);
       }
-
-      petSprite.setX(this.location.x + petOffsetX);
-      petSprite.setY(this.location.y + petOffsetY);
-      petLabel.setX(this.location.x + petOffsetX);
-      petLabel.setY(this.location.y + petOffsetY + 20);
 
       // TODO: add different pet sprites
       if (this.location.moving) {
