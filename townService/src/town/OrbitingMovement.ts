@@ -1,6 +1,6 @@
 import PetDecorator from './PetDecorator';
 import IPet from '../lib/IPet';
-import { PlayerLocation } from '../types/CoveyTownSocket';
+import { Pet, PlayerLocation } from '../types/CoveyTownSocket';
 
 export default class OrbitingMovement extends PetDecorator {
   private _radius: number;

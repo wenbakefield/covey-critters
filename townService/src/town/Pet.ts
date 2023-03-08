@@ -71,13 +71,4 @@ export default class Pet implements IPet {
       y: this._y,
     };
   }
-
-  fromPetModel(petModel: PetModel): IPet {
-    // May need to change to Factory in the Future to accomodate different MovementPattern
-    if (!petModel) {
-      throw new Error('No Pet Model to be instantiate');
-    } else {
-      return new Pet(petModel.name, petModel.species, petModel.x, petModel.y, petModel.movemetType);
-    }
-  }
 }
