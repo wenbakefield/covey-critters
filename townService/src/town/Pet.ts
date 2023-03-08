@@ -1,51 +1,83 @@
-import IPet from "../lib/IPet";
-import { PlayerLocation } from "../types/CoveyTownSocket";
+import IPet from '../lib/IPet';
+import { MovementType, Pet as PetModel, PlayerLocation, Species } from '../types/CoveyTownSocket';
 import { nanoid } from 'nanoid';
 
-export enum Species {
-    dog = "dog",
-    cat = "cat",
-    hamster = "hamster",
-    gecko = "gecko",
-    turtle = "turtle",
-    parrot = "parrot",
-    dragon = "dragon",
-    ghoul = "ghoul"
-}
-
 export default class Pet implements IPet {
-    private readonly _id: string;
-    private _name: string;
-    private readonly _species: Species;
-    private x_offset: number;
-    private y_offset: number;
+  private readonly _id: string;
 
-    constructor(name: string, species: Species, x_offset: number, y_offset: number) {
-        this._id = nanoid();
-        this._name = name;
-        this._species = species;
-        this.x_offset = x_offset;
-        this.y_offset = y_offset;
-    }
+  private _name: string;
 
-    get id(): string {
-        return this._id;
-    }
-    
-    get name(): string {
-        return this._name;
-    }
+  private readonly _species: Species;
 
-    get species(): string {
-        return this._species;
-    }
+  private _movementType: MovementType;
 
-    set name(value: string) {
-        this._name = value;
-    }
+  private _x: number;
 
-    nextMovement(playerLocation: PlayerLocation): [number, number] {
-        return [playerLocation.x + this.x_offset, playerLocation.y + this.y_offset]
-    }
+  private _y: number;
 
+  private _xOffset: number;
+
+  private _yOffset: number;
+
+  constructor(
+    name: string,
+    species: Species,
+    x: number,
+    y: number,
+    movementType = MovementType.OffsetPlayer,
+    x_offset = -40, // default value for pet location
+    y_offset = -20,
+  ) {
+    // May need to change to Factory in the Future to accomodate different MovementPattern
+    this._id = nanoid();
+    this._name = name;
+    this._species = species;
+    this._movementType = movementType;
+    this._x = x;
+    this._y = y;
+    this._xOffset = x_offset;
+    this._yOffset = y_offset;
+  }
+
+  get id(): string {
+    return this._id;
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  set name(value: string) {
+    this._name = value;
+  }
+
+  get species(): string {
+    return this._species;
+  }
+
+  nextMovement(playerLocation: PlayerLocation): [number, number] {
+    this._x = playerLocation.x + this._xOffset;
+    this._y = playerLocation.y + this._yOffset;
+    return [playerLocation.x + this._xOffset, playerLocation.y + this._yOffset];
+  }
+
+  toPetModel(): PetModel {
+    return {
+      id: this._id,
+      name: this._name,
+      species: this._species,
+      movemetType: this._movementType,
+      x: this._x,
+      y: this._y,
+    };
+  }
+
+  fromPetModel(petModel: PetModel): IPet {
+    // May need to change to Factory in the Future to accomodate different MovementPattern
+    if (!petModel) {
+      throw new Error('No Pet Model to be instantiate');
+    } else {
+      return new Pet(petModel.name, petModel.species, petModel.x, petModel.y, petModel.movemetType);
+    }
+  }
 }
