@@ -80,9 +80,11 @@ export interface ConversationArea {
   topic?: string;
   occupantsByID: string[];
 };
-export interface SBGame {
+
+export interface GameSession {
   playerId: string,
   score: number,
+  scoreLimit: number,
   isOver: boolean,
   timeLimit: number;
 };

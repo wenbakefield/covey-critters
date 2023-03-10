@@ -1,5 +1,5 @@
 import Player from './Player';
-import { SBGame as SBGameModel } from '../types/CoveyTownSocket';
+import { GameSession as GameSessionModel } from '../types/CoveyTownSocket';
 
 /**
  *  An abstract Game Session Class that will contain common characteristic of a game
@@ -8,7 +8,7 @@ export default interface IGameSession {
   /**
    * Check if the GameSession is end and return true if the game is ended.
    */
-  isOver(): boolean;
+  isOver(isTimeOver?: boolean): boolean;
 
   /**
    * Get the time of the GameSession.
@@ -33,5 +33,10 @@ export default interface IGameSession {
   /**
    * Return the game as an object
    */
-  toModel(): SBGameModel;
+  toModel(): GameSessionModel;
+
+  /**
+   * Update GameState from GameModel;
+   */
+  updateFromModel(game: GameSessionModel): void;
 }
