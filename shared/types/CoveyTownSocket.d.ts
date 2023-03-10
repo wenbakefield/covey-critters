@@ -1,9 +1,3 @@
-export interface SBGame {
-  playerId: string,
-  score: number,
-  isOver: boolean,
-  timeLimit: number;
-};
 export type TownJoinResponse = {
   /** Unique ID that represents this player * */
   userID: string;
@@ -62,12 +56,14 @@ export interface ConversationArea {
   topic?: string;
   occupantsByID: string[];
 };
+
 export interface SBGame {
   playerId: string,
   score: number,
   isOver: boolean,
   timeLimit: number;
 };
+
 export interface BoundingBox {
   x: number;
   y: number;
