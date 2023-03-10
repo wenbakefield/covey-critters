@@ -1,3 +1,9 @@
+export interface SBGame {
+  playerId: string,
+  score: number,
+  isOver: boolean,
+  timeLimit: number;
+};
 export type TownJoinResponse = {
   /** Unique ID that represents this player * */
   userID: string;
@@ -17,12 +23,14 @@ export type TownJoinResponse = {
   interactables: Interactable[];
 }
 
-export type Interactable = ViewingArea | ConversationArea | PosterSessionArea;
+export type Interactable = ViewingArea | ConversationArea | PosterSessionArea | CarnivalGameArea;
 
 export type TownSettingsUpdate = {
   friendlyName?: string;
   isPubliclyListed?: boolean;
 }
+
+export type Pet = {}
 
 export type Direction = 'front' | 'back' | 'left' | 'right';
 export interface Player {
@@ -30,6 +38,12 @@ export interface Player {
   userName: string;
   location: PlayerLocation;
 };
+
+export interface GameSession {
+  playerId: string;
+  isOver: boolean;
+  score: number;
+}
 
 export type XY = { x: number, y: number };
 
@@ -50,6 +64,16 @@ export type ChatMessage = {
   dateCreated: Date;
   interactableId?: string;
 };
+
+export type Pet = {
+  // TODO
+}
+
+export type PetRule = {
+  percentileRangeMin: number; 
+  percentileRangeMax: number;
+  petSelection: IPet[]
+}
 
 export interface ConversationArea {
   id: string;
@@ -86,8 +110,15 @@ export interface PosterSessionArea {
   title?: string;
 }
 
+export interface CarnivalGameArea {
+  id: string;
+  petRule: PetRule[];
+}
+
+
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
+  petMoved: (pet: IPet) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
@@ -95,10 +126,13 @@ export interface ServerToClientEvents {
   townClosing: () => void;
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
+  gameUpdated: (game: Game) => void;
 }
 
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;
   playerMovement: (movementData: PlayerLocation) => void;
+  petMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
+  updateGame: (player: Player, key: string) => void;
 }

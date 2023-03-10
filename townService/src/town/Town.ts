@@ -4,7 +4,7 @@ import { BroadcastOperator } from 'socket.io';
 import IVideoClient from '../lib/IVideoClient';
 import Player from '../lib/Player';
 import TwilioVideo from '../lib/TwilioVideo';
-import { isPosterSessionArea, isViewingArea } from '../TestUtils';
+import { isCarnivalGameArea, isPosterSessionArea, isViewingArea } from '../TestUtils';
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
@@ -15,11 +15,13 @@ import {
   SocketData,
   ViewingArea as ViewingAreaModel,
   PosterSessionArea as PosterSessionAreaModel,
+  CarnivalGameArea as CarnivalGameAreaModel,
 } from '../types/CoveyTownSocket';
 import ConversationArea from './ConversationArea';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
 import PosterSessionArea from './PosterSessionArea';
+import CarnivalGameArea from './CarnivalGameArea';
 import SingletonScoreboardFactory from './Scoreboard';
 
 
@@ -179,6 +181,16 @@ export default class Town {
         // updatemodel if theres an existing poster session area with the same ID
         if (existingPosterSessionAreaArea) {
           existingPosterSessionAreaArea.updateModel(update);
+        }
+      } else if (isCarnivalGameArea(update)) {
+        newPlayer.townEmitter.emit('interactableUpdate', update);
+        const existingCarnivalGameArea = <CarnivalGameArea>(
+          this._interactables.find(
+            area => area.id === update.id && area instanceof CarnivalGameArea,
+          )
+        );
+        if (existingCarnivalGameArea) {
+          existingCarnivalGameArea.updateModel(update);
         }
       }
     });
@@ -353,6 +365,36 @@ export default class Town {
   }
 
   /**
+   * Creates a new carnival game area in this town if there is not currently an active
+   * carnival game area with the same ID. The carnival area ID must match the name of a
+   * carnival game area that exists in this town's map, and the carnival game area must not
+   * already have a video set.
+   *
+   * If successful creating the carnival game area, this method:
+   *    Adds any players who are in the region defined by the carnival game area to it
+   *    Notifies all players in the town that the carnival game area has been updated by
+   *      emitting an interactableUpdate event
+   *
+   * @param viewingArea Information describing the carnival game area to create.
+   *
+   * @returns True if the carnival game area was created or false if there is no known
+   * carnival game area with the specified ID or if there is already an active carnival game area
+   * with the specified ID or if there is no pet rule specify
+   */
+  public addCarnivalGameArea(carnivalGameArea: CarnivalGameAreaModel): boolean {
+    const area = this._interactables.find(
+      eachArea => eachArea.id === carnivalGameArea.id,
+    ) as CarnivalGameArea;
+    if (!area || area.petRule.length === 0) {
+      return false;
+    }
+    area.updateModel(carnivalGameArea);
+    area.addPlayersWithinBounds(this._players);
+    this._broadcastEmitter.emit('interactableUpdate', area.toModel());
+    return true;
+  }
+
+  /**
    * Fetch a player's session based on the provided session token. Returns undefined if the
    * session token is not valid.
    *
@@ -425,10 +467,17 @@ export default class Town {
       .filter(eachObject => eachObject.type === 'PosterSessionArea')
       .map(eachPSAreaObj => PosterSessionArea.fromMapObject(eachPSAreaObj, this._broadcastEmitter));
 
+    const carnivalGameAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'CarnivalGameArea')
+      .map(eachCarnAreaObj =>
+        CarnivalGameArea.fromMapObject(eachCarnAreaObj, this._broadcastEmitter),
+      );
+
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
-      .concat(posterSessionAreas);
+      .concat(posterSessionAreas)
+      .concat(carnivalGameAreas);
     this._validateInteractables();
   }
 

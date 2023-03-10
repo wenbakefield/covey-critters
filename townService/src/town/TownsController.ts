@@ -23,6 +23,7 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
+  SBGame,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
