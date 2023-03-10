@@ -9,8 +9,8 @@ import {
   CarnivalGameArea as CarnivalGameAreaModel,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import IScoreBoard from '../lib/IScoreBoard';
-import SingletonScoreboardFactory from './ScoreBoard';
+import IScoreBoard from './IScoreBoard';
+import SingletonScoreboardFactory from './Scoreboard';
 import SpaceBarGame from './SpaceBarGame';
 import IPet from '../lib/IPet';
 
