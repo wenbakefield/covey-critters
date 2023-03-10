@@ -11,7 +11,7 @@ import {
 import InteractableArea from './InteractableArea';
 import IScoreBoard from './IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
-import SpaceBarGame from './SpaceBarGame';
+import SBGame from './SBGame';
 import IPet from '../lib/IPet';
 
 export default class CarnivalGameArea extends InteractableArea {
@@ -210,7 +210,7 @@ export default class CarnivalGameArea extends InteractableArea {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _addGame(player: Player, _gameType?: number) {
-    const spaceBarGame = new SpaceBarGame(player, 100, 100);
+    const spaceBarGame = new SBGame(player, 100, 100);
     this._gameSession.push(spaceBarGame);
   }
 
