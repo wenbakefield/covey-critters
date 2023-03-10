@@ -24,6 +24,7 @@ import PosterSessionArea from './PosterSessionArea';
 import CarnivalGameArea from './CarnivalGameArea';
 import SingletonScoreboardFactory from './Scoreboard';
 
+
 /**
  * The Town class implements the logic for each town: managing the various events that
  * can occur (e.g. joining a town, moving, leaving a town)

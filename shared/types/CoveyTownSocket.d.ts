@@ -88,6 +88,7 @@ export interface GameSession {
   isOver: boolean,
   timeLimit: number;
 };
+
 export interface BoundingBox {
   x: number;
   y: number;

@@ -27,6 +27,7 @@ import {
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
+import SBGame from './SBGame';
 
 /**
  * This is the town route
