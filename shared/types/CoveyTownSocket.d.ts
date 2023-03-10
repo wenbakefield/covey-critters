@@ -57,9 +57,10 @@ export interface ConversationArea {
   occupantsByID: string[];
 };
 
-export interface SBGame {
+export interface GameSession {
   playerId: string,
   score: number,
+  scoreLimit: number,
   isOver: boolean,
   timeLimit: number;
 };
