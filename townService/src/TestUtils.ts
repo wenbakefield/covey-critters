@@ -210,5 +210,5 @@ export function isConversationArea(interactable: Interactable): interactable is 
 }
 
 export function isCarnivalGameArea(interactable: Interactable): interactable is CarnivalGameArea {
-  return 'pet' in interactable;
+  return 'petRule' in interactable;
 }

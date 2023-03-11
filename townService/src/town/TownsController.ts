@@ -23,10 +23,11 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
-  SBGame,
+  CarnivalGameArea,
+  GameSession,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
-import { isPosterSessionArea } from '../TestUtils';
+import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 
 /**
  * This is the town route
@@ -275,6 +276,38 @@ export class TownsController extends Controller {
   }
 
   /**
+   * Creates a carnival game area in a given town
+   *
+   * @param townID ID of the town in which to create the new poster session area
+   * @param sessionToken session token of the player making the request, must
+   *        match the session token returned when the player joined the town
+   * @param requestBody The new carnival game area to create
+   *
+   * @throws InvalidParametersError if the session token is not valid, or if the
+   *          poster session area could not be created
+   */
+  @Post('{townID}/createCarnivalArea')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async createCarnivalGameArea(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+    @Body() requestBody: CarnivalGameArea,
+  ): Promise<void> {
+    // download file here TODO
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    if (!curTown.getPlayerBySessionToken(sessionToken)) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    // add viewing area to the town, throw error if it fails
+    if (!curTown.addCarnivalGameArea(requestBody)) {
+      throw new InvalidParametersError('Invalid carnival game area');
+    }
+  }
+
+  /**
    * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
    * @param requestBody The new viewing area to create
    */
@@ -282,7 +315,7 @@ export class TownsController extends Controller {
   @Response<InvalidParametersError>(400, 'Invalid values specified')
   public async timeLimitReached(
     @Path() townID: string,
-    @Body() requestBody: SBGame,
+    @Body() requestBody: GameSession,
   ): Promise<void> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {

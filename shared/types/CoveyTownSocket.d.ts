@@ -1,4 +1,4 @@
-export interface SBGame {
+export interface GameSession {
   playerId: string,
   score: number,
   isOver: boolean,
@@ -39,12 +39,6 @@ export interface Player {
   location: PlayerLocation;
 };
 
-export interface GameSession {
-  playerId: string;
-  isOver: boolean;
-  score: number;
-}
-
 export type XY = { x: number, y: number };
 
 export interface PlayerLocation {
@@ -72,7 +66,7 @@ export type Pet = {
 export type PetRule = {
   percentileRangeMin: number; 
   percentileRangeMax: number;
-  petSelection: IPet[]
+  petSelection: Pet[]
 }
 
 export interface ConversationArea {
@@ -118,7 +112,7 @@ export interface CarnivalGameArea {
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
-  petMoved: (pet: IPet) => void;
+  petMoved: (pet: Pet) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
@@ -126,7 +120,7 @@ export interface ServerToClientEvents {
   townClosing: () => void;
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
-  gameUpdated: (game: Game) => void;
+  gameUpdated: (game: GameSession) => void;
 }
 
 export interface ClientToServerEvents {
@@ -134,5 +128,5 @@ export interface ClientToServerEvents {
   playerMovement: (movementData: PlayerLocation) => void;
   petMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
-  updateGame: (player: Player, key: string) => void;
+  updateGame: (key: string) => void;
 }

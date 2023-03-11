@@ -172,8 +172,76 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"SBGame": {
+			"Pet": {
 				"properties": {},
+				"type": "object"
+			},
+			"PetRule": {
+				"properties": {
+					"petSelection": {
+						"items": {
+							"$ref": "#/components/schemas/Pet"
+						},
+						"type": "array"
+					},
+					"percentileRangeMax": {
+						"type": "number",
+						"format": "double"
+					},
+					"percentileRangeMin": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"petSelection",
+					"percentileRangeMax",
+					"percentileRangeMin"
+				],
+				"type": "object"
+			},
+			"CarnivalGameArea": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"petRule": {
+						"items": {
+							"$ref": "#/components/schemas/PetRule"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"petRule"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SBGame": {
+				"properties": {
+					"playerId": {
+						"type": "string"
+					},
+					"score": {
+						"type": "number",
+						"format": "double"
+					},
+					"isOver": {
+						"type": "boolean"
+					},
+					"timeLimit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"playerId",
+					"score",
+					"isOver",
+					"timeLimit"
+				],
 				"type": "object",
 				"additionalProperties": false
 			}
@@ -656,6 +724,63 @@
 						}
 					}
 				]
+			}
+		},
+		"/towns/{townID}/createCarnivalArea": {
+			"post": {
+				"operationId": "CreateCarnivalGameArea",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Invalid values specified",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InvalidParametersError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Creates a carnival game area in a given town",
+				"tags": [
+					"towns"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "ID of the town in which to create the new poster session area",
+						"in": "path",
+						"name": "townID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "session token of the player making the request, must\nmatch the session token returned when the player joined the town",
+						"in": "header",
+						"name": "X-Session-Token",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The new carnival game area to create",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CarnivalGameArea",
+								"description": "The new carnival game area to create"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/towns/{townID}/CarnivalGameArea/timeLimitReach/{playerId}": {

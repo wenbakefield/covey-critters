@@ -24,7 +24,6 @@ import PosterSessionArea from './PosterSessionArea';
 import CarnivalGameArea from './CarnivalGameArea';
 import SingletonScoreboardFactory from './Scoreboard';
 
-
 /**
  * The Town class implements the logic for each town: managing the various events that
  * can occur (e.g. joining a town, moving, leaving a town)
@@ -153,6 +152,11 @@ export default class Town {
       this._updatePlayerLocation(newPlayer, movementData);
     });
 
+    // Set up listener to process updates on pet x,y location, and emit back updated location of pet.
+    socket.on('petMovement', (movementData: PlayerLocation) => {
+      this._updatePetLocation(newPlayer, movementData);
+    });
+
     // Set up a listener to process updates to interactables.
     // Currently only knows how to process updates for ViewingAreas and PosterSessionAreas, and
     // ignores any other updates for any other kind of interactable.
@@ -191,6 +195,26 @@ export default class Town {
         );
         if (existingCarnivalGameArea) {
           existingCarnivalGameArea.updateModel(update);
+        }
+      }
+    });
+
+    // Set up listener to update GameSession in Carnival Game Area, and emit back updated GameSession to the client
+    socket.on('updateGame', key => {
+      const carnivalGameArea = this._interactables.find(
+        conv => conv.id === newPlayer.location.interactableID,
+      );
+      if (carnivalGameArea instanceof CarnivalGameArea) {
+        const game = carnivalGameArea.getGame(newPlayer.id);
+
+        if (game.isOver()) {
+          carnivalGameArea.notifyScoreBoard(newPlayer.id);
+          newPlayer.townEmitter.emit('gameUpdated', game.toModel());
+          // Emit to client gameUpdated with game isOver state = true;
+        } else {
+          // Emit to Client gameUpdate;
+          game.onTick(key);
+          newPlayer.townEmitter.emit('gameUpdated', game.toModel());
         }
       }
     });
@@ -244,6 +268,12 @@ export default class Town {
     player.location = location;
 
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
+  }
+
+  private _updatePetLocation(player: Player, movementData: PlayerLocation) {
+    let pet;
+    // TODO get Pet from Player and invoke nextMovement()
+    // this._broadcastEmitter.emit('petMoved', pet.toPetModel());
   }
 
   /**
@@ -385,7 +415,7 @@ export default class Town {
     const area = this._interactables.find(
       eachArea => eachArea.id === carnivalGameArea.id,
     ) as CarnivalGameArea;
-    if (!area || area.petRule.length === 0) {
+    if (!area || carnivalGameArea.petRule.length === 0) {
       return false;
     }
     area.updateModel(carnivalGameArea);
