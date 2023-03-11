@@ -17,12 +17,14 @@ import {
   TownSettingsUpdate,
   ViewingArea as ViewingAreaModel,
   PosterSessionArea as PosterSessionAreaModel,
+  CarnivalGameArea as CarnivalGameAreaModel,
 } from '../types/CoveyTownSocket';
 import { isConversationArea, isViewingArea, isPosterSessionArea } from '../types/TypeUtils';
 import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
 import PosterSessionAreaController from './PosterSessionAreaController';
+import { Socket } from 'dgram';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY = 300;
 
@@ -418,6 +420,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       }
     });
 
+    this._socket.on('petMoved', petMoved => {
+      // TODO Update Pet Movement
+      // this.emit('');
+    });
+
     /**
      * When an interactable's state changes, push that update into the relevant controller, which is assumed
      * to be either a Viewing Area, a Poster Session Area, or a Conversation Area, and which is assumed to already
@@ -453,6 +460,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         }
       }
     });
+
+    this._socket.on('gameUpdated', gameModel => {
+      //TODO recieve updated GameModel from backend and emit updateGame back to backend.
+      const key = '';
+      this._socket.emit('updateGame', key);
+    });
   }
 
   /**
@@ -468,6 +481,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.emit('playerMovement', newLocation);
     const ourPlayer = this._ourPlayer;
     assert(ourPlayer);
+    // May be add a check to see if player has a pet?
+    this._socket.emit('petMovement', newLocation);
     ourPlayer.location = newLocation;
     this.emit('playerMoved', ourPlayer);
   }
@@ -543,6 +558,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     // TODO catch the error if the file type is invalid
     console.warn('Intermediate poster session: ' + JSON.stringify(newArea, null, 4));
     await this._townsService.createPosterSessionArea(this.townID, this.sessionToken, newArea);
+  }
+
+  /**
+   * Create a new carnival game area, sending the request to the townService. Throws an error if the request
+   * is not successful. Does not immediately update local state about the new carnival game area - it will be updated
+   * once the townService creates the area and emits an interactableUpdate.
+   *
+   * @param newArea Represent the new carnivalGameArea
+   */
+  async createCarnivalGameArea(newArea: CarnivalGameAreaModel) {
+    await this._townsService.createCarnivalGameArea(this.townID, this.sessionToken, newArea);
   }
 
   /**

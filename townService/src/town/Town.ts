@@ -16,6 +16,7 @@ import {
   ViewingArea as ViewingAreaModel,
   PosterSessionArea as PosterSessionAreaModel,
   CarnivalGameArea as CarnivalGameAreaModel,
+  PetOwnerMap,
 } from '../types/CoveyTownSocket';
 import ConversationArea from './ConversationArea';
 import InteractableArea from './InteractableArea';
@@ -273,7 +274,8 @@ export default class Town {
   private _updatePetLocation(player: Player, movementData: PlayerLocation) {
     let pet;
     // TODO get Pet from Player and invoke nextMovement()
-    // this._broadcastEmitter.emit('petMoved', pet.toPetModel());
+    // const updatedPet: PetOwnerMap = { playerId: player.id, pet: pet.toPetModel }
+    // this._broadcastEmitter.emit('petMoved', updatedPet);
   }
 
   /**

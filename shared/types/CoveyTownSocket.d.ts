@@ -109,10 +109,15 @@ export interface CarnivalGameArea {
   petRule: PetRule[];
 }
 
+export interface PetOwnerMap {
+  playerId: string
+  pet: Pet
+}
+
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
-  petMoved: (pet: Pet) => void;
+  petMoved: (petMoved: PetOwnerMap) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
