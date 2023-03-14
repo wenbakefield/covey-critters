@@ -35,7 +35,8 @@ export default class ScoreboardController {
   @Post('{Player}/{score}')
   public addPlayerScore(
     @Path() player: PlayerModel,
-    @Path()score: number): void {
+    @Path() score: number
+    ): void {
     this._scoreboard.notifyScoreBoard(player, score);
   }
 
