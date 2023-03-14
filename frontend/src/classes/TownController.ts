@@ -422,7 +422,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     this._socket.on('petMoved', petMoved => {
       // TODO Update Pet Movement
-      // this.emit('');
+      this._socket.emit('petMovement');
     });
 
     /**
