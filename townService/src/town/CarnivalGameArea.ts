@@ -7,12 +7,14 @@ import {
   PetRule,
   TownEmitter,
   CarnivalGameArea as CarnivalGameAreaModel,
+  Pet as PetModel,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
 import IScoreBoard from './IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
 import SBGame from './SBGame';
 import IPet from '../lib/IPet';
+import PetFactory from '../lib/PetFactory';
 
 export default class CarnivalGameArea extends InteractableArea {
   private _scoreboard: IScoreBoard;
@@ -98,8 +100,8 @@ export default class CarnivalGameArea extends InteractableArea {
    * @param playerId Represent the player that will get a new pet
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public assignPetToPlayer(playerId: string, petName: string): IPet {
-    const pet: IPet = this._randomizePet(playerId);
+  public assignPetToPlayer(playerId: string, petName: string): PetModel {
+    const pet: PetModel = this._randomizePet(playerId);
     const player = this._occupants.find(players => players.id === playerId);
     if (!player) {
       throw Error(`Player with id ${playerId} cannot be found within this CarnivalGameArea`);
@@ -130,7 +132,7 @@ export default class CarnivalGameArea extends InteractableArea {
     );
   }
 
-  private _randomizePet(playerid: string): IPet {
+  private _randomizePet(playerid: string): PetModel {
     const playerPecentile: number = this._getPlayerPercentile(playerid) * 100;
     for (let i = 0; i < this._petRule.length; i++) {
       const petRule = this._petRule[i];
