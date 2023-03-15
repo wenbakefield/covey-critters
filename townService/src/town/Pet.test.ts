@@ -1,25 +1,23 @@
-import { MovementType, Species } from '../types/CoveyTownSocket';
+import { MovementType, PlayerLocation, Species } from '../types/CoveyTownSocket';
 import Pet from './Pet';
 
 describe('Pet', () => {
+  const initialPlayerLocation: PlayerLocation = {
+    x: 50,
+    y: 100,
+    rotation: 'front',
+    moving: true,
+  };
+
   let pet: Pet;
   const petName = 'Lemmy';
   const petSpecies = Species.gecko;
-  const petX = 50;
-  const petY = 100;
   const petOffsetX = -40;
   const petOffsetY = -20;
 
   beforeEach(() => {
-    pet = new Pet(
-      petName,
-      petSpecies,
-      petX,
-      petY,
-      MovementType.OffsetPlayer,
-      petOffsetX,
-      petOffsetY,
-    );
+    pet = new Pet(petName, petSpecies, MovementType.OffsetPlayer, petOffsetX, petOffsetY);
+    pet.initializeLocation(initialPlayerLocation);
   });
 
   it('should have a unique id', () => {
@@ -84,8 +82,8 @@ describe('Pet', () => {
     expect(petModel?.name).toBe(petName);
     expect(petModel?.species).toBe(petSpecies);
     expect(petModel?.movementType).toBe(MovementType.OffsetPlayer);
-    expect(petModel?.x).toBe(petX);
-    expect(petModel?.y).toBe(petY);
+    expect(petModel?.x).toBe(10);
+    expect(petModel?.y).toBe(80);
   });
 
   it('should throw error if pet is assigned a blank name', () => {
