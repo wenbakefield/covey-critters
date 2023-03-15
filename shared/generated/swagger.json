@@ -171,6 +171,11 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"SBGame": {
+				"properties": {},
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -651,6 +656,53 @@
 						}
 					}
 				]
+			}
+		},
+		"/towns/{townID}/CarnivalGameArea/timeLimitReach/{playerId}": {
+			"patch": {
+				"operationId": "TimeLimitReached",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Invalid values specified",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InvalidParametersError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard",
+				"tags": [
+					"towns"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "townID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The new viewing area to create",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SBGame",
+								"description": "The new viewing area to create"
+							}
+						}
+					}
+				}
 			}
 		}
 	},
