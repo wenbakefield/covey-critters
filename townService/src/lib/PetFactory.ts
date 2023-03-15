@@ -13,16 +13,16 @@ class PetFactory {
         petModel.species,
         petModel.x,
         petModel.y,
-        petModel.movemetType,
+        petModel.movementType,
       );
-      switch (petModel.movemetType) {
+      switch (petModel.movementType) {
         case MovementType.OffsetPlayer:
           return new Pet(
             petModel.name,
             petModel.species,
             petModel.x,
             petModel.y,
-            petModel.movemetType,
+            petModel.movementType,
           );
           break;
         case MovementType.OrbitPlayer:
