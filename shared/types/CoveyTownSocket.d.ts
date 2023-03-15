@@ -1,3 +1,9 @@
+export interface SBGame {
+  playerId: string,
+  score: number,
+  isOver: boolean,
+  timeLimit: number;
+};
 export type TownJoinResponse = {
   /** Unique ID that represents this player * */
   userID: string;
@@ -24,6 +30,8 @@ export type TownSettingsUpdate = {
   isPubliclyListed?: boolean;
 }
 
+export type Pet = {}
+
 export type Direction = 'front' | 'back' | 'left' | 'right';
 export interface Player {
   id: string;
@@ -31,6 +39,12 @@ export interface Player {
   location: PlayerLocation;
   pet: Pet;
 };
+
+export interface GameSession {
+  playerId: string;
+  isOver: boolean;
+  score: number;
+}
 
 export type XY = { x: number, y: number };
 
@@ -77,6 +91,7 @@ export type Pet = {
   y: number;
 } | undefined;
 
+
 export type PetRule = {
   percentileRangeMin: number; 
   percentileRangeMax: number;
@@ -88,6 +103,15 @@ export interface ConversationArea {
   topic?: string;
   occupantsByID: string[];
 };
+
+export interface GameSession {
+  playerId: string,
+  score: number,
+  scoreLimit: number,
+  isOver: boolean,
+  timeLimit: number;
+};
+
 export interface BoundingBox {
   x: number;
   y: number;
@@ -117,6 +141,7 @@ export interface CarnivalGameArea {
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
+  petMoved: (pet: IPet) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
@@ -124,10 +149,13 @@ export interface ServerToClientEvents {
   townClosing: () => void;
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
+  gameUpdated: (game: Game) => void;
 }
 
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;
   playerMovement: (movementData: PlayerLocation) => void;
+  petMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
+  updateGame: (player: Player, key: string) => void;
 }
