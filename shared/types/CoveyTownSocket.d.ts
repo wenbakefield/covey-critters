@@ -29,7 +29,7 @@ export interface Player {
   id: string;
   userName: string;
   location: PlayerLocation;
-  pet: IPet;
+  pet: Pet;
 };
 
 export type XY = { x: number, y: number };
@@ -80,7 +80,7 @@ export type Pet = {
 export type PetRule = {
   percentileRangeMin: number; 
   percentileRangeMax: number;
-  petSelection: IPet[]
+  petSelection: Pet[]
 }
 
 export interface ConversationArea {

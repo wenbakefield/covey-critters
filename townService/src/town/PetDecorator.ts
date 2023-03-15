@@ -8,6 +8,10 @@ export default abstract class PetDecorator implements IPet {
     this._pet = pet;
   }
 
+  toPetModel(): Pet {
+    return this._pet.toPetModel();
+  }
+
   /**
    * Calculate the next x,y trajectories of where the Pet Is heading
    * @param playerLocation given player current location on the map
@@ -15,5 +19,30 @@ export default abstract class PetDecorator implements IPet {
    */
   nextMovement(playerLocation: PlayerLocation): [number, number] {
     return this._pet.nextMovement(playerLocation);
+  }
+
+  /**
+   * Retrieve the pet location;
+   * @returns x,y coordinate that represent the Pet
+   */
+  getPetLocation(): [number, number] {
+    return this._pet.getPetLocation();
+  }
+
+  /**
+   * Given new set of location set Pet location
+   * @param x represent the coordinate along the x axis
+   * @param y represent the coordinate along the y axis
+   */
+  setPetLocation(x: number, y: number): void {
+    this._pet.setPetLocation(x, y);
+  }
+
+  /**
+   * Initialize the pet location when the pet is instantiated
+   * @param playerLocation represent the player coordinate in the town
+   */
+  initializeLocation(playerLocation: PlayerLocation): void {
+    this._pet.initializeLocation(playerLocation);
   }
 }

@@ -11,9 +11,9 @@ export default class Pet implements IPet {
 
   private _movementType: MovementType;
 
-  private _x: number;
+  private _x?: number;
 
-  private _y: number;
+  private _y?: number;
 
   private _xOffset: number;
 
@@ -22,8 +22,6 @@ export default class Pet implements IPet {
   constructor(
     name: string,
     species: Species,
-    x: number,
-    y: number,
     movementType = MovementType.OffsetPlayer,
     x_offset = -40, // default value for pet location
     y_offset = -20,
@@ -33,10 +31,24 @@ export default class Pet implements IPet {
     this._name = name;
     this._species = species;
     this._movementType = movementType;
-    this._x = x;
-    this._y = y;
     this._xOffset = x_offset;
     this._yOffset = y_offset;
+  }
+
+  get x(): number {
+    return this._x === undefined ? 0 : this._x;
+  }
+
+  set x(xlocation: number) {
+    this._x = xlocation;
+  }
+
+  get y(): number {
+    return this._y === undefined ? 0 : this._y;
+  }
+
+  set y(ylocation: number) {
+    this._y = ylocation;
   }
 
   get id(): string {
@@ -60,8 +72,8 @@ export default class Pet implements IPet {
   }
 
   nextMovement(playerLocation: PlayerLocation): [number, number] {
-    this._x = playerLocation.x + this._xOffset;
-    this._y = playerLocation.y + this._yOffset;
+    this.x = playerLocation.x + this._xOffset;
+    this.y = playerLocation.y + this._yOffset;
     return [playerLocation.x + this._xOffset, playerLocation.y + this._yOffset];
   }
 
@@ -71,8 +83,24 @@ export default class Pet implements IPet {
       name: this._name,
       species: this._species,
       movementType: this._movementType,
-      x: this._x,
-      y: this._y,
+      x: this.x,
+      y: this.y,
     };
+  }
+
+  getPetLocation(): [number, number] {
+    return [this.x, this.y];
+  }
+
+  setPetLocation(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
+  }
+
+  initializeLocation(playerLocation: PlayerLocation): void {
+    if (this._x === undefined && this._y === undefined) {
+      this.x = playerLocation.x + this._xOffset;
+      this.y = playerLocation.y + this._yOffset;
+    }
   }
 }

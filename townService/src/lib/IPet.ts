@@ -11,4 +11,22 @@ export default interface IPet {
    * Return a Pet Model to client
    */
   toPetModel(): PetModel;
+
+  /**
+   * Retrieve current Pet Location
+   */
+  getPetLocation(): [number, number];
+
+  /**
+   * Given a new x an y location set the Pet Location
+   * @param x represent the coordinate on x axis
+   * @param y represent the coordinate on y axis
+   */
+  setPetLocation(x: number, y: number): void;
+
+  /**
+   * Initilize the Pet Location
+   * @param playerLocation represent player coordinate
+   */
+  initializeLocation(playerLocation: PlayerLocation): void;
 }
