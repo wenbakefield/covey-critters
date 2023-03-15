@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { Player as PlayerModel, PlayerLocation, TownEmitter } from '../types/CoveyTownSocket';
+import { Pet, Player as PlayerModel, PlayerLocation, TownEmitter } from '../types/CoveyTownSocket';
 
 /**
  * Each user who is connected to a town is represented by a Player object
@@ -22,6 +22,8 @@ export default class Player {
 
   /** A special town emitter that will emit events to the entire town BUT NOT to this player */
   public readonly townEmitter: TownEmitter;
+
+  private _pet?: Pet;
 
   constructor(userName: string, townEmitter: TownEmitter) {
     this.location = {
@@ -56,11 +58,20 @@ export default class Player {
     return this._sessionToken;
   }
 
+  set pet(value: Pet | undefined) {
+    this._pet = value;
+  }
+
+  get pet(): Pet | undefined {
+    return this._pet;
+  }
+
   toPlayerModel(): PlayerModel {
     return {
       id: this._id,
       location: this.location,
       userName: this._userName,
+      pet: this._pet,
     };
   }
 }
