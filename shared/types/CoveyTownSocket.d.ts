@@ -60,12 +60,12 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export enum MovementType {
+export const enum MovementType {
   OffsetPlayer = 'offsetPlayer',
   OrbitPlayer = 'orbitPlayer',
 }
 
-export enum Species {
+export const enum Species {
   dog = 'dog',
   cat = 'cat',
   hamster = 'hamster',
@@ -80,7 +80,7 @@ export type Pet = {
   id: string;
   name: string;
   species: Species;
-  movemetType: MovementType;
+  movementType: MovementType;
   x: number;
   y: number;
 } | undefined;
@@ -88,7 +88,7 @@ export type Pet = {
 export type PetRule = {
   percentileRangeMin: number; 
   percentileRangeMax: number;
-  petSelection: Pet[]
+  petSelection: IPet[]
 }
 
 export interface ConversationArea {

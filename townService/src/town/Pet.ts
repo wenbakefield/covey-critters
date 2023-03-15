@@ -1,6 +1,6 @@
-import IPet from '../lib/IPet';
-import { MovementType, Pet as PetModel, PlayerLocation, Species } from '../types/CoveyTownSocket';
 import { nanoid } from 'nanoid';
+import IPet from '../lib/IPet';
+import { Species, MovementType, PlayerLocation, Pet as PetModel } from '../types/CoveyTownSocket';
 
 export default class Pet implements IPet {
   private readonly _id: string;
@@ -48,7 +48,11 @@ export default class Pet implements IPet {
   }
 
   set name(value: string) {
-    this._name = value;
+    if (value.length > 0) {
+      this._name = value;
+    } else {
+      throw new Error('New pet name cannot be blank!');
+    }
   }
 
   get species(): string {
@@ -66,7 +70,7 @@ export default class Pet implements IPet {
       id: this._id,
       name: this._name,
       species: this._species,
-      movemetType: this._movementType,
+      movementType: this._movementType,
       x: this._x,
       y: this._y,
     };
