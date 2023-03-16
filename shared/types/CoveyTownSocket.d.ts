@@ -74,6 +74,17 @@ export const enum Species {
   ghoul = 'ghoul',
 }
 
+export const enum Species {
+  dog = 'dog',
+  cat = 'cat',
+  hamster = 'hamster',
+  gecko = 'gecko',
+  turtle = 'turtle',
+  parrot = 'parrot',
+  dragon = 'dragon',
+  ghoul = 'ghoul',
+}
+
 export type Pet = {
   id: string;
   name: string;

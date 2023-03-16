@@ -14,6 +14,7 @@ import InteractableArea from './InteractableArea';
 import IScoreBoard from './IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
 import SBGame from './SBGame';
+import IPet from '../lib/IPet';
 import PetFactory from '../lib/PetFactory';
 
 export default class CarnivalGameArea extends InteractableArea {
