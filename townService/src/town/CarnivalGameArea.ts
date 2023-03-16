@@ -8,12 +8,12 @@ import {
   TownEmitter,
   CarnivalGameArea as CarnivalGameAreaModel,
   Pet as PetModel,
+  PlayerLocation,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
 import IScoreBoard from './IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
 import SBGame from './SBGame';
-import IPet from '../lib/IPet';
 import PetFactory from '../lib/PetFactory';
 
 export default class CarnivalGameArea extends InteractableArea {
@@ -88,9 +88,10 @@ export default class CarnivalGameArea extends InteractableArea {
       throw Error(`Player with id ${playerId} cannot be found within this CarnivalGameArea`);
     } else {
       const gameSession = this.getGame(playerId);
-      if (gameSession.isOver() || isTimeOver) {
+      if (gameSession.isOver(isTimeOver)) {
+        // Overide
         const score = gameSession.getScore();
-        this._scoreboard.notifyScoreBoard(player, score);
+        this._scoreboard.notifyScoreBoard(player.toPlayerModel(), score);
       }
     }
   }
@@ -105,12 +106,14 @@ export default class CarnivalGameArea extends InteractableArea {
     const player = this._occupants.find(players => players.id === playerId);
     if (!player) {
       throw Error(`Player with id ${playerId} cannot be found within this CarnivalGameArea`);
-    } else {
+    } else if (pet) {
       // Assign Player a Pet;
-      // TODO
-      petName.at(0);
+      pet.name = petName;
+      const ipet = PetFactory.spawnPet(pet, player.location);
+      player.pet = ipet;
+      return ipet.toPetModel();
     }
-    return pet;
+    throw Error('Unable to Assign Player a Pet');
   }
 
   /**
@@ -161,8 +164,8 @@ export default class CarnivalGameArea extends InteractableArea {
         const percentile = this._scoreboard.calculatedPercentile(score);
         return percentile;
       }
+      throw Error('Player has not completed the game');
     }
-    return 0;
   }
 
   /**
