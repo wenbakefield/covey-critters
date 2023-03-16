@@ -1,9 +1,3 @@
-export interface GameSession {
-  playerId: string,
-  score: number,
-  isOver: boolean,
-  timeLimit: number;
-};
 export type TownJoinResponse = {
   /** Unique ID that represents this player * */
   userID: string;
@@ -61,17 +55,6 @@ export type ChatMessage = {
 export const enum MovementType {
   OffsetPlayer = 'offsetPlayer',
   OrbitPlayer = 'orbitPlayer',
-}
-
-export const enum Species {
-  dog = 'dog',
-  cat = 'cat',
-  hamster = 'hamster',
-  gecko = 'gecko',
-  turtle = 'turtle',
-  parrot = 'parrot',
-  dragon = 'dragon',
-  ghoul = 'ghoul',
 }
 
 export const enum Species {

@@ -272,10 +272,14 @@ export default class Town {
   }
 
   private _updatePetLocation(player: Player, movementData: PlayerLocation) {
-    let pet;
-    // TODO get Pet from Player and invoke nextMovement()
-    // const updatedPet: PetOwnerMap = { playerId: player.id, pet: pet.toPetModel }
-    // this._broadcastEmitter.emit('petMoved', updatedPet);
+    if (player.pet) {
+      // Only emit socket event when player has a pet
+      player.pet.nextMovement(movementData);
+      this._broadcastEmitter.emit('petMoved', {
+        playerId: player.id,
+        pet: player.pet?.toPetModel(),
+      });
+    }
   }
 
   /**

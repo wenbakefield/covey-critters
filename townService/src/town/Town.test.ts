@@ -16,10 +16,14 @@ import {
   ChatMessage,
   GameSession,
   Interactable,
+  MovementType,
+  Pet,
   PlayerLocation,
+  Species,
   TownEmitter,
   ViewingArea as ViewingAreaModel,
 } from '../types/CoveyTownSocket';
+import CarnivalGameArea from './CarnivalGameArea';
 import ConversationArea from './ConversationArea';
 import SingletonScoreboardFactory from './Scoreboard';
 import Town from './Town';
@@ -752,6 +756,79 @@ describe('Town', () => {
         const lastEvent = getLastEmittedEvent(playerTestData.socketToRoomMock, 'gameUpdated');
         expect(lastEvent).toEqual(endGame);
         expect(scoreboard.getAllScores()).toHaveLength(1);
+      });
+    });
+
+    describe('PetMoved', () => {
+      let petMovementCallBack: (playerLocation: PlayerLocation) => void;
+      let actualPet: Pet;
+      const playerLocation: PlayerLocation = {
+        x: 50,
+        y: 100,
+        rotation: 'front',
+        moving: true,
+      };
+      const dragon: Pet = {
+        id: nanoid(),
+        name: 'Dragon',
+        species: Species.dragon,
+        movementType: MovementType.OffsetPlayer,
+        x: 0,
+        y: 0,
+      };
+      const newModel: CarnivalGameAreaModel = {
+        id: 'Name5',
+        petRule: [
+          {
+            percentileRangeMin: 0,
+            percentileRangeMax: 101, // For the upperbound
+            petSelection: [dragon],
+          },
+        ],
+      };
+      beforeEach(() => {
+        town.initializeFromMap(testingMaps.twoConvTwoViewingOneCarn);
+        playerTestData.moveTo(605, 1201); // Inside of "Name5" area
+        expect(town.addCarnivalGameArea(newModel)).toBe(true);
+        petMovementCallBack = getEventListener(playerTestData.socket, 'petMovement');
+      });
+
+      it('Does not forward updates to the entired town', () => {
+        petMovementCallBack(playerLocation);
+        expect(() => getLastEmittedEvent(townEmitter, 'petMoved')).toThrowError();
+      });
+
+      it('Does not forward updates if the player does not have a pet', () => {
+        petMovementCallBack(playerLocation);
+        expect(playerTestData.player?.pet).not.toBeDefined();
+        expect(() => getLastEmittedEvent(townEmitter, 'petMoved')).toThrowError();
+      });
+
+      describe('After the player has completed the Game', () => {
+        beforeEach(() => {
+          const carnivalGame = <CarnivalGameArea>town.getInteractable('Name5');
+          const game = carnivalGame.getGame(playerTestData.player!.id);
+          game.isOver(true); // Overide the game state to end
+          actualPet = carnivalGame.assignPetToPlayer(playerTestData.player!.id, 'lemmy');
+        });
+
+        it('Pet should be spawned', () => {
+          expect(playerTestData.player?.pet).toBeDefined();
+        });
+
+        it('Pet movement move next', () => {
+          petMovementCallBack(playerLocation);
+          const lastEvent = getLastEmittedEvent(townEmitter, 'petMoved');
+          const expectedPet: Pet = {
+            id: actualPet!.id,
+            name: 'lemmy',
+            species: Species.dragon,
+            movementType: MovementType.OffsetPlayer,
+            x: 10,
+            y: 80,
+          };
+          expect(lastEvent.pet).toEqual(expectedPet);
+        });
       });
     });
     describe('playerMovement', () => {
