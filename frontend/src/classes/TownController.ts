@@ -555,6 +555,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this.emit('playerMoved', ourPlayer);
   }
 
+  /**
+   * Emit a updatedGame mevent for the current player, updating the game state in the backend.
+   * @param key represent the key pressed that the player has entered
+   */
   public gameOnTick(key: string) {
     this._socket.emit('updateGame', key);
   }
