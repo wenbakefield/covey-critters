@@ -29,7 +29,7 @@ export interface Player {
   id: string;
   userName: string;
   location: PlayerLocation;
-  pet: Pet;
+  pet?: Pet;
 };
 
 export type XY = { x: number, y: number };

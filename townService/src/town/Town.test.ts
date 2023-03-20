@@ -715,9 +715,11 @@ describe('Town', () => {
       };
       beforeEach(async () => {
         town.initializeFromMap(testingMaps.twoConvTwoViewingOneCarn);
-        scoreboard.removePlayerScore(playerTestData.player!.toPlayerModel());
+        scoreboard.removePlayerScore(player.toPlayerModel());
         playerTestData.moveTo(605, 1201); // Inside of "Name5" area
         expect(town.addCarnivalGameArea(newModel)).toBe(true);
+        const lastEvent = getLastEmittedEvent(playerTestData.socketToRoomMock, 'gameUpdated');
+        expect(lastEvent).toBeDefined(); // Should be emitted when player is add into Carnival Game Session
         gameUpdateCallback = getEventListener(playerTestData.socket, 'updateGame');
         gameUpdateCallback('32');
       });
@@ -726,7 +728,7 @@ describe('Town', () => {
         const lastEvent = getLastEmittedEvent(playerTestData.socketToRoomMock, 'gameUpdated');
         const playerGameSession = {
           isOver: false,
-          playerId: playerTestData.player!.id,
+          playerId: player.id,
           score: 1,
           scoreLimit: 100,
           timeLimit: 100,
@@ -744,7 +746,7 @@ describe('Town', () => {
       it('Notify scoreboard when game has ended', () => {
         expect(scoreboard.getAllScores()).toHaveLength(0);
         const endGame = {
-          playerId: playerTestData.player!.id,
+          playerId: player.id,
           score: 100,
           scoreLimit: 100,
           isOver: true,
@@ -807,7 +809,7 @@ describe('Town', () => {
       describe('After the player has completed the Game', () => {
         beforeEach(() => {
           const carnivalGame = <CarnivalGameArea>town.getInteractable('Name5');
-          const game = carnivalGame.getGame(playerTestData.player!.id);
+          const game = carnivalGame.getGame(player.id);
           game.isOver(true); // Overide the game state to end
           actualPet = carnivalGame.assignPetToPlayer(playerTestData.player!.id, 'lemmy');
         });

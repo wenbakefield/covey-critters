@@ -19,12 +19,20 @@ import {
   PosterSessionArea as PosterSessionAreaModel,
   CarnivalGameArea as CarnivalGameAreaModel,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isViewingArea, isPosterSessionArea } from '../types/TypeUtils';
+import {
+  isConversationArea,
+  isViewingArea,
+  isPosterSessionArea,
+  isCarnivalGameArea,
+} from '../types/TypeUtils';
 import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
 import PosterSessionAreaController from './PosterSessionAreaController';
-import { Socket } from 'dgram';
+import CarnivalGameAreaController from './CarnivalGameAreaController';
+import PetController from './PetController';
+import CarnivalGameArea from '../components/Town/interactables/CarnivalGameArea';
+import SpaceBarGameController from './SBGameController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY = 300;
 
@@ -64,6 +72,11 @@ export type TownEvents = {
    */
   playerMoved: (movedPlayer: PlayerController) => void;
   /**
+   * An event that indicates that a player has moved. This event is dispatched after updating the pet's location -
+   * the new location can be found on the PetController
+   */
+  petMoved: (movedPet: PetController) => void;
+  /**
    * An event that indicates that the set of conversation areas has changed. This event is dispatched
    * when a conversation area is created, or when the set of active conversations has changed. This event is dispatched
    * after updating the town controller's record of conversation areas.
@@ -79,6 +92,11 @@ export type TownEvents = {
    * the town controller's record of poster session areas.
    */
   posterSessionAreasChanged: (newPosterSessionAreas: PosterSessionAreaController[]) => void;
+  /**
+   * An even that indicates that the set of carnival game area has changed. This event is emitted after updating
+   * the town controller's record of carnival game areas
+   */
+  carnivalAreasChanged: (newCarnivalAreas: CarnivalGameAreaController[]) => void;
   /**
    * An event that indicates that a new chat message has been received, which is the parameter passed to the listener
    */
@@ -201,6 +219,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private _viewingAreas: ViewingAreaController[] = [];
 
   private _posterSessionAreas: PosterSessionAreaController[] = [];
+
+  private _carnivalGameAreas: CarnivalGameAreaController[] = [];
 
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
     super();
@@ -330,6 +350,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this.emit('posterSessionAreasChanged', newPosterSessionAreas);
   }
 
+  public get carnivalGameAreas() {
+    return this._carnivalGameAreas;
+  }
+
+  public set carnivalGameAreas(newCarnivalGameAreas: CarnivalGameAreaController[]) {
+    this._carnivalGameAreas = newCarnivalGameAreas;
+    this.emit('carnivalAreasChanged', newCarnivalGameAreas);
+  }
+
   /**
    * Begin interacting with an interactable object. Emits an event to all listeners.
    * @param interactedObj
@@ -422,7 +451,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     this._socket.on('petMoved', petMoved => {
       // TODO Update Pet Movement
-      this._socket.emit('petMovement');
+      const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === petMoved.playerId);
+      if (playerToUpdate) {
+        if (playerToUpdate == this._ourPlayer && playerToUpdate.pet && petMoved.pet) {
+          const x = petMoved.pet.x;
+          const y = petMoved.pet.y;
+          playerToUpdate.pet.location = { x, y };
+          this.emit('petMoved', playerToUpdate.pet);
+        }
+      }
     });
 
     /**
@@ -458,14 +495,42 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         if (relArea) {
           relArea.updateFrom(interactable);
         }
+      } else if (isCarnivalGameArea(interactable)) {
+        const relArea = this.carnivalGameAreas.find(area => area.id == interactable.id);
+        if (relArea) {
+          relArea.updateFrom(interactable);
+        }
       }
     });
 
     this._socket.on('gameUpdated', gameModel => {
       //TODO recieve updated GameModel from backend and emit updateGame back to backend.
-      const key = '';
-      this._socket.emit('updateGame', key);
+      const game = this._getGameByPlayerID(gameModel.playerId);
+      game.updateFrom(gameModel);
+      // const key = '';
+      // this._socket.emit('updateGame', key);
     });
+  }
+
+  private _getGameByPlayerID(playerId: string): SpaceBarGameController {
+    const carnivalGameArea = this._carnivalGameAreas.find(area => {
+      if (!area.getGameSessionByID(playerId)) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+    if (carnivalGameArea) {
+      const game = carnivalGameArea.getGameSessionByID(playerId);
+      if (game) {
+        return game;
+      } else {
+        // Should not be possible to throw this error
+        throw new Error('Game is not found within the carnival game area');
+      }
+    } else {
+      throw new Error('Cannot find game as Carnival Game Area Does Not Exist');
+    }
   }
 
   /**
@@ -482,9 +547,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     const ourPlayer = this._ourPlayer;
     assert(ourPlayer);
     // May be add a check to see if player has a pet?
-    this._socket.emit('petMovement', newLocation);
+    if (ourPlayer.pet) {
+      this._socket.emit('petMovement', newLocation);
+      this.emit('petMoved', ourPlayer.pet);
+    }
     ourPlayer.location = newLocation;
     this.emit('playerMoved', ourPlayer);
+  }
+
+  public gameOnTick(key: string) {
+    this._socket.emit('updateGame', key);
   }
 
   /**
@@ -568,7 +640,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * @param newArea Represent the new carnivalGameArea
    */
   async createCarnivalGameArea(newArea: CarnivalGameAreaModel) {
-    await this._townsService.createCarnivalGameArea(this.townID, this.sessionToken, newArea);
+    // await this._townsService.createCarnivalGameArea(this.townID, this.sessionToken, newArea);
   }
 
   /**
@@ -604,6 +676,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this._conversationAreas = [];
         this._viewingAreas = [];
         this._posterSessionAreas = [];
+        this._carnivalGameAreas = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
             this._conversationAreasInternal.push(
@@ -616,6 +689,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._viewingAreas.push(new ViewingAreaController(eachInteractable));
           } else if (isPosterSessionArea(eachInteractable)) {
             this._posterSessionAreas.push(new PosterSessionAreaController(eachInteractable));
+          } else if (isCarnivalGameArea(eachInteractable)) {
+            this.carnivalGameAreas.push(new CarnivalGameAreaController(eachInteractable));
           }
         });
         this._userID = initialData.userID;
@@ -675,6 +750,24 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         imageContents: undefined,
       });
       this._posterSessionAreas.push(newController);
+      return newController;
+    }
+  }
+
+  public getCarnivalSessionAreaController(
+    carnivalGameArea: CarnivalGameArea,
+  ): CarnivalGameAreaController {
+    const existingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.name,
+    );
+    if (existingController) {
+      return existingController;
+    } else {
+      const newController = new CarnivalGameAreaController({
+        id: carnivalGameArea.name,
+        petRule: [],
+      });
+      this._carnivalGameAreas.push(newController);
       return newController;
     }
   }

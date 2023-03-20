@@ -14,7 +14,6 @@ import InteractableArea from './InteractableArea';
 import IScoreBoard from './IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
 import SBGame from './SBGame';
-import IPet from '../lib/IPet';
 import PetFactory from '../lib/PetFactory';
 
 export default class CarnivalGameArea extends InteractableArea {
@@ -217,6 +216,7 @@ export default class CarnivalGameArea extends InteractableArea {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _addGame(player: Player, _gameType?: number) {
     const spaceBarGame = new SBGame(player, 100, 100);
+    player.townEmitter.emit('gameUpdated', spaceBarGame.toModel());
     this._gameSession.push(spaceBarGame);
   }
 
@@ -235,7 +235,10 @@ export default class CarnivalGameArea extends InteractableArea {
    *
    */
   public toModel(): Interactable {
-    return { id: this.id, petRule: this._petRule };
+    return {
+      id: this.id,
+      petRule: this._petRule,
+    };
   }
 
   /**
