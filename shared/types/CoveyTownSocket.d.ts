@@ -30,13 +30,12 @@ export type TownSettingsUpdate = {
   isPubliclyListed?: boolean;
 }
 
-export type Pet = {}
-
 export type Direction = 'front' | 'back' | 'left' | 'right';
 export interface Player {
   id: string;
   userName: string;
   location: PlayerLocation;
+  pet?: Pet;
 };
 
 export interface GameSession {
@@ -65,14 +64,35 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export type Pet = {
-  // TODO
+export const enum MovementType {
+  OffsetPlayer = 'offsetPlayer',
+  OrbitPlayer = 'orbitPlayer',
 }
+
+export const enum Species {
+  dog = 'dog',
+  cat = 'cat',
+  hamster = 'hamster',
+  gecko = 'gecko',
+  turtle = 'turtle',
+  parrot = 'parrot',
+  dragon = 'dragon',
+  ghoul = 'ghoul',
+}
+
+export type Pet = {
+  id: string;
+  name: string;
+  species: Species;
+  movementType: MovementType;
+  x: number;
+  y: number;
+} | undefined;
 
 export type PetRule = {
   percentileRangeMin: number; 
   percentileRangeMax: number;
-  petSelection: IPet[]
+  petSelection: Pet[]
 }
 
 export interface ConversationArea {
