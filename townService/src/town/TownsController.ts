@@ -27,9 +27,9 @@ import {
   GameSession,
   Pet,
 } from '../types/CoveyTownSocket';
+import CarnivalGameArea from './CarnivalGameArea';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
-import CarnivalGameArea from './CarnivalGameArea';
 
 /**
  * This is the town route
@@ -313,16 +313,36 @@ export class TownsController extends Controller {
    * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
    * @param requestBody The new viewing area to create
    */
-  @Patch('{townID}/CarnivalGameArea/timeLimitReach/{playerId}')
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}timeLimitReach/{playerId}')
   @Response<InvalidParametersError>(400, 'Invalid values specified')
   public async timeLimitReached(
     @Path() townID: string,
-    @Body() requestBody: GameSession,
-  ): Promise<void> {
+    @Path() carnivalAreaId: string,
+    @Path() playerId: string,
+    @Header('X-Session-Token') sessionToken: string,
+    @Body() requestBody: SBGame,
+  ): Promise<SBGame> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
+      throw new InvalidParametersError('Invalid town ID');
     }
+    if (!town.getPlayerBySessionToken(sessionToken)) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const carnivalArea = town.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invali carnival area ID');
+    }
+    const game = (<CarnivalGameArea>carnivalArea).getGame(playerId);
+    const updateGame = {
+      playerId: game.getPlayer().id,
+      score: game.getScore(),
+      scoreLimit: game.getScoreLimit(),
+      isOver: true,
+      timeLimit: game.getTimeLimit(),
+    };
+    game.updateFromModel(updateGame);
+    return updateGame;
   }
 
   @Get('{townID}/Pet/')
