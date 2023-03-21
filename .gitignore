@@ -104,3 +104,4 @@ dist
 .tern-port
 townService/build/*
 shared/generated/*
+townService/generated/*
