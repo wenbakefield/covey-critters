@@ -86,9 +86,19 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Species": {
+        "dataType": "refEnum",
+        "enums": ["dog","cat","hamster","gecko","turtle","parrot","dragon","ghoul"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "MovementType": {
+        "dataType": "refEnum",
+        "enums": ["offsetPlayer","orbitPlayer"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Pet": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"y":{"dataType":"double","required":true},"x":{"dataType":"double","required":true},"movementType":{"ref":"MovementType","required":true},"species":{"ref":"Species","required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},{"dataType":"undefined"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PetRule": {
@@ -105,11 +115,12 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "SBGame": {
+    "GameSession": {
         "dataType": "refObject",
         "properties": {
             "playerId": {"dataType":"string","required":true},
             "score": {"dataType":"double","required":true},
+            "scoreLimit": {"dataType":"double","required":true},
             "isOver": {"dataType":"boolean","required":true},
             "timeLimit": {"dataType":"double","required":true},
         },
@@ -397,7 +408,7 @@ export function RegisterRoutes(app: express.Router) {
             function TownsController_timeLimitReached(request: any, response: any, next: any) {
             const args = {
                     townID: {"in":"path","name":"townID","required":true,"dataType":"string"},
-                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SBGame"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"GameSession"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
