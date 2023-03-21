@@ -90,7 +90,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       label.setX(this.location.x);
       label.setY(this.location.y - 20);
 
-      if (this.pet !== undefined && petLabel && petSprite) {
+      if (this.pet !== undefined && petLabel && petSprite && petLabel && petSprite) {
         const { x, y } = this.pet.location;
         petSprite.setX(x);
         petSprite.setY(y);
