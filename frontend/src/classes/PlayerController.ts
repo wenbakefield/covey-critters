@@ -11,8 +11,8 @@ export type PlayerGameObjects = {
   label: Phaser.GameObjects.Text;
   locationManagedByGameScene: boolean /* For the local player, the game scene will calculate the current location, and we should NOT apply updates when we receive events */;
 
-  petSprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  petLabel: Phaser.GameObjects.Text;
+  petSprite?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  petLabel?: Phaser.GameObjects.Text;
 };
 export default class PlayerController extends (EventEmitter as new () => TypedEmitter<PlayerEvents>) {
   private _location: PlayerLocation;
@@ -71,7 +71,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       label.setX(this.location.x);
       label.setY(this.location.y - 20);
 
-      if (this.pet !== undefined) {
+      if (this.pet !== undefined && petLabel && petSprite) {
         petSprite.setX(this.pet.x);
         petSprite.setY(this.pet.y);
         petLabel.setX(this.pet.x);
@@ -81,12 +81,16 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       // TODO: add different pet sprites
       if (this.location.moving) {
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
-        petSprite.anims.play(`pet-${this.location.rotation}-walk`, true);
+        if (petSprite) {
+          petSprite.anims.play(`pet-${this.location.rotation}-walk`, true);
+        }
       } else {
         sprite.anims.stop();
-        petSprite.anims.stop();
         sprite.setTexture('atlas', `misa-${this.location.rotation}`);
-        petSprite.setTexture('pet', `pet-${this.location.rotation}`);
+        if (petSprite) {
+          petSprite.anims.stop();
+          petSprite.setTexture('pet', `pet-${this.location.rotation}`);
+        }
       }
     }
   }
