@@ -210,12 +210,12 @@ export default class Town {
 
         if (game.isOver()) {
           carnivalGameArea.notifyScoreBoard(newPlayer.id);
-          newPlayer.townEmitter.emit('gameUpdated', game.toModel());
+          this._broadcastEmitter.emit('gameUpdated', game.toModel());
           // Emit to client gameUpdated with game isOver state = true;
         } else {
           // Emit to Client gameUpdate;
           game.onTick(key);
-          newPlayer.townEmitter.emit('gameUpdated', game.toModel());
+          this._broadcastEmitter.emit('gameUpdated', game.toModel());
         }
       }
     });

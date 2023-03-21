@@ -7,9 +7,9 @@ export default class Pet implements IPet {
 
   private _name: string;
 
-  private readonly _species: Species;
+  private readonly _species: string;
 
-  private _movementType: MovementType;
+  private _movementType: string;
 
   private _x?: number;
 
@@ -21,8 +21,8 @@ export default class Pet implements IPet {
 
   constructor(
     name: string,
-    species: Species,
-    movementType = MovementType.OffsetPlayer,
+    species: string,
+    movementType = 'offsetPlayer',
     x_offset = -40, // default value for pet location
     y_offset = -20,
   ) {

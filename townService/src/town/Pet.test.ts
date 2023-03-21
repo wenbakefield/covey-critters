@@ -11,12 +11,12 @@ describe('Pet', () => {
 
   let pet: Pet;
   const petName = 'Lemmy';
-  const petSpecies = Species.gecko;
+  const petSpecies = 'gecko';
   const petOffsetX = -40;
   const petOffsetY = -20;
 
   beforeEach(() => {
-    pet = new Pet(petName, petSpecies, MovementType.OffsetPlayer, petOffsetX, petOffsetY);
+    pet = new Pet(petName, petSpecies, 'offsetPlayer', petOffsetX, petOffsetY);
     pet.initializeLocation(initialPlayerLocation);
   });
 
@@ -81,7 +81,7 @@ describe('Pet', () => {
     expect(petModel?.id).toBeDefined();
     expect(petModel?.name).toBe(petName);
     expect(petModel?.species).toBe(petSpecies);
-    expect(petModel?.movementType).toBe(MovementType.OffsetPlayer);
+    expect(petModel?.movementType).toBe('offsetPlayer');
     expect(petModel?.x).toBe(10);
     expect(petModel?.y).toBe(80);
   });

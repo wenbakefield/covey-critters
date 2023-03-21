@@ -1,7 +1,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CarnivalGameArea } from '../models/CarnivalGameArea';
 import type { ConversationArea } from '../models/ConversationArea';
+import type { GameSession } from '../models/GameSession';
 import type { PosterSessionArea } from '../models/PosterSessionArea';
 import type { Town } from '../models/Town';
 import type { TownCreateParams } from '../models/TownCreateParams';
@@ -248,6 +250,62 @@ export class TownsService {
             headers: {
                 'X-Session-Token': xSessionToken,
             },
+            errors: {
+                400: `Invalid values specified`,
+            },
+        });
+    }
+
+    /**
+     * Creates a carnival game area in a given town
+     * @param townId ID of the town in which to create the new poster session area
+     * @param xSessionToken session token of the player making the request, must
+     * match the session token returned when the player joined the town
+     * @param requestBody The new carnival game area to create
+     * @returns void
+     * @throws ApiError
+     */
+    public createCarnivalGameArea(
+        townId: string,
+        xSessionToken: string,
+        requestBody: CarnivalGameArea,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/towns/{townID}/createCarnivalArea',
+            path: {
+                'townID': townId,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Invalid values specified`,
+            },
+        });
+    }
+
+    /**
+     * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
+     * @param townId
+     * @param requestBody The new viewing area to create
+     * @returns void
+     * @throws ApiError
+     */
+    public timeLimitReached(
+        townId: string,
+        requestBody: GameSession,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/towns/{townID}/CarnivalGameArea/timeLimitReach/{playerId}',
+            path: {
+                'townID': townId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 400: `Invalid values specified`,
             },

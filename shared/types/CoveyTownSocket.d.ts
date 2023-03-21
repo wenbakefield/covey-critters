@@ -52,35 +52,39 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export const enum MovementType {
-  OffsetPlayer = 'offsetPlayer',
-  OrbitPlayer = 'orbitPlayer',
-}
+// export const enum MovementType {
+//   OffsetPlayer = 'offsetPlayer',
+//   OrbitPlayer = 'orbitPlayer',
+// }
 
-export const enum Species {
-  dog = 'dog',
-  cat = 'cat',
-  hamster = 'hamster',
-  gecko = 'gecko',
-  turtle = 'turtle',
-  parrot = 'parrot',
-  dragon = 'dragon',
-  ghoul = 'ghoul',
-}
+// export const enum Species {
+//   dog = 'dog',
+//   cat = 'cat',
+//   hamster = 'hamster',
+//   gecko = 'gecko',
+//   turtle = 'turtle',
+//   parrot = 'parrot',
+//   dragon = 'dragon',
+//   ghoul = 'ghoul',
+// }
 
-export type Pet = {
+export type MovementType = 'offsetPlayer' | 'orbitPlayer';
+
+export type Species = 'dog' | 'cat' | 'hamster' | 'gecko' | 'turtle' | 'parrot' | 'dragon' | 'ghoul';
+
+export interface Pet {
   id: string;
   name: string;
-  species: Species;
-  movementType: MovementType;
+  species: string;
+  movementType: string;
   x: number;
   y: number;
-} | undefined;
+}
 
-export type PetRule = {
+export interface PetRule {
   percentileRangeMin: number; 
   percentileRangeMax: number;
-  petSelection: Pet[]
+  petSelection: Pet[];
 }
 
 export interface ConversationArea {

@@ -725,7 +725,7 @@ describe('Town', () => {
       });
 
       it('forwards updates to others in the town', () => {
-        const lastEvent = getLastEmittedEvent(playerTestData.socketToRoomMock, 'gameUpdated');
+        const lastEvent = getLastEmittedEvent(townEmitter, 'gameUpdated');
         const playerGameSession = {
           isOver: false,
           playerId: player.id,
@@ -734,13 +734,6 @@ describe('Town', () => {
           timeLimit: 100,
         };
         expect(lastEvent).toEqual(playerGameSession);
-      });
-
-      it('does not forward updates to the ENTIRE town', () => {
-        expect(
-          // getLastEmittedEvent will throw an error if no event was emitted, which we expect to be the case here
-          () => getLastEmittedEvent(townEmitter, 'gameUpdated'),
-        ).toThrowError();
       });
 
       it('Notify scoreboard when game has ended', () => {
@@ -755,7 +748,7 @@ describe('Town', () => {
         for (let i = 0; i <= 99; i++) {
           gameUpdateCallback('32');
         }
-        const lastEvent = getLastEmittedEvent(playerTestData.socketToRoomMock, 'gameUpdated');
+        const lastEvent = getLastEmittedEvent(townEmitter, 'gameUpdated');
         expect(lastEvent).toEqual(endGame);
         expect(scoreboard.getAllScores()).toHaveLength(1);
       });
@@ -773,8 +766,8 @@ describe('Town', () => {
       const dragon: Pet = {
         id: nanoid(),
         name: 'Dragon',
-        species: Species.dragon,
-        movementType: MovementType.OffsetPlayer,
+        species: 'dragon',
+        movementType: 'offsetPlayer',
         x: 0,
         y: 0,
       };
@@ -824,8 +817,8 @@ describe('Town', () => {
           const expectedPet: Pet = {
             id: actualPet!.id,
             name: 'lemmy',
-            species: Species.dragon,
-            movementType: MovementType.OffsetPlayer,
+            species: 'dragon',
+            movementType: 'offsetPlayer',
             x: 10,
             y: 80,
           };

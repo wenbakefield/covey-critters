@@ -1,11 +1,7 @@
 import { EventEmitter } from 'events';
 import { useEffect, useState } from 'react';
 import TypedEventEmitter from 'typed-emitter';
-import {
-  CarnivalGameArea as CarnivalGameAreaModel,
-  PetRule,
-  PetOwnerMap,
-} from '../types/CoveyTownSocket';
+import { CarnivalGameArea as CarnivalGameAreaModel, PetRule } from '../types/CoveyTownSocket';
 import SpaceBarGameController from './SBGameController';
 
 /**
@@ -18,6 +14,10 @@ export type CarnivalGameAreaEvents = {
    * @param petRule Represent the new pet rule
    */
   petRuleChange: (petRules: PetRule[]) => void;
+
+  playerJoinGame: (spaceBarGame: SpaceBarGameController) => void;
+
+  playerLeftGame: (playerId: string) => void;
 };
 
 export default class CarnivalGameAreaController extends (EventEmitter as new () => TypedEventEmitter<CarnivalGameAreaEvents>) {
@@ -50,6 +50,20 @@ export default class CarnivalGameAreaController extends (EventEmitter as new () 
       this._model.petRule = rules;
       this.emit('petRuleChange', rules);
     }
+  }
+
+  public addGameSession(gameController: SpaceBarGameController) {
+    const existGame = this._gameSession.find(game => game.player === gameController.player);
+    if (!existGame) {
+      this._gameSession.push(gameController);
+    } else {
+      this.removeGameSession(gameController.player);
+      this._gameSession.push(gameController);
+    }
+  }
+
+  public removeGameSession(playerId: string) {
+    this._gameSession = this._gameSession.filter(game => game.player !== playerId);
   }
 
   public getGameSessionByID(playerId: string): SpaceBarGameController | undefined {

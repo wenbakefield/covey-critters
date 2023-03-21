@@ -559,7 +559,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * Emit a updatedGame mevent for the current player, updating the game state in the backend.
    * @param key represent the key pressed that the player has entered
    */
-  public gameOnTick(key: string) {
+  public emitGameOnTick(key: string) {
     this._socket.emit('updateGame', key);
   }
 
@@ -644,7 +644,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * @param newArea Represent the new carnivalGameArea
    */
   async createCarnivalGameArea(newArea: CarnivalGameAreaModel) {
-    // await this._townsService.createCarnivalGameArea(this.townID, this.sessionToken, newArea);
+    await this._townsService.createCarnivalGameArea(this.townID, this.sessionToken, newArea);
   }
 
   /**

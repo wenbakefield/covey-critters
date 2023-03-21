@@ -17,8 +17,8 @@ describe('Testing Pet Decorator and Factory', () => {
       const petModelOrbital: PetModel = {
         id: nanoid(),
         name: 'lemmy',
-        species: Species.dog,
-        movementType: MovementType.OffsetPlayer,
+        species: 'dog',
+        movementType: 'offsetPlayer',
         x: 0,
         y: 0,
       };
@@ -43,8 +43,8 @@ describe('Testing Pet Decorator and Factory', () => {
       const petModelOrbital: PetModel = {
         id: nanoid(),
         name: 'lemmy',
-        species: Species.dog,
-        movementType: MovementType.OrbitPlayer,
+        species: 'dog',
+        movementType: 'orbitPlayer',
         x: 0,
         y: 0,
       };
