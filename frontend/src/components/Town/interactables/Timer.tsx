@@ -1,20 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-export function Timer ({seconds}: { seconds: number }): JSX.Element {
+export function Timer({ seconds }: { seconds: number }): number {
+  const [timeLeft, setTimeLeft] = useState(seconds);
 
-    const [timeLeft, setTimeLeft] = useState(seconds);
-  
-    useEffect(() => {
-      if (!timeLeft) return;
-      const intervalId = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-      return () => clearInterval(intervalId);
-    }, [timeLeft]);
-  
-    return (
-      <div>
-        <h1>{timeLeft}</h1>
-      </div>
-    );
-  };
+  useEffect(() => {
+    if (!timeLeft) return;
+    const intervalId = setInterval(() => {
+      setTimeLeft(timeLeft - 1);
+    }, 1000);
+    return () => clearInterval(intervalId);
+  }, [timeLeft]);
+
+  return timeLeft;
+}
