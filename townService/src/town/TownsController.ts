@@ -24,9 +24,12 @@ import {
   ViewingArea,
   PosterSessionArea,
   SBGame,
+  Player as PlayerModel,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
+import IScoreBoard from './IScoreBoard';
+import SingletonScoreboardFactory from './Scoreboard';
 
 /**
  * This is the town route
@@ -37,6 +40,8 @@ import { isPosterSessionArea } from '../TestUtils';
 // eslint-disable-next-line import/prefer-default-export
 export class TownsController extends Controller {
   private _townsStore: CoveyTownsStore = CoveyTownsStore.getInstance();
+
+  private _scoreboard: IScoreBoard = SingletonScoreboardFactory.instance();
 
   /**
    * List all towns that are set to be publicly available
@@ -288,6 +293,43 @@ export class TownsController extends Controller {
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
     }
+  }
+
+  @Get('{townID}/Scoreboard')
+  public getAllScores(): [PlayerModel, number][] {
+    return this._scoreboard.getAllScores();
+  }
+
+  @Get('{townID}/Scoreboard/{topNumber}')
+  public getXScores(
+    @Path()
+    topNumber: number
+    ): [PlayerModel, number][] {
+    return this._scoreboard.getTopX(topNumber);
+  }
+
+  @Delete('{townID}/Scoreboard/{Player}')
+  public removePlayer(
+    @Path()
+    player: PlayerModel
+    ): void {
+    this._scoreboard.removePlayerScore(player);
+  }
+
+  @Post('{townID}/Scoreboard/{Player}/{score}')
+  public addPlayerScore(
+    @Path() player: PlayerModel,
+    @Path() score: number
+    ): void {
+    this._scoreboard.notifyScoreBoard(player, score);
+  }
+
+  @Get('{townID}/Scoreboard/{score}')
+  public getPercentile(
+    @Path()
+    score: number
+    ): number {
+    return this._scoreboard.calculatedPercentile(score);
   }
 
   /**
