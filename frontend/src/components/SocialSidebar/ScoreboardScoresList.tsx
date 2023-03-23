@@ -4,6 +4,7 @@ import ScoreboardController, {
   useScoreBoard,
 } from '../../classes/ScoreboardController';
 import PlayerName from './PlayerName';
+import { Player as PlayerModel } from '../../types/CoveyTownSocket';
 
 type ScoreBoardViewModel = {
   scores: [PlayerModel, number][];
