@@ -12,6 +12,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { ConversationArea } from './models/ConversationArea';
 export type { InvalidParametersError } from './models/InvalidParametersError';
 export type { PosterSessionArea } from './models/PosterSessionArea';
+export type { SBGame } from './models/SBGame';
 export type { Town } from './models/Town';
 export type { TownCreateParams } from './models/TownCreateParams';
 export type { TownCreateResponse } from './models/TownCreateResponse';

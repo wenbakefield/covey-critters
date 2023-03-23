@@ -89,6 +89,10 @@ const models: TsoaRoute.Models = {
     "SBGame": {
         "dataType": "refObject",
         "properties": {
+            "playerId": {"dataType":"string","required":true},
+            "score": {"dataType":"double","required":true},
+            "isOver": {"dataType":"boolean","required":true},
+            "timeLimit": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
