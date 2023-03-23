@@ -382,14 +382,14 @@ describe('TownsController integration tests', () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(newPlayer, 30);
-        expect(testAreaController.getXScores(5)).toStrictEqual([[newPlayer, 30]]);
+        expect(testAreaController.getXScores(5)).toStrictEqual([{player: newPlayer, score: 30}]);
         testAreaController.removePlayer(newPlayer);
       });
       it('adding a player score tuple - test with getAllScores', () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(newPlayer, 30);
-        expect(testAreaController.getAllScores()).toStrictEqual([[newPlayer, 30]]);
+        expect(testAreaController.getAllScores()).toStrictEqual([{player: newPlayer, score: 30}]);
         testAreaController.removePlayer(newPlayer);
       });
       it('removing a player score tuple', () => {
@@ -415,7 +415,7 @@ describe('TownsController integration tests', () => {
         testAreaController.addPlayerScore(newPlayer, 37);
         testAreaController.removePlayer(newPlayer);
         testAreaController.addPlayerScore(newPlayer2, 40);
-        expect(testAreaController.getAllScores()).toStrictEqual([[newPlayer2, 40]]);
+        expect(testAreaController.getAllScores()).toStrictEqual([{player: newPlayer2, score: 40}]);
         testAreaController.removePlayer(newPlayer2);
       });
       it('getting a percentile for score higher than all scores', () => {

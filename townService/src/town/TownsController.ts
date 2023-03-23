@@ -25,6 +25,7 @@ import {
   PosterSessionArea,
   SBGame,
   Player as PlayerModel,
+  PlayerScoreTuple,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
@@ -296,7 +297,7 @@ export class TownsController extends Controller {
   }
 
   @Get('{townID}/Scoreboard')
-  public getAllScores(): [PlayerModel, number][] {
+  public getAllScores(): PlayerScoreTuple[] {
     return this._scoreboard.getAllScores();
   }
 
@@ -304,7 +305,7 @@ export class TownsController extends Controller {
   public getXScores(
     @Path()
     topNumber: number
-    ): [PlayerModel, number][] {
+    ): PlayerScoreTuple[] {
     return this._scoreboard.getTopX(topNumber);
   }
 

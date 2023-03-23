@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { mock } from 'jest-mock-extended';
-import { TownEmitter } from '../types/CoveyTownSocket';
+import { TownEmitter, PlayerScoreTuple, Player as PlayerModel } from '../types/CoveyTownSocket';
 import SingletonScoreboardFactory from './Scoreboard';
 import Player from '../lib/Player';
 
@@ -91,18 +91,19 @@ describe('Scoreboard tests', () => {
     const scoreboard1 = SingletonScoreboardFactory.instance();
     const newPlayer = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer.toPlayerModel(), 20);
-    expect(scoreboard1.getTopX(1)).toStrictEqual([[newPlayer.toPlayerModel(), 20]]);
+    const newPair: PlayerScoreTuple = { player: newPlayer.toPlayerModel(), score: 20 };
+    expect(scoreboard1.getTopX(1)).toStrictEqual([newPair]);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
   });
 
-  it('notifyScoreBoard for same player playing twice', () => {
+  it('notifyScoreBoard for same player playing twice to check scoreboard', () => {
     const scoreboard1 = SingletonScoreboardFactory.instance();
     const newPlayer = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer.toPlayerModel(), 20);
     scoreboard1.notifyScoreBoard(newPlayer.toPlayerModel(), 25);
     const expectedScoreBoardValue = [
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer.toPlayerModel(), 20],
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer.toPlayerModel(), score: 20},
     ];
     expect(scoreboard1.getTopX(2)).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -116,9 +117,9 @@ describe('Scoreboard tests', () => {
     const newPlayer1 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer1.toPlayerModel(), 8);
     const expectedScoreBoardValue = [
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer.toPlayerModel(), 20],
-      [newPlayer1.toPlayerModel(), 8],
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer.toPlayerModel(), score: 20},
+      {player: newPlayer1.toPlayerModel(), score: 8},
     ];
     expect(scoreboard1.getTopX(3)).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -134,9 +135,9 @@ describe('Scoreboard tests', () => {
     const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
     const expectedScoreBoardValue = [
-      [newPlayer3.toPlayerModel(), 30],
-      [newPlayer2.toPlayerModel(), 25],
-      [newPlayer.toPlayerModel(), 20],
+      {player: newPlayer3.toPlayerModel(), score: 30},
+      {player: newPlayer2.toPlayerModel(), score: 25},
+      {player: newPlayer.toPlayerModel(), score: 20},
     ];
     expect(scoreboard1.getTopX(3)).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -153,9 +154,9 @@ describe('Scoreboard tests', () => {
     const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 15);
     const expectedScoreBoardValue = [
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer2.toPlayerModel(), 20],
-      [newPlayer3.toPlayerModel(), 15],
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer2.toPlayerModel(), score: 20},
+      {player: newPlayer3.toPlayerModel(), score: 15},
     ];
     expect(scoreboard1.getTopX(3)).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -172,9 +173,9 @@ describe('Scoreboard tests', () => {
     const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 15);
     const expectedScoreBoardValue = [
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer2.toPlayerModel(), 20],
-      [newPlayer3.toPlayerModel(), 15],
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer2.toPlayerModel(), score: 20},
+      {player: newPlayer3.toPlayerModel(), score: 15},
     ];
     expect(scoreboard1.getTopX(5)).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -191,9 +192,9 @@ describe('Scoreboard tests', () => {
     const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 15);
     const expectedScoreBoardValue = [
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer2.toPlayerModel(), 20],
-      [newPlayer3.toPlayerModel(), 15],
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer2.toPlayerModel(), score: 20},
+      {player: newPlayer3.toPlayerModel(), score: 15},
     ];
     expect(scoreboard1.getAllScores()).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -219,11 +220,11 @@ describe('Scoreboard tests', () => {
     const newPlayer5 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer5.toPlayerModel(), 2);
     const expectedScoreBoardValue = [
-      [newPlayer4.toPlayerModel(), 50],
-      [newPlayer2.toPlayerModel(), 35],
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer3.toPlayerModel(), 10],
-      [newPlayer5.toPlayerModel(), 2],
+      {player: newPlayer4.toPlayerModel(), score: 50},
+      {player: newPlayer2.toPlayerModel(), score: 35},
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer3.toPlayerModel(), score: 10},
+      {player: newPlayer5.toPlayerModel(), score: 2},
     ];
     expect(scoreboard1.getTopX(5)).toStrictEqual(expectedScoreBoardValue);
     scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
@@ -246,10 +247,10 @@ describe('Scoreboard tests', () => {
     const newPlayer5 = new Player(nanoid(), mock<TownEmitter>());
     scoreboard1.notifyScoreBoard(newPlayer5.toPlayerModel(), 2);
     const expectedScoreBoardValue = [
-      [newPlayer4.toPlayerModel(), 50],
-      [newPlayer.toPlayerModel(), 25],
-      [newPlayer3.toPlayerModel(), 10],
-      [newPlayer5.toPlayerModel(), 2],
+      {player: newPlayer4.toPlayerModel(), score: 50},
+      {player: newPlayer.toPlayerModel(), score: 25},
+      {player: newPlayer3.toPlayerModel(), score: 10},
+      {player: newPlayer5.toPlayerModel(), score: 2},
     ];
     scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
     expect(scoreboard1.getTopX(5)).toStrictEqual(expectedScoreBoardValue);
