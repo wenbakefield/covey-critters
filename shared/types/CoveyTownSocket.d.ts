@@ -64,32 +64,9 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export const enum MovementType {
-  OffsetPlayer = 'offsetPlayer',
-  OrbitPlayer = 'orbitPlayer',
-}
+export type MovementType = 'offsetPlayer' | 'orbitPlayer';
 
-export const enum Species {
-  black_bear = 'black-bear',
-  brown_bear = 'brown-bear',
-  brown_cobra = 'brown-cobra',
-  brown_mouse = 'brown-mouse',
-  brown_sheep = 'brown-sheep',
-  brown_snake = 'brown-snake',
-  brown_wolf = 'brown-wolf',
-  dark_gray_wolf = 'dark-gray-wolf',
-  dark_wolf = 'dark-wolf',
-  gray_mouse = 'gray-mouse',
-  gray_wolf = 'gray-wolf',
-  green_cobra = 'green-cobra',
-  green_snake = 'green-snake',
-  light_wolf = 'light-wolf',
-  pigeon = 'pigeon',
-  red_snake = 'red-snake',
-  seagull = 'seagull',
-  white_mouse = 'white-mouse',
-  white_sheep = 'white-sheep',
-}
+export type Species = 'black-bear' | 'brown-bear' | 'brown-cobra' | 'brown-mouse' | 'brown-sheep' | 'brown-snake' | 'brown-wolf' | 'dark-gray-wolf' | 'dark-wolf' | 'gray-mouse' | 'gray-wolf' | 'green-cobra' | 'green-snake' | 'light-wolf' | 'pigeon' | 'red-snake' | 'seagull' | 'white-mouse' | 'white-sheep';
 
 export type Pet = {
   id: string;
