@@ -3,7 +3,6 @@ import React from 'react';
 import ScoreboardController, {
   useScoreBoard,
 } from '../../classes/ScoreboardController';
-import PlayerName from './PlayerName';
 import { Player as PlayerModel } from '../../types/CoveyTownSocket';
 
 type ScoreBoardViewModel = {
@@ -29,8 +28,7 @@ function ScoreBoardView({ scores }: ScoreBoardViewModel): JSX.Element {
           return (
             //next pair of lines throw errors.
             <ListItem key={playerScoreTuple[0].id}>
-              <h4>{playerScoreTuple[1]}</h4>
-              <PlayerName player={playerScoreTuple[0]} />
+              <h4>{playerScoreTuple[0]} : {playerScoreTuple[1]}</h4>
             </ListItem>
           );
         })}
