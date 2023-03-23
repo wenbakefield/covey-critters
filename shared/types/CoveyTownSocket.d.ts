@@ -35,7 +35,7 @@ export interface Player {
   id: string;
   userName: string;
   location: PlayerLocation;
-  pet: Pet;
+  pet?: Pet;
 };
 
 export interface GameSession {
