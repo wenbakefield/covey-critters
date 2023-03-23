@@ -1,24 +1,23 @@
 import EventEmitter from 'events';
 import { Player as PlayerModel } from '../types/CoveyTownSocket';
 import SingletonScoreboardFactory from './Scoreboard';
-import IScoreBoard from '../'
-
+import { ScoreBoard, PlayerScoreTuple} from '../types/CoveyTownSocket';
 export type ScoreBoardEvents = {
-  scoreboardChange: (newScoreBoard: [PlayerModel, number][]) => void;
+  scoreboardChange: (newScoreBoard: PlayerScoreTuple[]) => void;
 };
 
 export default class ScoreboardController extends (EventEmitter as new () => TypedEmitter<ScoreBoardEvents>) {
-  private _scoreboard: IScoreBoard;
+  private _scoreboard: ScoreBoard;
 
   constructor() {
     this._scoreboard = SingletonScoreboardFactory.instance();
   }
 
-  public getAllScores(): [PlayerModel, number][] {
+  public getAllScores(): PlayerScoreTuple[] {
     return this._scoreboard.getAllScores();
   }
 
-  public getXScores(topNumber: number): [PlayerModel, number][] {
+  public getXScores(topNumber: number): PlayerScoreTuple[] {
     return this._scoreboard.getTopX(topNumber);
   }
 
@@ -35,7 +34,7 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
   }
 }
 
-export function useScoreBoard(area: ScoreBoadController): [PlayerModel, number][] {
+export function useScoreBoard(area: ScoreBoadController): PlayerScoreTuple[] {
   const [scores, setScores] = useState(area.getAllScores());
   useEffect(() => {
     area.addListener('scoreboardChange', setScores);

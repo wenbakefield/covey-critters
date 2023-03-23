@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { Player as PlayerModel, PlayerScoreTuple } from '../types/CoveyTownSocket';
-import IScoreBoard from './IScoreBoard';
+import { Player as PlayerModel, PlayerScoreTuple, IScoreBoard } from '../types/CoveyTownSocket';
 
 // uses observer and singleton Patterns
 class Scoreboard implements IScoreBoard {

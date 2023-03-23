@@ -1,12 +1,10 @@
 import { Box, Heading, ListItem, UnorderedList } from '@chakra-ui/react';
 import React from 'react';
-import ScoreboardController, {
-  useScoreBoard,
-} from '../../classes/ScoreboardController';
-import { Player as PlayerModel } from '../../types/CoveyTownSocket';
+import ScoreboardController, { useScoreBoard } from '../../classes/ScoreboardController';
+import { Player as PlayerModel, PlayerScoreTuple } from '../../types/CoveyTownSocket';
 
 type ScoreBoardViewModel = {
-  scores: [PlayerModel, number][];
+  scores: PlayerScoreTuple[];
 };
 
 type ScoreBoardViewProps = {
@@ -27,8 +25,10 @@ function ScoreBoardView({ scores }: ScoreBoardViewModel): JSX.Element {
         {scores.map(playerScoreTuple => {
           return (
             //next pair of lines throw errors.
-            <ListItem key={playerScoreTuple[0].id}>
-              <h4>{playerScoreTuple[0]} : {playerScoreTuple[1]}</h4>
+            <ListItem key={playerScoreTuple.player.id}>
+              <h4>
+                {playerScoreTuple.player.userName} : {playerScoreTuple.score}
+              </h4>
             </ListItem>
           );
         })}
@@ -43,11 +43,7 @@ export default function ScoreBoardList({ area }: ScoreBoardViewProps): JSX.Eleme
       <Heading as='h2' fontSize='l'>
         Carnival Game Scoreboard:
       </Heading>
-      {scores.length === 0 ? (
-        <>Scoreboard is empty</>
-      ) : (
-        <ScoreBoardView scoresList = {scores} />
-      )}
+      {scores.length === 0 ? <>Scoreboard is empty</> : <ScoreBoardView scores={scores} />}
     </Box>
   );
 }

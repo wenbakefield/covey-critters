@@ -26,10 +26,10 @@ import {
   SBGame,
   Player as PlayerModel,
   PlayerScoreTuple,
+  IScoreBoard,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
-import IScoreBoard from './IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
 
 /**
