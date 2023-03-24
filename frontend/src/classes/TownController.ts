@@ -8,7 +8,7 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { TownsService, TownsServiceClient } from '../generated/client';
+import { GameSession, TownsService, TownsServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -76,6 +76,11 @@ export type TownEvents = {
    * the new location can be found on the PetController
    */
   petMoved: (movedPet: PetController) => void;
+  /**
+   * An event that indicates that a player has play the game. THis event is dispatched after updating the game state
+   * the new game state can be found in the SpaceBarGameController
+   */
+  gameUpdated: (gameModel: GameSession) => void;
   /**
    * An event that indicates that the set of conversation areas has changed. This event is dispatched
    * when a conversation area is created, or when the set of active conversations has changed. This event is dispatched
@@ -457,6 +462,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           const x = petMoved.pet.x;
           const y = petMoved.pet.y;
           playerToUpdate.pet.location = { x, y };
+          playerToUpdate.pet.name = petMoved.pet.name;
+          this.emit('petMoved', playerToUpdate.pet); // Should this be emitted
+        } else {
+          const newPet = PetController.fromModel(petMoved.pet);
+          playerToUpdate.pet = newPet;
           this.emit('petMoved', playerToUpdate.pet);
         }
       }
@@ -506,13 +516,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.on('gameUpdated', gameModel => {
       //TODO recieve updated GameModel from backend and emit updateGame back to backend.
       const game = this._getGameByPlayerID(gameModel.playerId);
-      game.updateFrom(gameModel);
-      // const key = '';
-      // this._socket.emit('updateGame', key);
+      if (game) {
+        game.updateFrom(gameModel);
+      }
     });
   }
 
-  private _getGameByPlayerID(playerId: string): SpaceBarGameController {
+  private _getGameByPlayerID(playerId: string): SpaceBarGameController | undefined {
     const carnivalGameArea = this._carnivalGameAreas.find(area => {
       if (!area.getGameSessionByID(playerId)) {
         return false;
@@ -520,17 +530,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         return true;
       }
     });
+    // Get The Game if exists else create the new game
     if (carnivalGameArea) {
       const game = carnivalGameArea.getGameSessionByID(playerId);
       if (game) {
         return game;
       } else {
-        // Should not be possible to throw this error
-        throw new Error('Game is not found within the carnival game area');
+        throw new Error('Game does not exists in Carnival Area');
       }
-    } else {
-      throw new Error('Cannot find game as Carnival Game Area Does Not Exist');
     }
+    return undefined;
   }
 
   /**
@@ -561,6 +570,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public emitGameOnTick(key: string) {
     this._socket.emit('updateGame', key);
+  }
+
+  /**
+   * Get the Pet Location of the player if the player has a pet
+   * @returns the location of the pet
+   */
+  public getPetLocation() {
+    if (this._ourPlayer?.pet) {
+      return this.ourPlayer.pet?.location;
+    }
   }
 
   /**

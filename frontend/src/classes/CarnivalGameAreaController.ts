@@ -83,3 +83,14 @@ export default class CarnivalGameAreaController extends (EventEmitter as new () 
     this.petRule = interactable.petRule;
   }
 }
+
+export function usePetRule(area: CarnivalGameAreaController): PetRule[] {
+  const [petRule, setPetRule] = useState(area.petRule);
+  useEffect(() => {
+    area.addListener('petRuleChange', setPetRule);
+    return () => {
+      area.removeListener('petRuleChange', setPetRule);
+    };
+  }, [area]);
+  return petRule;
+}
