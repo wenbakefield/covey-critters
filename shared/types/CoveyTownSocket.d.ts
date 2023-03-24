@@ -161,11 +161,3 @@ export interface PlayerScoreTuple{
   player: Player;
   score: number; 
 }
-
-export interface IScoreBoard{
-  notifyScoreBoard(player: Player, score: number): void;
-  getTopX(depth: number): PlayerScoreTuple[];
-  getAllScores(): PlayerScoreTuple[];
-  calculatedPercentile(givenScore: number): number;
-  removePlayerScore(player: Player): void;
-} 

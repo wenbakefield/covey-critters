@@ -24,13 +24,13 @@ import {
   ViewingArea,
   PosterSessionArea,
   SBGame,
-  Player as PlayerModel,
+  Player,
   PlayerScoreTuple,
-  IScoreBoard,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
 import SingletonScoreboardFactory from './Scoreboard';
+import IScoreBoard from './IScoreBoard';
 
 /**
  * This is the town route
@@ -297,39 +297,51 @@ export class TownsController extends Controller {
   }
 
   @Get('{townID}/Scoreboard')
-  public getAllScores(): PlayerScoreTuple[] {
+  public getAllScores(@Path() townID: string): PlayerScoreTuple[] {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
     return this._scoreboard.getAllScores();
   }
 
   @Get('{townID}/Scoreboard/{topNumber}')
-  public getXScores(
-    @Path()
-    topNumber: number
-    ): PlayerScoreTuple[] {
+  public getXScores(@Path() townID: string, @Path() topNumber: number): PlayerScoreTuple[] {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
     return this._scoreboard.getTopX(topNumber);
   }
 
   @Delete('{townID}/Scoreboard/{Player}')
-  public removePlayer(
-    @Path()
-    player: PlayerModel
-    ): void {
+  public removePlayer(@Path() townID: string, @Body() player: Player): void {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
     this._scoreboard.removePlayerScore(player);
   }
 
   @Post('{townID}/Scoreboard/{Player}/{score}')
   public addPlayerScore(
-    @Path() player: PlayerModel,
-    @Path() score: number
-    ): void {
+    @Path() townID: string,
+    @Body() player: Player,
+    @Path() score: number,
+  ): void {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
     this._scoreboard.notifyScoreBoard(player, score);
   }
 
-  @Get('{townID}/Scoreboard/{score}')
-  public getPercentile(
-    @Path()
-    score: number
-    ): number {
+  @Get('{townID}/Scoreboard/percentile/{score}')
+  public getPercentile(@Path() townID: string, @Path() score: number): number {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
     return this._scoreboard.calculatedPercentile(score);
   }
 

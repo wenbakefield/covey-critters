@@ -1,7 +1,8 @@
 import EventEmitter from 'events';
 import { Player as PlayerModel } from '../types/CoveyTownSocket';
 import SingletonScoreboardFactory from './Scoreboard';
-import { ScoreBoard, PlayerScoreTuple} from '../types/CoveyTownSocket';
+import { PlayerScoreTuple} from '../types/CoveyTownSocket';
+import Iscore
 export type ScoreBoardEvents = {
   scoreboardChange: (newScoreBoard: PlayerScoreTuple[]) => void;
 };
