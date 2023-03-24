@@ -110,13 +110,44 @@ describe('PetController integration tests', () => {
 
     describe('Pet and CarnivalGameArea', () => {
       it('Assign Pet to Player', async () => {
+        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
         const pet = await controller.assignPet(
           testingTown.townID,
           carnivalGameArea.id,
           'lemmy',
           sessionToken,
         );
-        expect(pet).toBeUndefined();
+        expect(pet).toBeDefined();
+        expect(pet?.name).toEqual('lemmy');
+        expect(pet?.x).not.toEqual(0);
+        expect(pet?.x).not.toEqual(0);
+      });
+
+      it('Retrieve Pet from Player', async () => {
+        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
+        await controller.assignPet(testingTown.townID, carnivalGameArea.id, 'lemmy', sessionToken);
+        const pet = await controller.getPetFromPlayerId(testingTown.townID, sessionToken);
+        expect(pet).toBeDefined();
+        expect(pet?.name).toEqual('lemmy');
+        expect(pet?.x).not.toEqual(0);
+        expect(pet?.x).not.toEqual(0);
+      });
+      it('Rename Exiting Pet from Player', async () => {
+        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
+        await controller.assignPet(testingTown.townID, carnivalGameArea.id, 'lemmy', sessionToken);
+        const pet = await controller.getPetFromPlayerId(testingTown.townID, sessionToken);
+        expect(pet).toBeDefined();
+        expect(pet?.name).toEqual('lemmy');
+        await controller.renamePet(testingTown.townID, 'mmr', sessionToken);
+        const renamePet = await controller.getPetFromPlayerId(testingTown.townID, sessionToken);
+        expect(renamePet).toBeDefined();
+        expect(renamePet?.name).toEqual('mmr');
+      });
+
+      it('Should return undefined if player does not have a pet', async () => {
+        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
+        const pet = await controller.getPetFromPlayerId(testingTown.townID, sessionToken);
+        expect(pet).not.toBeDefined();
       });
     });
   });
