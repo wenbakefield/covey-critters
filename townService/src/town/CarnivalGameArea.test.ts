@@ -133,8 +133,8 @@ describe('CarnivalGameArea', () => {
         petSelection: [
           {
             id: nanoid(),
-            name: 'Dragon',
-            species: 'dragon',
+            name: 'brown-cobra' ,
+            species: 'brown-cobra' ,
             movementType: 'offsetPlayer',
             x: 0,
             y: 0,
@@ -147,7 +147,7 @@ describe('CarnivalGameArea', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         id: actualPetModel!.id,
         name: 'lemmy',
-        species: 'dragon',
+        species: 'brown-cobra' ,
         movementType: 'offsetPlayer',
         x: -40,
         y: -20,
@@ -164,8 +164,8 @@ describe('CarnivalGameArea', () => {
         petSelection: [
           {
             id: nanoid(),
-            name: 'Dragon',
-            species: 'dragon',
+            name: 'brown-cobra' ,
+            species: 'brown-cobra' ,
             movementType: 'offsetPlayer',
             x: 0,
             y: 0,

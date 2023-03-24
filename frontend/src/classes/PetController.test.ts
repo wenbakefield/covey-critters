@@ -14,7 +14,7 @@ describe('[T2] PetController', () => {
       id: nanoid(),
       name: 'lemmy',
       movementType: 'orbitPlayer',
-      species: 'dragon',
+      species: 'brown-cobra' ,
       x: 0,
       y: 0,
     };

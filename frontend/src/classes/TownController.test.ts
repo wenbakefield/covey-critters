@@ -1,8 +1,6 @@
 import { mock, mockClear, MockProxy } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { CarnivalGameArea, GameSession, ViewingArea } from '../generated/client';
-import { PosterSessionArea } from '../generated/client';
 import {
   EventNames,
   getEventListener,
@@ -12,6 +10,10 @@ import {
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
+  CarnivalGameArea,
+  PosterSessionArea,
+  GameSession,
+  ViewingArea,
   CoveyTownSocket,
   Pet,
   PetOwnerMap,
@@ -128,7 +130,7 @@ describe('TownController', () => {
           id: nanoid(),
           name: 'lemmy',
           movementType: 'offsetPlayer',
-          species: 'dog',
+          species: 'black-bear',
           x: 0,
           y: 0,
         };
@@ -151,7 +153,7 @@ describe('TownController', () => {
           id: petModel.id,
           name: 'lemmy',
           movementType: 'offsetPlayer',
-          species: 'dog',
+          species: 'black-bear',
           x: 10,
           y: 20,
         };
@@ -170,7 +172,7 @@ describe('TownController', () => {
           id: petModel.id,
           name: 'mmm',
           movementType: 'offsetPlayer',
-          species: 'dog',
+          species: 'black-bear',
           x: 0,
           y: 0,
         };
@@ -217,7 +219,7 @@ describe('TownController', () => {
         id: nanoid(),
         name: 'lemmy',
         movementType: 'offsetPlayer',
-        species: 'dog',
+        species: 'black-bear',
         x: 0,
         y: 0,
       });
@@ -595,7 +597,7 @@ describe('TownController', () => {
                   id: nanoid(),
                   name: 'lemmy',
                   movementType: 'offsetPlayer',
-                  species: 'dragon',
+                  species: 'brown-cobra' ,
                   x: 0,
                   y: 0,
                 },
@@ -619,7 +621,7 @@ describe('TownController', () => {
                   id: nanoid(),
                   name: 'lemmy',
                   movementType: 'offsetPlayer',
-                  species: 'dragon',
+                  species: 'brown-cobra' ,
                   x: 0,
                   y: 0,
                 },
@@ -714,7 +716,7 @@ describe('TownController', () => {
           id: nanoid(),
           name: 'lemmy',
           movementType: 'offsetPlayer',
-          species: 'dog',
+          species: 'black-bear',
           x: 0,
           y: 0,
         },

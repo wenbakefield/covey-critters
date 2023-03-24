@@ -11,7 +11,7 @@ describe('Pet', () => {
 
   let pet: Pet;
   const petName = 'Lemmy';
-  const petSpecies = 'gecko';
+  const petSpecies = 'brown-mouse';
   const petOffsetX = -40;
   const petOffsetY = -20;
 

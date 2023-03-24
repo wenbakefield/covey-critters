@@ -23,11 +23,11 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
-  CarnivalGameArea as CarnivalGameAreaModel,
+  CarnivalGameArea,
   GameSession,
   Pet,
 } from '../types/CoveyTownSocket';
-import CarnivalGameArea from './CarnivalGameArea';
+import CarnivalGameAreaReal from './CarnivalGameArea';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 
@@ -293,7 +293,7 @@ export class TownsController extends Controller {
   public async createCarnivalGameArea(
     @Path() townID: string,
     @Header('X-Session-Token') sessionToken: string,
-    @Body() requestBody: CarnivalGameAreaModel,
+    @Body() requestBody: CarnivalGameArea,
   ): Promise<void> {
     // download file here TODO
     const curTown = this._townsStore.getTownByID(townID);
@@ -332,7 +332,7 @@ export class TownsController extends Controller {
     if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
       throw new InvalidParametersError('Invali carnival area ID');
     }
-    const game = (<CarnivalGameArea>carnivalArea).getGame(player.id);
+    const game = (<CarnivalGameAreaReal>carnivalArea).getGame(player.id);
     const updateGame = {
       playerId: player.id,
       score: game.getScore(),
@@ -406,7 +406,7 @@ export class TownsController extends Controller {
       throw new InvalidParametersError('Invalid poster session ID');
     }
     if (isCarnivalGameArea(carnivalGameArea)) {
-      const pet = (<CarnivalGameArea>carnivalGameArea).assignPetToPlayer(player.id, name);
+      const pet = (<CarnivalGameAreaReal>carnivalGameArea).assignPetToPlayer(player.id, name);
       return pet;
     }
     return undefined;

@@ -52,7 +52,7 @@ describe('[T2] CarnivalGameControllerArea', () => {
             {
               id: nanoid(),
               name: 'lemmy',
-              species: 'dragon',
+              species: 'brown-cobra' ,
               movementType: 'orbitalPlayer',
               x: 0,
               y: 0,

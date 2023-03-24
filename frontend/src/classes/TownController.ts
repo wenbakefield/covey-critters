@@ -8,7 +8,7 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { GameSession, TownsService, TownsServiceClient } from '../generated/client';
+import { TownsService, TownsServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -18,6 +18,7 @@ import {
   ViewingArea as ViewingAreaModel,
   PosterSessionArea as PosterSessionAreaModel,
   CarnivalGameArea as CarnivalGameAreaModel,
+  GameSession,
 } from '../types/CoveyTownSocket';
 import {
   isConversationArea,

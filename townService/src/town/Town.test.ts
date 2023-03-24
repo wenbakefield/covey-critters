@@ -765,8 +765,8 @@ describe('Town', () => {
       };
       const dragon: Pet = {
         id: nanoid(),
-        name: 'Dragon',
-        species: 'dragon',
+        name: 'brown-cobra' ,
+        species: 'brown-cobra' ,
         movementType: 'offsetPlayer',
         x: 0,
         y: 0,
@@ -817,7 +817,7 @@ describe('Town', () => {
           const expectedPet: Pet = {
             id: actualPet!.id,
             name: 'lemmy',
-            species: 'dragon',
+            species: 'brown-cobra' ,
             movementType: 'offsetPlayer',
             x: 10,
             y: 80,

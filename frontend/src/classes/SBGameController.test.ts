@@ -1,6 +1,6 @@
 import { mock, mockClear } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
-import { GameSession } from '../generated/client';
+import { GameSession } from '../types/CoveyTownSocket';
 import SpaceBarGameController, { SpaceBarGameEvents } from './SBGameController';
 
 describe('[T2] SpaceBarGame Controller', () => {

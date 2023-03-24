@@ -94,7 +94,7 @@ describe('PetController integration tests', () => {
               id: nanoid(),
               name: nanoid(),
               movementType: 'offsetPlayer',
-              species: 'dog',
+              species: 'black-bear',
               x: 0,
               y: 0,
             },
