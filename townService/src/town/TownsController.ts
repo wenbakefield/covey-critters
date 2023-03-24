@@ -318,24 +318,23 @@ export class TownsController extends Controller {
   public async timeLimitReached(
     @Path() townID: string,
     @Path() carnivalAreaId: string,
-    @Path() playerId: string,
     @Header('X-Session-Token') sessionToken: string,
-    @Body() requestBody: SBGame,
-  ): Promise<SBGame> {
+  ): Promise<GameSession> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid town ID');
     }
-    if (!town.getPlayerBySessionToken(sessionToken)) {
+    const player = town.getPlayerBySessionToken(sessionToken);
+    if (!player) {
       throw new InvalidParametersError('Invalid session ID');
     }
     const carnivalArea = town.getInteractable(carnivalAreaId);
     if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
       throw new InvalidParametersError('Invali carnival area ID');
     }
-    const game = (<CarnivalGameArea>carnivalArea).getGame(playerId);
+    const game = (<CarnivalGameArea>carnivalArea).getGame(player.id);
     const updateGame = {
-      playerId: game.getPlayer().id,
+      playerId: player.id,
       score: game.getScore(),
       scoreLimit: game.getScoreLimit(),
       isOver: true,
