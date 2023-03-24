@@ -2,7 +2,7 @@
 import { Player as PlayerModel, PlayerScoreTuple } from '../types/CoveyTownSocket';
 import IScoreBoard from '../lib/IScoreBoard';
 // uses observer and singleton Patterns
-class Scoreboard implements IScoreBoard {
+export default class Scoreboard implements IScoreBoard {
   // list of tuples that each tuple is holding Player-score pair
   private _playersAndScores: PlayerScoreTuple[] = [];
 
@@ -74,20 +74,5 @@ class Scoreboard implements IScoreBoard {
       }
     });
     return betterScoreCount / this._playersAndScores.length;
-  }
-}
-
-export default class SingletonScoreboardFactory {
-  private static _theScoreBoard: IScoreBoard | undefined;
-
-  private constructor() {
-    SingletonScoreboardFactory._theScoreBoard = undefined;
-  }
-
-  public static instance(): IScoreBoard {
-    if (SingletonScoreboardFactory._theScoreBoard === undefined) {
-      SingletonScoreboardFactory._theScoreBoard = new Scoreboard();
-    }
-    return SingletonScoreboardFactory._theScoreBoard;
   }
 }

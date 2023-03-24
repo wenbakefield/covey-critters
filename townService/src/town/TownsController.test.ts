@@ -382,14 +382,18 @@ describe('TownsController integration tests', () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 30);
-        expect(testAreaController.getXScores(testingTown.townID, 5)).toStrictEqual([{player: newPlayer, score: 30}]);
+        expect(testAreaController.getXScores(testingTown.townID, 5)).toStrictEqual([
+          { player: newPlayer, score: 30 },
+        ]);
         testAreaController.removePlayer(testingTown.townID, newPlayer);
       });
       it('adding a player score tuple - test with getAllScores', () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 30);
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([{player: newPlayer, score: 30}]);
+        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([
+          { player: newPlayer, score: 30 },
+        ]);
         testAreaController.removePlayer(testingTown.townID, newPlayer);
       });
       it('removing a player score tuple', () => {
@@ -415,7 +419,9 @@ describe('TownsController integration tests', () => {
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 37);
         testAreaController.removePlayer(testingTown.townID, newPlayer);
         testAreaController.addPlayerScore(testingTown.townID, newPlayer2, 40);
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([{player: newPlayer2, score: 40}]);
+        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([
+          { player: newPlayer2, score: 40 },
+        ]);
         testAreaController.removePlayer(testingTown.townID, newPlayer2);
       });
       it('getting a percentile for score higher than all scores', () => {
@@ -423,7 +429,7 @@ describe('TownsController integration tests', () => {
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 30);
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 37);
-        expect(testAreaController.getPercentile(testingTown.townID,40)).toStrictEqual(0);
+        expect(testAreaController.getPercentile(testingTown.townID, 40)).toStrictEqual(0);
         testAreaController.removePlayer(testingTown.townID, newPlayer);
       });
       it('getting a percentile for a score equal to highest score', () => {
@@ -431,7 +437,7 @@ describe('TownsController integration tests', () => {
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 30);
         testAreaController.addPlayerScore(testingTown.townID, newPlayer, 37);
-        expect(testAreaController.getPercentile(testingTown.townID,37)).toStrictEqual(0);
+        expect(testAreaController.getPercentile(testingTown.townID, 37)).toStrictEqual(0);
         testAreaController.removePlayer(testingTown.townID, newPlayer);
       });
       it('getting a percentile for a score between 2 different scores', () => {
@@ -450,7 +456,6 @@ describe('TownsController integration tests', () => {
         expect(testAreaController.getPercentile(testingTown.townID, 28)).toStrictEqual(1);
         testAreaController.removePlayer(testingTown.townID, newPlayer);
       });
-    
     });
   });
 });

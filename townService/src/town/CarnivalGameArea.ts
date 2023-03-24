@@ -11,7 +11,7 @@ import {
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
 import IScoreBoard from '../lib/IScoreBoard';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import SBGame from './SBGame';
 import IPet from '../lib/IPet';
 import PetFactory from '../lib/PetFactory';

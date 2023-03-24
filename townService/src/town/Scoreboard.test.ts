@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { mock } from 'jest-mock-extended';
 import { TownEmitter, PlayerScoreTuple, Player as PlayerModel } from '../types/CoveyTownSocket';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import Player from '../lib/Player';
 
 describe('Scoreboard tests', () => {

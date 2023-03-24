@@ -29,7 +29,7 @@ import {
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import IScoreBoard from '../lib/IScoreBoard';
 
 /**

@@ -22,7 +22,7 @@ import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
 import PosterSessionArea from './PosterSessionArea';
 import CarnivalGameArea from './CarnivalGameArea';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
