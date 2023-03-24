@@ -10,7 +10,7 @@ import {
   Pet as PetModel,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import IScoreBoard from './IScoreBoard';
+import IScoreBoard from '../lib/IScoreBoard';
 import SingletonScoreboardFactory from './Scoreboard';
 import SBGame from './SBGame';
 import IPet from '../lib/IPet';

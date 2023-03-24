@@ -30,7 +30,7 @@ import {
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea } from '../TestUtils';
 import SingletonScoreboardFactory from './Scoreboard';
-import IScoreBoard from './IScoreBoard';
+import IScoreBoard from '../lib/IScoreBoard';
 
 /**
  * This is the town route
