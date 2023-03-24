@@ -82,14 +82,14 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       if (this.location.moving) {
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
         if (petSprite) {
-          petSprite.anims.play(`pet-${this.location.rotation}-walk`, true);
+          petSprite.anims.play(`${this.pet?.species}-${this.location.rotation}-walk`, true);
         }
       } else {
         sprite.anims.stop();
         sprite.setTexture('atlas', `misa-${this.location.rotation}`);
         if (petSprite) {
           petSprite.anims.stop();
-          petSprite.setTexture('pet', `pet-${this.location.rotation}`);
+          petSprite.setTexture('atlas', `${this.pet?.species}-1`);
         }
       }
     }
