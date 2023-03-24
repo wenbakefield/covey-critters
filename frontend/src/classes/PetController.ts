@@ -76,6 +76,10 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     }
   }
 
+  public get species() {
+    return this._model.species;
+  }
+
   public toModel(): PetModel {
     return this._model;
   }

@@ -1,6 +1,6 @@
 import { mock, mockClear } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
-import { Pet, PetRule } from '../types/CoveyTownSocket';
+import { PetRule } from '../types/CoveyTownSocket';
 import CarnivalGameAreaController, { CarnivalGameAreaEvents } from './CarnivalGameAreaController';
 import SpaceBarGameController from './SBGameController';
 
@@ -52,7 +52,7 @@ describe('[T2] CarnivalGameControllerArea', () => {
             {
               id: nanoid(),
               name: 'lemmy',
-              species: 'brown-cobra' ,
+              species: 'brown-cobra',
               movementType: 'orbitalPlayer',
               x: 0,
               y: 0,
