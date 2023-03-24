@@ -28,6 +28,12 @@ describe('Pet', () => {
     expect(pet.name).toBe(petName);
   });
 
+  it('should change the pet name', () => {
+    expect(pet.name).toEqual('Lemmy');
+    pet.setPetName('sunny');
+    expect(pet.name).toEqual('sunny');
+  });
+
   it('should allow changing the name', () => {
     const newName = 'Ludwig';
     pet.name = newName;

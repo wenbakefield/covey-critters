@@ -23,11 +23,13 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
-  CarnivalGameArea,
+  CarnivalGameArea as CarnivalGameAreaModel,
   GameSession,
+  Pet,
 } from '../types/CoveyTownSocket';
 import PosterSessionAreaReal from './PosterSessionArea';
 import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
+import CarnivalGameArea from './CarnivalGameArea';
 
 /**
  * This is the town route
@@ -291,7 +293,7 @@ export class TownsController extends Controller {
   public async createCarnivalGameArea(
     @Path() townID: string,
     @Header('X-Session-Token') sessionToken: string,
-    @Body() requestBody: CarnivalGameArea,
+    @Body() requestBody: CarnivalGameAreaModel,
   ): Promise<void> {
     // download file here TODO
     const curTown = this._townsStore.getTownByID(townID);
@@ -321,6 +323,74 @@ export class TownsController extends Controller {
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
     }
+  }
+
+  @Get('{townID}/Pet/')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async getPetFromPlayerId(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<Pet | undefined> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else if (player.pet) {
+        return player.pet.toPetModel();
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  @Patch('{townID}/Pet/rename/{name}')
+  @Response<InvalidParametersError>(400, 'Invalid town values')
+  public async renamePet(
+    @Path() townID: string,
+    @Path() name: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else if (player.pet) {
+        player.pet.setPetName(name);
+      }
+    }
+  }
+
+  @Patch('{townID}/CarnivalArea/{carnivalAreaId}/assignPet/{name}')
+  @Response<InvalidParametersError>(400, 'Invalid town values')
+  public async assignPet(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Path() name: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<Pet | undefined> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const carnivalGameArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalGameArea || !isCarnivalGameArea(carnivalGameArea)) {
+      throw new InvalidParametersError('Invalid poster session ID');
+    }
+    if (isCarnivalGameArea(carnivalGameArea)) {
+      const pet = (<CarnivalGameArea>carnivalGameArea).assignPetToPlayer(player.id, name);
+      return pet;
+    }
+    return undefined;
   }
 
   /**

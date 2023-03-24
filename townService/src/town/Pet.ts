@@ -97,6 +97,10 @@ export default class Pet implements IPet {
     this.y = y;
   }
 
+  setPetName(name: string): void {
+    this._name = name;
+  }
+
   initializeLocation(playerLocation: PlayerLocation): void {
     if (this._x === undefined && this._y === undefined) {
       this.x = playerLocation.x + this._xOffset;
