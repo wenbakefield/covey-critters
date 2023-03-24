@@ -498,10 +498,15 @@
                  "y":1104.66683333333
                 }, 
                 {
-                 "type":"ConversationArea",
+                 "type":"CarnivalGameArea",
                  "height":125.333,
                  "id":29,
-                 "name":"Basement Lounge",
+                 "name":"Play Game and Get Some Pet!",
+                 "properties":[
+                     {
+                      "name":"carnivalGame",
+                      "type":"string"
+                     }],
                  "rotation":0,
                  "visible":true,
                  "width":134.000333333333,

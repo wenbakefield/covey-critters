@@ -555,21 +555,29 @@ export default class TownGameScene extends Phaser.Scene {
 
       if (player.pet !== undefined) {
         const petSprite = this.physics.add
-          .sprite(player.pet.x, player.pet.y, 'atlas', `${player.pet.species}-1`)
+          .sprite(player.pet.location.x, player.pet.location.y, 'atlas', `${player.pet.species}-1`)
           .setSize(30, 40)
           .setOffset(0, 24);
-        const petLabel = this.add.text(player.pet.x, player.pet.y - 20, player.pet.name, {
-          font: '18px monospace',
-          color: '#000000',
-          // padding: {x: 20, y: 10},
-          backgroundColor: '#ffffff',
-        });
+        const petLabel = this.add.text(
+          player.pet.location.x,
+          player.pet.location.y - 20,
+          player.pet.name,
+          {
+            font: '18px monospace',
+            color: '#000000',
+            // padding: {x: 20, y: 10},
+            backgroundColor: '#ffffff',
+          },
+        );
         player.gameObjects = {
           sprite,
           label,
-          petSprite,
-          petLabel,
           locationManagedByGameScene: false,
+          petGameObject: {
+            sprite: petSprite,
+            label: petLabel,
+            locationManagedByGameScene: false,
+          },
         };
       } else {
         player.gameObjects = {

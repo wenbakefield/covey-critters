@@ -26,12 +26,16 @@ export default class SBGame implements IGameSession {
   }
 
   public isOver(isTimeOver = false): boolean {
-    this._isOver = this._spaceBarCount >= this._maxScore || isTimeOver;
+    this._isOver = this._spaceBarCount >= this._maxScore || isTimeOver || this._isOver;
     return this._isOver;
   }
 
   public getTimeLimit(): number {
     return this._timeLimit;
+  }
+
+  public getScoreLimit(): number {
+    return this._maxScore;
   }
 
   public onTick(key: string): void {

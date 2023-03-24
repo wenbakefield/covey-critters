@@ -1,9 +1,3 @@
-export interface SBGame {
-  playerId: string,
-  score: number,
-  isOver: boolean,
-  timeLimit: number;
-};
 export type TownJoinResponse = {
   /** Unique ID that represents this player * */
   userID: string;
@@ -38,12 +32,6 @@ export interface Player {
   pet?: Pet;
 };
 
-export interface GameSession {
-  playerId: string;
-  isOver: boolean;
-  score: number;
-}
-
 export type XY = { x: number, y: number };
 
 export interface PlayerLocation {
@@ -68,20 +56,19 @@ export type MovementType = 'offsetPlayer' | 'orbitPlayer';
 
 export type Species = 'black-bear' | 'brown-bear' | 'brown-cobra' | 'brown-mouse' | 'brown-sheep' | 'brown-snake' | 'brown-wolf' | 'dark-gray-wolf' | 'dark-wolf' | 'gray-mouse' | 'gray-wolf' | 'green-cobra' | 'green-snake' | 'light-wolf' | 'pigeon' | 'red-snake' | 'seagull' | 'white-mouse' | 'white-sheep';
 
-export type Pet = {
+export interface Pet {
   id: string;
   name: string;
-  species: Species;
-  movementType: MovementType;
+  species: string;
+  movementType: string;
   x: number;
   y: number;
-} | undefined;
+}
 
-
-export type PetRule = {
+export interface PetRule {
   percentileRangeMin: number; 
   percentileRangeMax: number;
-  petSelection: Pet[]
+  petSelection: Pet[];
 }
 
 export interface ConversationArea {
@@ -124,10 +111,15 @@ export interface CarnivalGameArea {
   petRule: PetRule[];
 }
 
+export interface PetOwnerMap {
+  playerId: string
+  pet: Pet
+}
+
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
-  petMoved: (pet: IPet) => void;
+  petMoved: (petMoved: PetOwnerMap) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
@@ -135,7 +127,7 @@ export interface ServerToClientEvents {
   townClosing: () => void;
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
-  gameUpdated: (game: Game) => void;
+  gameUpdated: (game: GameSession) => void;
 }
 
 export interface ClientToServerEvents {
@@ -143,5 +135,5 @@ export interface ClientToServerEvents {
   playerMovement: (movementData: PlayerLocation) => void;
   petMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
-  updateGame: (player: Player, key: string) => void;
+  updateGame: (key: string) => void;
 }

@@ -16,6 +16,7 @@ import {
   ViewingArea as ViewingAreaModel,
   PosterSessionArea as PosterSessionAreaModel,
   CarnivalGameArea as CarnivalGameAreaModel,
+  PetOwnerMap,
 } from '../types/CoveyTownSocket';
 import ConversationArea from './ConversationArea';
 import InteractableArea from './InteractableArea';
@@ -152,6 +153,11 @@ export default class Town {
       this._updatePlayerLocation(newPlayer, movementData);
     });
 
+    // Set up listener to process updates on pet x,y location, and emit back updated location of pet.
+    socket.on('petMovement', (movementData: PlayerLocation) => {
+      this._updatePetLocation(newPlayer, movementData);
+    });
+
     // Set up a listener to process updates to interactables.
     // Currently only knows how to process updates for ViewingAreas and PosterSessionAreas, and
     // ignores any other updates for any other kind of interactable.
@@ -190,6 +196,26 @@ export default class Town {
         );
         if (existingCarnivalGameArea) {
           existingCarnivalGameArea.updateModel(update);
+        }
+      }
+    });
+
+    // Set up listener to update GameSession in Carnival Game Area, and emit back updated GameSession to the client
+    socket.on('updateGame', key => {
+      const carnivalGameArea = this._interactables.find(
+        conv => conv.id === newPlayer.location.interactableID,
+      );
+      if (carnivalGameArea instanceof CarnivalGameArea) {
+        const game = carnivalGameArea.getGame(newPlayer.id);
+
+        if (game.isOver()) {
+          carnivalGameArea.notifyScoreBoard(newPlayer.id);
+          this._broadcastEmitter.emit('gameUpdated', game.toModel());
+          // Emit to client gameUpdated with game isOver state = true;
+        } else {
+          // Emit to Client gameUpdate;
+          game.onTick(key);
+          this._broadcastEmitter.emit('gameUpdated', game.toModel());
         }
       }
     });
@@ -243,6 +269,17 @@ export default class Town {
     player.location = location;
 
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
+  }
+
+  private _updatePetLocation(player: Player, movementData: PlayerLocation) {
+    if (player.pet) {
+      // Only emit socket event when player has a pet
+      player.pet.nextMovement(movementData);
+      this._broadcastEmitter.emit('petMoved', {
+        playerId: player.id,
+        pet: player.pet?.toPetModel(),
+      });
+    }
   }
 
   /**
@@ -384,7 +421,7 @@ export default class Town {
     const area = this._interactables.find(
       eachArea => eachArea.id === carnivalGameArea.id,
     ) as CarnivalGameArea;
-    if (!area || area.petRule.length === 0) {
+    if (!area || carnivalGameArea.petRule.length === 0) {
       return false;
     }
     area.updateModel(carnivalGameArea);

@@ -11,9 +11,14 @@ export default interface IGameSession {
   isOver(isTimeOver?: boolean): boolean;
 
   /**
-   * Get the time of the GameSession.
+   * Get the time limit of the GameSession.
    */
   getTimeLimit(): number;
+
+  /**
+   * Get the score limit of the GameSession.
+   */
+  getScoreLimit(): number;
 
   /**
    * Progress the game to the next state
