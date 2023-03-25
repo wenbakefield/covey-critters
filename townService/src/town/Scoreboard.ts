@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { Player as PlayerModel, PlayerScoreTuple } from '../types/CoveyTownSocket';
 import IScoreBoard from '../lib/IScoreBoard';
 // uses observer and singleton Patterns
