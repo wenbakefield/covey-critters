@@ -8,7 +8,7 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { TownsService, TownsServiceClient } from '../generated/client';
+import { PetRule, TownsService, TownsServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -797,6 +797,55 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
+   * Dispatch Patch request to modify the Pet rule in Carnival Game Area
+   * @param carnivalGameArea represent the carnivalGameArea that need to adjust
+   * @param petRule represent the added pet rule
+   * @returns petRules represent all the rewards condition for the game
+   */
+  public async changeCarnivalGamePetRule(
+    carnivalGameArea: CarnivalGameAreaController,
+    petRule: PetRule,
+  ): Promise<PetRule[]> {
+    const exitingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (exitingController) {
+      return this._townsService.changePetRule(
+        this.townID,
+        carnivalGameArea.id,
+        this.sessionToken,
+        petRule,
+      );
+    } else {
+      throw new Error('Unable to find Carnival Game Area in TownController');
+    }
+  }
+
+  /**
+   * Dispatch Patch request to intialize the game to the townService
+   * @param carnivalGameArea represent the carnivalGameArea.
+   * @param gameModel represent the player's game session
+   */
+  public async initializeGame(
+    carnivalGameArea: CarnivalGameAreaController,
+    gameModel: GameSession,
+  ): Promise<void> {
+    const exitingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (exitingController) {
+      return this._townsService.initializeCarnivalGame(
+        this.townID,
+        carnivalGameArea.id,
+        this.sessionToken,
+        gameModel,
+      );
+    } else {
+      throw new Error('Unable to find Carnival Game Area in TownController');
+    }
+  }
+
+  /**
    * Emit a viewing area update to the townService
    * @param viewingArea The Viewing Area Controller that is updated and should be emitted
    *    with the event
@@ -812,6 +861,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public emitPosterSessionAreaUpdate(posterSessionArea: PosterSessionAreaController) {
     this._socket.emit('interactableUpdate', posterSessionArea.posterSessionAreaModel());
+  }
+
+  /**
+   * Emit a carnival game area update to the townService
+   * @param carnivalGameArea The Carnival Game Area Controller that is updated snad should be emitted with event.
+   */
+  public emitCarnivalGameAreaUpdate(carnivalGameArea: CarnivalGameAreaController) {
+    this._socket.emit('interactableUpdate', carnivalGameArea.carnivalGameAreaModel());
   }
 
   /**
@@ -995,6 +1052,38 @@ export function usePosterSessionAreaController(
     throw new Error(`Unable to locate poster session area id ${posterSessionAreaID}`);
   }
   return ret;
+}
+
+export function useCarnivalGameAreaController(
+  carnivalGameAreaID: string,
+): CarnivalGameAreaController {
+  const townController = useTownController();
+  const ret = townController.carnivalGameAreas.find(eachArea => eachArea.id === carnivalGameAreaID);
+  if (!ret) {
+    throw new Error(`Unable to locate carnival game area id ${carnivalGameAreaID}`);
+  } else {
+    return ret;
+  }
+}
+
+export function useSpaceBarGameController(playerID: string): SpaceBarGameController {
+  const townController = useTownController();
+  const carnivalArea = townController.carnivalGameAreas.find(
+    eachArea => eachArea.getGameSessionByID(playerID) !== undefined,
+  );
+  if (!carnivalArea) {
+    throw new Error(
+      `Unable to locate game within Carnival Game Area as player ${playerID} does not exists`,
+    );
+  } else {
+    const gameController = carnivalArea.getGameSessionByID(playerID);
+    if (!gameController) {
+      // This should not be possible
+      throw new Error('Carnival Game Area is found however cannot locate Game Controller');
+    } else {
+      return gameController;
+    }
+  }
 }
 
 function samePlayers(a1: PlayerController[], a2: PlayerController[]) {
