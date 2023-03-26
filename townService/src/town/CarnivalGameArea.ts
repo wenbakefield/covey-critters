@@ -90,7 +90,7 @@ export default class CarnivalGameArea extends InteractableArea {
       const gameSession = this.getGame(playerId);
       if (gameSession.isOver() || isTimeOver) {
         const score = gameSession.getScore();
-        this._scoreboard.notifyScoreBoard(player, score);
+        this._scoreboard.notifyScoreBoard(player.toPlayerModel(), score);
       }
     }
   }
