@@ -8,7 +8,7 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { PetRule, TownsService, TownsServiceClient } from '../generated/client';
+import { Pet, PetRule, TownsService, TownsServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -842,6 +842,49 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       );
     } else {
       throw new Error('Unable to find Carnival Game Area in TownController');
+    }
+  }
+
+  /**
+   * Dispatch a patch call to assign Player a pet in townService and retrieved the pet that got assigned
+   * @param carnivalGameArea represent the carnivalGameArea that the player is in
+   * @param petName represent the pet name
+   */
+  public async assignPetToPlayer(
+    carnivalGameArea: CarnivalGameAreaController,
+    petName: string,
+  ): Promise<Pet | undefined> {
+    const existingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (existingController) {
+      return this._townsService.assignPet(
+        this.townID,
+        carnivalGameArea.id,
+        petName,
+        this.sessionToken,
+      );
+    }
+  }
+
+  /**
+   * Dispatch a patch call to end the player game session and retrieved the updated gamesession from townservice
+   * @param carnivalGameArea represent the carnival area which the player is in
+   */
+  public async carnivalGameTimeLimitReach(
+    carnivalGameArea: CarnivalGameAreaController,
+  ): Promise<GameSession> {
+    const existingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (existingController) {
+      return this._townsService.timeLimitReached(
+        this.townID,
+        carnivalGameArea.id,
+        this.sessionToken,
+      );
+    } else {
+      throw new Error(`Unable to retrieve Carnival Game Area with id ${carnivalGameArea.id}`);
     }
   }
 
