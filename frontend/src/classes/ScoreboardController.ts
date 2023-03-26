@@ -47,12 +47,15 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
   public removePlayer(player: PlayerModel): void {
     const filteredList = this._scoreboard.filter(tuple => tuple.player.id !== player.id);
     this._scoreboard = filteredList;
+    this.emit('scoreboardChange', filteredList);
   }
 
   public addPlayerScore(player: PlayerModel, score: number): void {
     const newPair: PlayerScoreTuple = { player, score };
     if (this._scoreboard.length === 0) {
       this._scoreboard.push(newPair);
+      const newScoreBoard: PlayerScoreTuple[] = [newPair];
+      this.emit('scoreboardChange', newScoreBoard);
     } else {
       let ifPlaced = false;
       const copyOfScoreBoard: PlayerScoreTuple[] = [];
@@ -67,6 +70,7 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
         copyOfScoreBoard.push(newPair);
       }
       this._scoreboard = copyOfScoreBoard;
+      this.emit('scoreboardChange', copyOfScoreBoard);
     }
   }
 
