@@ -1,49 +1,96 @@
 import EventEmitter from 'events';
-import { Player as PlayerModel } from '../types/CoveyTownSocket';
-import SingletonScoreboardFactory from './Scoreboard';
-import { PlayerScoreTuple } from '../types/CoveyTownSocket';
+import _ from 'lodash';
+import { useEffect, useState } from 'react';
 import TypedEmitter from 'typed-emitter';
-//import Iscore
+import { Player as PlayerModel, PlayerScoreTuple } from '../types/CoveyTownSocket';
 
 export type ScoreBoardEvents = {
   scoreboardChange: (newScoreBoard: PlayerScoreTuple[]) => void;
 };
 
 export default class ScoreboardController extends (EventEmitter as new () => TypedEmitter<ScoreBoardEvents>) {
-  private _scoreboard: ScoreBoard;
+  private _scoreboard: PlayerScoreTuple[];
 
-  constructor() {
-    this._scoreboard = SingletonScoreboardFactory.instance();
+  constructor(playerScoreTuple: PlayerScoreTuple[]) {
+    super();
+    this._scoreboard = playerScoreTuple;
   }
 
-  public getAllScores(): PlayerScoreTuple[] {
-    return this._scoreboard.getAllScores();
+  get scoreboard() {
+    return this._scoreboard;
+  }
+
+  set scoreboard(newScoreBoard: PlayerScoreTuple[]) {
+    if (
+      newScoreBoard.length !== this._scoreboard.length ||
+      _.xor(newScoreBoard, this._scoreboard).length > 0
+    ) {
+      this.emit('scoreboardChange', newScoreBoard);
+      this._scoreboard = newScoreBoard;
+    }
   }
 
   public getXScores(topNumber: number): PlayerScoreTuple[] {
-    return this._scoreboard.getTopX(topNumber);
+    if (topNumber < 1) {
+      return [];
+    }
+    if (this._scoreboard.length < topNumber) {
+      return this._scoreboard;
+    }
+    const topXOfScoreBoard: PlayerScoreTuple[] = [];
+    for (let i = 0; i < topNumber; i++) {
+      topXOfScoreBoard.push(this._scoreboard[i]);
+    }
+    return topXOfScoreBoard;
   }
 
   public removePlayer(player: PlayerModel): void {
-    this._scoreboard.removePlayerScore(player);
+    const filteredList = this._scoreboard.filter(tuple => tuple.player.id !== player.id);
+    this._scoreboard = filteredList;
   }
 
   public addPlayerScore(player: PlayerModel, score: number): void {
-    this._scoreboard.notifyScoreBoard(player, score);
+    const newPair: PlayerScoreTuple = { player, score };
+    if (this._scoreboard.length === 0) {
+      this._scoreboard.push(newPair);
+    } else {
+      let ifPlaced = false;
+      const copyOfScoreBoard: PlayerScoreTuple[] = [];
+      for (let index = 0; index < this._scoreboard.length; index++) {
+        if (this._scoreboard[index].score < score && !ifPlaced) {
+          copyOfScoreBoard.push(newPair);
+          ifPlaced = true;
+        }
+        copyOfScoreBoard.push(this._scoreboard[index]);
+      }
+      if (!ifPlaced) {
+        copyOfScoreBoard.push(newPair);
+      }
+      this._scoreboard = copyOfScoreBoard;
+    }
   }
 
   public getPercentile(score: number): number {
-    return this._scoreboard.calculatedPercentile(score);
+    if (this._scoreboard.length === 0) {
+      return 0;
+    }
+    let betterScoreCount = 0;
+    this._scoreboard.forEach(tuple => {
+      if (tuple.score > score) {
+        betterScoreCount += 1;
+      }
+    });
+    return betterScoreCount / this._scoreboard.length;
   }
 }
 
-export function useScoreBoard(area: ScoreBoadController): PlayerScoreTuple[] {
-  const [scores, setScores] = useState(area.getAllScores());
+export function useScoreBoard(area: ScoreboardController): PlayerScoreTuple[] {
+  const [scoreboard, setScoreboard] = useState(area.scoreboard);
   useEffect(() => {
-    area.addListener('scoreboardChange', setScores);
+    area.addListener('scoreboardChange', setScoreboard);
     return () => {
-      area.removeListener('scoreboardChange', setScores);
+      area.removeListener('scoreboardChange', setScoreboard);
     };
   }, [area]);
-  return scores;
+  return scoreboard;
 }
