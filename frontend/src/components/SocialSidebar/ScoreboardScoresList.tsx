@@ -1,16 +1,16 @@
 import { Box, Heading, ListItem, UnorderedList } from '@chakra-ui/react';
 import React from 'react';
-import ScoreboardController, { useScoreBoard } from '../../classes/ScoreboardController';
-
-type ScoreBoardViewProps = {
-  area: ScoreboardController;
-};
+import { useScoreBoard } from '../../classes/ScoreboardController';
+import useTownController from '../../hooks/useTownController';
 
 /**
  * ScoreBoardList gets all scores and sends them to ScoreBoardView for creating and updating viewing panel.
  */
-function ScoreBoardView({ area }: ScoreBoardViewProps): JSX.Element {
-  const scoreboard = useScoreBoard(area);
+export default function ScoreBoardView(): JSX.Element {
+  const townController = useTownController();
+  townController.initalizeScoreboard();
+  const scoreboardController = townController.scoreboardController;
+  const scoreboard = useScoreBoard(scoreboardController);
   return (
     <Box>
       <Heading as='h3' fontSize='m'>
@@ -30,14 +30,3 @@ function ScoreBoardView({ area }: ScoreBoardViewProps): JSX.Element {
     </Box>
   );
 }
-// export default function ScoreBoardList(): JSX.Element {
-//   const area = //useScoreBoard(area);
-//   return (
-//     <Box>
-//       <Heading as='h2' fontSize='l'>
-//         Carnival Game Scoreboard:
-//       </Heading>
-//       {scores.length === 0 ? <>Scoreboard is empty</> : <ScoreBoardView scores={scores} />}
-//     </Box>
-//   );
-// }

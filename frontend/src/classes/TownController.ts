@@ -23,6 +23,7 @@ import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
 import PosterSessionAreaController from './PosterSessionAreaController';
+import ScoreboardController from './ScoreboardController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY = 300;
 
@@ -200,11 +201,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   private _posterSessionAreas: PosterSessionAreaController[] = [];
 
+  private _scoreboardController: ScoreboardController;
+
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
     super();
     this._townID = townID;
     this._userName = userName;
     this._loginController = loginController;
+    this._scoreboardController = new ScoreboardController([]);
 
     /*
         The event emitter will show a warning if more than this number of listeners are registered, as it
@@ -594,6 +598,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         });
         this._userID = initialData.userID;
         this._ourPlayer = this.players.find(eachPlayer => eachPlayer.id == this.userID);
+        this.initalizeScoreboard();
         this.emit('connect', initialData.providerVideoToken);
         resolve();
       });
@@ -699,6 +704,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       posterSessionArea.id,
       this.sessionToken,
     );
+  }
+
+  public async initalizeScoreboard(): Promise<void> {
+   const updatePlayerScoreTuple = await this._townsService.getAllScores(this.townID);
+   this._scoreboardController.scoreboard = updatePlayerScoreTuple;
+  }
+
+  public get scoreboardController() {
+    return this._scoreboardController;
   }
 
   /**
