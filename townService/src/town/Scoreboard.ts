@@ -1,7 +1,7 @@
 import { Player as PlayerModel, PlayerScoreTuple } from '../types/CoveyTownSocket';
 import IScoreBoard from '../lib/IScoreBoard';
 // uses observer and singleton Patterns
-class Scoreboard implements IScoreBoard {
+export default class Scoreboard implements IScoreBoard {
   // list of tuples that each tuple is holding Player-score pair
   private _playersAndScores: PlayerScoreTuple[] = [];
 
