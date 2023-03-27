@@ -707,8 +707,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public async initalizeScoreboard(): Promise<void> {
-   const updatePlayerScoreTuple = await this._townsService.getAllScores(this.townID);
-   this._scoreboardController.scoreboard = updatePlayerScoreTuple;
+    const updatePlayerScoreTuple = await this._townsService.getAllScores(this.townID);
+    this._scoreboardController.scoreboard = updatePlayerScoreTuple;
   }
 
   public get scoreboardController() {
