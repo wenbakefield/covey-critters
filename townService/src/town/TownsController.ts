@@ -23,7 +23,6 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
-  SBGame,
   Player,
   PlayerScoreTuple,
   CarnivalGameArea,

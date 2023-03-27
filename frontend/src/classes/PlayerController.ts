@@ -81,7 +81,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   private _updateGameComponentLocation() {
     if (this.gameObjects && !this.gameObjects.locationManagedByGameScene) {
-      const { sprite, label, petSprite, petLabel } = this.gameObjects;
+      const { sprite, label } = this.gameObjects;
       if (!sprite.anims) return;
       sprite.setX(this.location.x);
       sprite.setY(this.location.y);
@@ -91,16 +91,9 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       // TODO: add different pet sprites
       if (this.location.moving) {
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
-        if (petSprite) {
-          petSprite.anims.play(`pet-${this.location.rotation}-walk`, true);
-        }
       } else {
         sprite.anims.stop();
         sprite.setTexture('atlas', `misa-${this.location.rotation}`);
-        if (petSprite) {
-          petSprite.anims.stop();
-          petSprite.setTexture('pet', `pet-${this.location.rotation}`);
-        }
       }
     }
   }
