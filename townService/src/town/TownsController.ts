@@ -26,11 +26,15 @@ import {
   SBGame,
   Player,
   PlayerScoreTuple,
+  CarnivalGameArea,
+  GameSession,
+  Pet,
 } from '../types/CoveyTownSocket';
+import CarnivalGameAreaReal from './CarnivalGameArea';
 import PosterSessionAreaReal from './PosterSessionArea';
-import { isPosterSessionArea } from '../TestUtils';
 import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import IScoreBoard from '../lib/IScoreBoard';
+import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 
 /**
  * This is the town route
@@ -281,18 +285,110 @@ export class TownsController extends Controller {
   }
 
   /**
+   * Creates a carnival game area in a given town
+   *
+   * @param townID ID of the town in which to create the new poster session area
+   * @param sessionToken session token of the player making the request, must
+   *        match the session token returned when the player joined the town
+   * @param requestBody The new carnival game area to create
+   *
+   * @throws InvalidParametersError if the session token is not valid, or if the
+   *          poster session area could not be created
+   */
+  @Post('{townID}/createCarnivalArea')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async createCarnivalGameArea(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+    @Body() requestBody: CarnivalGameArea,
+  ): Promise<void> {
+    // download file here TODO
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    if (!curTown.getPlayerBySessionToken(sessionToken)) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    // add viewing area to the town, throw error if it fails
+    if (!curTown.addCarnivalGameArea(requestBody)) {
+      throw new InvalidParametersError('Invalid carnival game area');
+    }
+  }
+
+  /**
    * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
    * @param requestBody The new viewing area to create
    */
-  @Patch('{townID}/CarnivalGameArea/timeLimitReach/{playerId}')
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}timeLimitReach/{playerId}')
   @Response<InvalidParametersError>(400, 'Invalid values specified')
   public async timeLimitReached(
     @Path() townID: string,
-    @Body() requestBody: SBGame,
+    @Path() carnivalAreaId: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<GameSession> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    const player = town.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const carnivalArea = town.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invali carnival area ID');
+    }
+    const game = (<CarnivalGameAreaReal>carnivalArea).getGame(player.id);
+    const updateGame = {
+      playerId: player.id,
+      score: game.getScore(),
+      scoreLimit: game.getScoreLimit(),
+      isOver: true,
+      timeLimit: game.getTimeLimit(),
+    };
+    game.updateFromModel(updateGame);
+    return updateGame;
+  }
+
+  @Get('{townID}/Pet/')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async getPetFromPlayerId(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<Pet | undefined> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else if (player.pet) {
+        return player.pet.toPetModel();
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  @Patch('{townID}/Pet/rename/{name}')
+  @Response<InvalidParametersError>(400, 'Invalid town values')
+  public async renamePet(
+    @Path() townID: string,
+    @Path() name: string,
+    @Header('X-Session-Token') sessionToken: string,
   ): Promise<void> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else if (player.pet) {
+        player.pet.setPetName(name);
+      }
     }
   }
 
@@ -343,6 +439,33 @@ export class TownsController extends Controller {
       throw new InvalidParametersError('Invalid values specified');
     }
     return this._scoreboard.calculatedPercentile(score);
+  }
+
+  @Patch('{townID}/CarnivalArea/{carnivalAreaId}/assignPet/{name}')
+  @Response<InvalidParametersError>(400, 'Invalid town values')
+  public async assignPet(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Path() name: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<Pet | undefined> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const carnivalGameArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalGameArea || !isCarnivalGameArea(carnivalGameArea)) {
+      throw new InvalidParametersError('Invalid poster session ID');
+    }
+    if (isCarnivalGameArea(carnivalGameArea)) {
+      const pet = (<CarnivalGameAreaReal>carnivalGameArea).assignPetToPlayer(player.id, name);
+      return pet;
+    }
+    return undefined;
   }
 
   /**

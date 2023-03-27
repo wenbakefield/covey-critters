@@ -2,7 +2,13 @@ import { mock, mockClear } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import Player from '../lib/Player';
 import { getLastEmittedEvent } from '../TestUtils';
-import { PetRule, TownEmitter } from '../types/CoveyTownSocket';
+import {
+  MovementType,
+  Pet as PetModel,
+  PetRule,
+  Species,
+  TownEmitter,
+} from '../types/CoveyTownSocket';
 import CarnivalGameArea from './CarnivalGameArea';
 
 describe('CarnivalGameArea', () => {
@@ -103,7 +109,75 @@ describe('CarnivalGameArea', () => {
       expect(() => testArea.notifyScoreBoard('no-exist-player')).toThrow();
     });
   });
-  describe('assignPetToPlayer', () => {});
+  describe('assignPetToPlayer', () => {
+    it('Should not assign Player a Pet if the playerId is invalid', () => {
+      expect(() => testArea.assignPetToPlayer('non-exists-player', 'lemmy')).toThrow();
+    });
+
+    it('Should not assign player a pet if the player has not completed the game', () => {
+      const game = testArea.getGame(newPlayer.id);
+      expect(game.isOver()).toBe(false);
+      expect(() => testArea.assignPetToPlayer(newPlayer.id, 'lemmy')).toThrow();
+    });
+
+    it('Should not assign pet if the rule is empty', () => {
+      const game = testArea.getGame(newPlayer.id);
+      game.isOver(true); // Overide if the game is timeout
+      expect(() => testArea.assignPetToPlayer(newPlayer.id, 'lemmy')).toThrow();
+    });
+
+    it('Should assign pet if the rule is not empty', () => {
+      const game = testArea.getGame(newPlayer.id);
+      game.isOver(true); // Overide if the game is timeout
+      const newPetRule: PetRule = {
+        percentileRangeMin: 0,
+        percentileRangeMax: 20,
+        petSelection: [
+          {
+            id: nanoid(),
+            name: 'brown-cobra',
+            species: 'brown-cobra',
+            movementType: 'offsetPlayer',
+            x: 0,
+            y: 0,
+          },
+        ],
+      };
+      testArea.addPetRule(newPetRule);
+      const actualPetModel = testArea.assignPetToPlayer(newPlayer.id, 'lemmy');
+      const expectedPetModel: PetModel = {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: actualPetModel!.id,
+        name: 'lemmy',
+        species: 'brown-cobra',
+        movementType: 'offsetPlayer',
+        x: -40,
+        y: -20,
+      };
+      expect(actualPetModel).toEqual(expectedPetModel);
+    });
+
+    it('Should not assign player a pet if reward min-max range does not exists', () => {
+      const game = testArea.getGame(newPlayer.id);
+      game.isOver(true); // Overide if the game is timeout
+      const newPetRule: PetRule = {
+        percentileRangeMin: 80,
+        percentileRangeMax: 100,
+        petSelection: [
+          {
+            id: nanoid(),
+            name: 'brown-cobra',
+            species: 'brown-cobra',
+            movementType: 'offsetPlayer',
+            x: 0,
+            y: 0,
+          },
+        ],
+      };
+      testArea.addPetRule(newPetRule);
+      expect(() => testArea.assignPetToPlayer(newPlayer.id, 'lemmy')).toThrow();
+    });
+  });
   describe('addPetRule', () => {
     it('Add new pet rule that does not overlaps with other rules', () => {
       expect(testArea.petRule.length).toEqual(0);

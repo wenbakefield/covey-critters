@@ -205,6 +205,10 @@ export async function mockTownControllerConnection(
         imageContents: nanoid(),
         stars: 0,
       });
+      responseToSendController.interactables.push({
+        id: nanoid(),
+        petRule: [],
+      });
     }
   }
   mockSocket.on.mockImplementationOnce((eventName, eventListener) => {

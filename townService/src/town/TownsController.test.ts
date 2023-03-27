@@ -2,7 +2,13 @@ import assert from 'assert';
 import { DeepMockProxy, mockDeep, mock } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { Town } from '../api/Model';
-import { ConversationArea, Interactable, TownEmitter, ViewingArea } from '../types/CoveyTownSocket';
+import {
+  ConversationArea,
+  Interactable,
+  TownEmitter,
+  ViewingArea,
+  CarnivalGameArea,
+} from '../types/CoveyTownSocket';
 import TownsStore from '../lib/TownsStore';
 import {
   createConversationForTesting,
@@ -12,6 +18,7 @@ import {
   isViewingArea,
   isConversationArea,
   MockedPlayer,
+  isCarnivalGameArea,
 } from '../TestUtils';
 import { TownsController } from './TownsController';
 import Player from '../lib/Player';
@@ -297,6 +304,78 @@ describe('TownsController integration tests', () => {
         const conversationArea = createConversationForTesting();
         await expect(
           controller.createConversationArea(testingTown.townID, sessionToken, conversationArea),
+        ).rejects.toThrow();
+      });
+    });
+    describe('Create Carnival Game Area', () => {
+      it('Executes without error when creating a new carnival game area', async () => {
+        const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+        if (!carnivalGameArea) {
+          fail('Expected at least one carnival game area to be returned in the initial join data');
+        } else {
+          const newCarnivalGameArea: CarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+          const townEmitter = getBroadcastEmitterForTownID(testingTown.townID);
+          const updateMessage = getLastEmittedEvent(townEmitter, 'interactableUpdate');
+          if (isCarnivalGameArea(updateMessage)) {
+            expect(updateMessage).toEqual(newCarnivalGameArea);
+          } else {
+            fail('Expected an interactableUpdate to be dispatched with the new carnival game area');
+          }
+        }
+      });
+      it('Returns an error message if the town ID is invalid', async () => {
+        const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+        const newCarnivalGameArea: CarnivalGameArea = {
+          id: carnivalGameArea.id,
+          petRule: [
+            {
+              percentileRangeMin: 0,
+              percentileRangeMax: 10,
+              petSelection: [],
+            },
+          ],
+        };
+        await expect(
+          controller.createCarnivalGameArea(nanoid(), sessionToken, newCarnivalGameArea),
+        ).rejects.toThrow();
+      });
+
+      it('Checks for a valid session token before creating a carnival game area', async () => {
+        const invalidSessionToken = nanoid();
+        const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+        const newCarnivalGameArea: CarnivalGameArea = {
+          id: carnivalGameArea.id,
+          petRule: [
+            {
+              percentileRangeMin: 0,
+              percentileRangeMax: 10,
+              petSelection: [],
+            },
+          ],
+        };
+        await expect(
+          controller.createCarnivalGameArea(nanoid(), invalidSessionToken, newCarnivalGameArea),
+        ).rejects.toThrow();
+      });
+      it('Returns an error message if addCarnivalGameArea returns false', async () => {
+        const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+        carnivalGameArea.id = nanoid();
+        await expect(
+          controller.createCarnivalGameArea(testingTown.townID, sessionToken, carnivalGameArea),
         ).rejects.toThrow();
       });
     });

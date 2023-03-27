@@ -12,13 +12,20 @@ import {
   mockPlayer,
 } from '../TestUtils';
 import {
+  CarnivalGameArea as CarnivalGameAreaModel,
   ChatMessage,
+  GameSession,
   Interactable,
+  MovementType,
+  Pet,
   PlayerLocation,
+  Species,
   TownEmitter,
   ViewingArea as ViewingAreaModel,
 } from '../types/CoveyTownSocket';
+import CarnivalGameArea from './CarnivalGameArea';
 import ConversationArea from './ConversationArea';
+import SingletonScoreboardFactory from './Scoreboard';
 import Town from './Town';
 
 const mockTwilioVideo = mockDeep<TwilioVideo>();
@@ -449,6 +456,83 @@ const testingMaps: TestMapDict = {
       },
     ],
   },
+  twoConvTwoViewingOneCarn: {
+    tiledversion: '1.9.0',
+    tileheight: 32,
+    tilesets: [],
+    tilewidth: 32,
+    type: 'map',
+    layers: [
+      {
+        id: 4,
+        name: 'Objects',
+        objects: [
+          {
+            type: 'ConversationArea',
+            height: 237,
+            id: 39,
+            name: 'Name1',
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 40,
+            y: 120,
+          },
+          {
+            type: 'ConversationArea',
+            height: 266,
+            id: 43,
+            name: 'Name2',
+            rotation: 0,
+            visible: true,
+            width: 467,
+            x: 612,
+            y: 120,
+          },
+          {
+            type: 'ViewingArea',
+            height: 237,
+            id: 54,
+            name: 'Name3',
+            properties: [
+              {
+                name: 'video',
+                type: 'string',
+                value: 'someURL',
+              },
+            ],
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 155,
+            y: 566,
+          },
+          {
+            type: 'CarnivalGameArea',
+            height: 237,
+            id: 55,
+            name: 'Name5',
+            properties: [
+              {
+                name: 'carnivalArea',
+                type: 'string',
+              },
+            ],
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 600,
+            y: 1200,
+          },
+        ],
+        opacity: 1,
+        type: 'objectgroup',
+        visible: true,
+        x: 0,
+        y: 0,
+      },
+    ],
+  },
 };
 
 describe('Town', () => {
@@ -491,6 +575,8 @@ describe('Town', () => {
         'chatMessage',
         'playerMovement',
         'interactableUpdate',
+        'petMovement',
+        'updateGame',
       ];
       expectedEvents.forEach(eachEvent =>
         expect(getEventListener(playerTestData.socket, eachEvent)).toBeDefined(),
@@ -612,6 +698,132 @@ describe('Town', () => {
         expect(viewingArea.occupantsByID).toEqual([player.id]);
         disconnectPlayer(playerTestData);
         expect(viewingArea.occupantsByID).toEqual([]);
+      });
+    });
+    describe('gameUpdated', () => {
+      let gameUpdateCallback: (key: string) => void;
+      const scoreboard = SingletonScoreboardFactory.instance();
+      const newModel: CarnivalGameAreaModel = {
+        id: 'Name5',
+        petRule: [
+          {
+            percentileRangeMin: 0,
+            percentileRangeMax: 10,
+            petSelection: [],
+          },
+        ],
+      };
+      beforeEach(async () => {
+        town.initializeFromMap(testingMaps.twoConvTwoViewingOneCarn);
+        scoreboard.removePlayerScore(player.toPlayerModel());
+        playerTestData.moveTo(605, 1201); // Inside of "Name5" area
+        expect(town.addCarnivalGameArea(newModel)).toBe(true);
+        const lastEvent = getLastEmittedEvent(playerTestData.socketToRoomMock, 'gameUpdated');
+        expect(lastEvent).toBeDefined(); // Should be emitted when player is add into Carnival Game Session
+        gameUpdateCallback = getEventListener(playerTestData.socket, 'updateGame');
+        gameUpdateCallback('32');
+      });
+
+      it('forwards updates to others in the town', () => {
+        const lastEvent = getLastEmittedEvent(townEmitter, 'gameUpdated');
+        const playerGameSession = {
+          isOver: false,
+          playerId: player.id,
+          score: 1,
+          scoreLimit: 100,
+          timeLimit: 100,
+        };
+        expect(lastEvent).toEqual(playerGameSession);
+      });
+
+      it('Notify scoreboard when game has ended', () => {
+        expect(scoreboard.getAllScores()).toHaveLength(0);
+        const endGame = {
+          playerId: player.id,
+          score: 100,
+          scoreLimit: 100,
+          isOver: true,
+          timeLimit: 100,
+        };
+        for (let i = 0; i <= 99; i++) {
+          gameUpdateCallback('32');
+        }
+        const lastEvent = getLastEmittedEvent(townEmitter, 'gameUpdated');
+        expect(lastEvent).toEqual(endGame);
+        expect(scoreboard.getAllScores()).toHaveLength(1);
+      });
+    });
+
+    describe('PetMoved', () => {
+      let petMovementCallBack: (playerLocation: PlayerLocation) => void;
+      let actualPet: Pet;
+      const playerLocation: PlayerLocation = {
+        x: 50,
+        y: 100,
+        rotation: 'front',
+        moving: true,
+      };
+      const dragon: Pet = {
+        id: nanoid(),
+        name: 'brown-cobra',
+        species: 'brown-cobra',
+        movementType: 'offsetPlayer',
+        x: 0,
+        y: 0,
+      };
+      const newModel: CarnivalGameAreaModel = {
+        id: 'Name5',
+        petRule: [
+          {
+            percentileRangeMin: 0,
+            percentileRangeMax: 101, // For the upperbound
+            petSelection: [dragon],
+          },
+        ],
+      };
+      beforeEach(() => {
+        town.initializeFromMap(testingMaps.twoConvTwoViewingOneCarn);
+        playerTestData.moveTo(605, 1201); // Inside of "Name5" area
+        expect(town.addCarnivalGameArea(newModel)).toBe(true);
+        petMovementCallBack = getEventListener(playerTestData.socket, 'petMovement');
+      });
+
+      it('Does not forward updates to the entired town', () => {
+        petMovementCallBack(playerLocation);
+        expect(() => getLastEmittedEvent(townEmitter, 'petMoved')).toThrowError();
+      });
+
+      it('Does not forward updates if the player does not have a pet', () => {
+        petMovementCallBack(playerLocation);
+        expect(playerTestData.player?.pet).not.toBeDefined();
+        expect(() => getLastEmittedEvent(townEmitter, 'petMoved')).toThrowError();
+      });
+
+      describe('After the player has completed the Game', () => {
+        beforeEach(() => {
+          const carnivalGame = <CarnivalGameArea>town.getInteractable('Name5');
+          const game = carnivalGame.getGame(player.id);
+          game.isOver(true); // Overide the game state to end
+          actualPet = carnivalGame.assignPetToPlayer(playerTestData.player!.id, 'lemmy');
+        });
+
+        it('Pet should be spawned', () => {
+          expect(playerTestData.player?.pet).toBeDefined();
+        });
+
+        it('Pet movement move next', () => {
+          petMovementCallBack(playerLocation);
+          const lastEvent = getLastEmittedEvent(townEmitter, 'petMoved');
+          const expectedPet: Pet = {
+            id: actualPet!.id,
+            name: 'lemmy',
+            species: 'brown-cobra',
+            movementType: 'offsetPlayer',
+            x: 10,
+            y: 80,
+          };
+          expect(lastEvent.pet).toEqual(expectedPet);
+        });
       });
     });
     describe('playerMovement', () => {
@@ -753,6 +965,52 @@ describe('Town', () => {
           topic: newTopic,
           occupantsByID: [player.id],
         });
+      });
+    });
+  });
+
+  describe('addCarnivalGameArea', () => {
+    beforeEach(async () => {
+      town.initializeFromMap(testingMaps.twoConvTwoViewingOneCarn);
+    });
+
+    it('Should return false if no area exists with that ID', () => {
+      expect(town.addCarnivalGameArea({ id: nanoid(), petRule: [] })).toBe(false);
+    });
+
+    it('Should return false if given carnival game area contain empty pet rule', () => {
+      expect(town.addCarnivalGameArea({ id: 'Name5', petRule: [] })).toBe(false);
+    });
+
+    describe('When successful', () => {
+      const newModel: CarnivalGameAreaModel = {
+        id: 'Name5',
+        petRule: [
+          {
+            percentileRangeMin: 0,
+            percentileRangeMax: 10,
+            petSelection: [],
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        playerTestData.moveTo(605, 1201); // Inside of "Name5" area
+        expect(town.addCarnivalGameArea(newModel)).toBe(true);
+      });
+
+      it('Should update the local model for that area', () => {
+        const carnivalGameArea = town.getInteractable('Name5');
+        expect(carnivalGameArea.toModel()).toEqual(newModel);
+      });
+
+      it('Should emit an interactableUpdate message', () => {
+        const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
+        expect(lastEmittedUpdate).toEqual(newModel);
+      });
+      it('Should include any players in that area as occupants', () => {
+        const carnivalGameArea = town.getInteractable('Name5');
+        expect(carnivalGameArea.occupantsByID).toEqual([player.id]);
       });
     });
   });

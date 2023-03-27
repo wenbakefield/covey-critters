@@ -39,6 +39,14 @@ export default abstract class PetDecorator implements IPet {
   }
 
   /**
+   * Given new name of Pet set this pet a new name
+   * @param name represent the new name of the pet
+   */
+  setPetName(name: string): void {
+    this._pet.setPetName(name);
+  }
+
+  /**
    * Initialize the pet location when the pet is instantiated
    * @param playerLocation represent the player coordinate in the town
    */

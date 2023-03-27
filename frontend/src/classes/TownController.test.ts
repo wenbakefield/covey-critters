@@ -1,8 +1,6 @@
 import { mock, mockClear, MockProxy } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { ViewingArea } from '../generated/client';
-import { PosterSessionArea } from '../generated/client';
 import {
   EventNames,
   getEventListener,
@@ -12,15 +10,29 @@ import {
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
+  CarnivalGameArea,
+  PosterSessionArea,
+  GameSession,
+  ViewingArea,
   CoveyTownSocket,
+  Pet,
+  PetOwnerMap,
   Player as PlayerModel,
   PlayerLocation,
   ServerToClientEvents,
   TownJoinResponse,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isPosterSessionArea, isViewingArea } from '../types/TypeUtils';
+import {
+  isCarnivalGameArea,
+  isConversationArea,
+  isPosterSessionArea,
+  isViewingArea,
+} from '../types/TypeUtils';
+import CarnivalGameAreaController from './CarnivalGameAreaController';
+import PetController from './PetController';
 import PlayerController from './PlayerController';
 import PosterSessionAreaController from './PosterSessionAreaController';
+import SpaceBarGameController from './SBGameController';
 import TownController, { TownEvents } from './TownController';
 import ViewingAreaController from './ViewingAreaController';
 
@@ -107,6 +119,71 @@ describe('TownController', () => {
     beforeEach(async () => {
       townJoinResponse = await mockTownControllerConnection(testController, mockSocket);
     });
+
+    describe('PetController', () => {
+      let petModel: Pet;
+      let petController: PetController;
+      let petListener: (pet: PetOwnerMap) => void;
+
+      beforeEach(() => {
+        petModel = {
+          id: nanoid(),
+          name: 'lemmy',
+          movementType: 'offsetPlayer',
+          species: 'black-bear',
+          x: 0,
+          y: 0,
+        };
+        petController = PetController.fromModel(petModel);
+        petListener = getEventListener(mockSocket, 'petMoved');
+      });
+      it('petMoved assing PetController to playerController if petController does not exists', () => {
+        expect(testController.ourPlayer.pet).toBeUndefined();
+        petListener({
+          playerId: testController.ourPlayer.id,
+          pet: petModel,
+        });
+        expect(testController.ourPlayer.pet).toBeDefined();
+      });
+      it('Dispatch petMovementChange when new pet update event is emitted from backend', () => {
+        testController.ourPlayer.pet = petController;
+        const listener = jest.fn();
+        petController.addListener('petMovementChange', listener);
+        const newPet = {
+          id: petModel.id,
+          name: 'lemmy',
+          movementType: 'offsetPlayer',
+          species: 'black-bear',
+          x: 10,
+          y: 20,
+        };
+        petListener({
+          playerId: testController.ourPlayer.id,
+          pet: newPet,
+        });
+        expect(petController.toModel()).toEqual(newPet);
+        expect(listener).toBeCalledWith(newPet.x, newPet.y);
+      });
+      it('Dispatch petNameChange when new pet update event is emitted from backend', () => {
+        testController.ourPlayer.pet = petController;
+        const listener = jest.fn();
+        petController.addListener('petNameChange', listener);
+        const newPet = {
+          id: petModel.id,
+          name: 'mmm',
+          movementType: 'offsetPlayer',
+          species: 'black-bear',
+          x: 0,
+          y: 0,
+        };
+        petListener({
+          playerId: testController.ourPlayer.id,
+          pet: newPet,
+        });
+        expect(petController.toModel()).toEqual(newPet);
+        expect(listener).toBeCalledWith('mmm');
+      });
+    });
     it('Initializes the properties of the controller', () => {
       expect(testController.providerVideoToken).toEqual(townJoinResponse.providerVideoToken);
       expect(testController.friendlyName).toEqual(townJoinResponse.friendlyName);
@@ -135,6 +212,29 @@ describe('TownController', () => {
         sid: nanoid(),
       };
       emitEventAndExpectListenerFiring('chatMessage', message, 'chatMessage', message);
+    });
+    it("Emit the local pet's movement updates to the socket and to locally subscribed ConveyTownEvents listener", () => {
+      const newLocation: PlayerLocation = { ...testController.ourPlayer.location, x: 10, y: 10 };
+      testController.ourPlayer.pet = PetController.fromModel({
+        id: nanoid(),
+        name: 'lemmy',
+        movementType: 'offsetPlayer',
+        species: 'black-bear',
+        x: 0,
+        y: 0,
+      });
+      const expectPetUpdate = testController.ourPlayer.pet;
+      const movedPetListener = jest.fn();
+
+      testController.addListener('petMoved', movedPetListener);
+      testController.emitMovement(newLocation);
+
+      expect(mockSocket.emit).toBeCalledWith('petMovement', newLocation);
+      expect(movedPetListener).toBeCalledWith(expectPetUpdate);
+    });
+    it('Emit the local game updates to the socket and to locally subscribed ConveyTownEvents listener', () => {
+      testController.emitGameOnTick('32');
+      expect(mockSocket.emit).toBeCalledWith('updateGame', '32');
     });
     it("Emits the local player's movement updates to the socket and to locally subscribed CoveyTownEvents listeners", () => {
       const newLocation: PlayerLocation = { ...testController.ourPlayer.location, x: 10, y: 10 };
@@ -462,6 +562,114 @@ describe('TownController', () => {
           expect(listener).toBeCalledWith(posterSessionArea.imageContents);
         });
       });
+      describe('[REE1] CarnivalGameArea Area updates', () => {
+        function carnivalGameAreaOnTown() {
+          return {
+            ...(townJoinResponse.interactables.find(eachInteractable =>
+              isCarnivalGameArea(eachInteractable),
+            ) as CarnivalGameArea),
+          };
+        }
+        let eventListener: (update: CarnivalGameArea) => void;
+        let carnivalGameArea: CarnivalGameArea;
+        let carnivalGameAreaController: CarnivalGameAreaController;
+
+        beforeEach(() => {
+          carnivalGameArea = carnivalGameAreaOnTown();
+          const controller = testController.carnivalGameAreas.find(
+            eachArea => eachArea.id === carnivalGameArea.id,
+          );
+          if (!controller) {
+            fail(
+              `Could not find carnivalGame area controller for carnivalGame area ${carnivalGameArea.id}`,
+            );
+          }
+          carnivalGameAreaController = controller;
+          eventListener = getEventListener(mockSocket, 'interactableUpdate');
+        });
+        it('[REE1] interactables and CarnivalGameArea hooks Updates the CarnivalGameArea Model', () => {
+          carnivalGameArea.petRule = [
+            {
+              percentileRangeMin: 0,
+              percentileRangeMax: 100,
+              petSelection: [
+                {
+                  id: nanoid(),
+                  name: 'lemmy',
+                  movementType: 'offsetPlayer',
+                  species: 'brown-cobra',
+                  x: 0,
+                  y: 0,
+                },
+              ],
+            },
+          ];
+
+          eventListener(carnivalGameArea);
+          expect(carnivalGameAreaController.carnivalGameAreaModel()).toEqual(carnivalGameArea);
+        });
+        it('[REE1] interactableUpdate and carnivalGameArea hooks Emits a petRuleChange event if the number of petRule changes', () => {
+          const listener = jest.fn();
+          carnivalGameAreaController.addListener('petRuleChange', listener);
+
+          carnivalGameArea.petRule = [
+            {
+              percentileRangeMin: 0,
+              percentileRangeMax: 100,
+              petSelection: [
+                {
+                  id: nanoid(),
+                  name: 'lemmy',
+                  movementType: 'offsetPlayer',
+                  species: 'brown-cobra',
+                  x: 0,
+                  y: 0,
+                },
+              ],
+            },
+          ];
+          eventListener(carnivalGameArea);
+          expect(listener).toBeCalledWith(carnivalGameArea.petRule);
+        });
+
+        describe('SpaceBarGame Updates', () => {
+          let spaceBarGame: GameSession;
+          let spaceBarGameController: SpaceBarGameController;
+          let gameListener: (update: GameSession) => void;
+
+          beforeEach(() => {
+            spaceBarGame = {
+              playerId: testController.ourPlayer.id,
+              score: 0,
+              scoreLimit: 100,
+              isOver: false,
+              timeLimit: 100,
+            };
+            spaceBarGameController = SpaceBarGameController.fromModel(spaceBarGame);
+            gameListener = getEventListener(mockSocket, 'gameUpdated');
+          });
+          it('SpaceBar game hooks should dispatch gameModel update', () => {
+            carnivalGameAreaController.addGameSession(spaceBarGameController);
+            spaceBarGame.score = 10;
+            spaceBarGame.isOver = false;
+            const listener = jest.fn();
+            spaceBarGameController.addListener('gameChanged', listener);
+            gameListener(spaceBarGame);
+            expect(spaceBarGameController.toModel()).toEqual(spaceBarGame);
+            expect(listener).toBeCalledWith(spaceBarGame);
+          });
+          it('SpaceBar game hooks should dispatch gameTimeOut when updated game timeout', () => {
+            carnivalGameAreaController.addGameSession(spaceBarGameController);
+            spaceBarGame.score = 10;
+            spaceBarGame.isOver = true;
+            const listener = jest.fn();
+            spaceBarGameController.addListener('gameTimeOut', listener);
+            gameListener(spaceBarGame);
+            expect(spaceBarGameController.toModel()).toEqual(spaceBarGame);
+            expect(listener).toBeCalledWith(true);
+          });
+        });
+      });
     });
   });
   describe('Processing events that are received over the socket from the townService', () => {
@@ -474,6 +682,7 @@ describe('TownController', () => {
         id: nanoid(),
         location: { moving: false, rotation: 'back', x: 0, y: 1, interactableID: nanoid() },
         userName: nanoid(),
+        pet: undefined,
       };
       //Add that player to the test town
       testPlayerPlayersChangedFn = emitEventAndExpectListenerFiring(
@@ -497,6 +706,26 @@ describe('TownController', () => {
         testPlayer,
         'playerMoved',
         PlayerController.fromPlayerModel(testPlayer),
+      );
+    });
+
+    it('Emits petMoved events when a pet move', async () => {
+      const petOwner: PetOwnerMap = {
+        playerId: testPlayer.id,
+        pet: {
+          id: nanoid(),
+          name: 'lemmy',
+          movementType: 'offsetPlayer',
+          species: 'black-bear',
+          x: 0,
+          y: 0,
+        },
+      };
+      emitEventAndExpectListenerFiring(
+        'petMoved',
+        petOwner,
+        'petMoved',
+        PetController.fromModel(petOwner.pet),
       );
     });
     it('Emits playerMoved events when players move', async () => {

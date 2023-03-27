@@ -105,3 +105,5 @@ dist
 townService/build/*
 shared/generated/*
 townService/generated/*
+frontend/src/generated/*
+frontend/build/*
