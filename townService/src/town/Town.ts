@@ -4,7 +4,7 @@ import { BroadcastOperator } from 'socket.io';
 import IVideoClient from '../lib/IVideoClient';
 import Player from '../lib/Player';
 import TwilioVideo from '../lib/TwilioVideo';
-import { isPosterSessionArea, isViewingArea } from '../TestUtils';
+import { isCarnivalGameArea, isPosterSessionArea, isViewingArea } from '../TestUtils';
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
@@ -15,11 +15,15 @@ import {
   SocketData,
   ViewingArea as ViewingAreaModel,
   PosterSessionArea as PosterSessionAreaModel,
+  CarnivalGameArea as CarnivalGameAreaModel,
+  PetOwnerMap,
 } from '../types/CoveyTownSocket';
 import ConversationArea from './ConversationArea';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
 import PosterSessionArea from './PosterSessionArea';
+import CarnivalGameArea from './CarnivalGameArea';
+import SingletonScoreboardFactory from './Scoreboard';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -90,6 +94,8 @@ export default class Town {
 
   private _connectedSockets: Set<CoveyTownSocket> = new Set();
 
+  private _scoreboard = SingletonScoreboardFactory.instance();
+
   constructor(
     friendlyName: string,
     isPubliclyListed: boolean,
@@ -126,6 +132,7 @@ export default class Town {
     // clean up our listener adapter, and then let the CoveyTownController know that the
     // player's session is disconnected
     socket.on('disconnect', () => {
+      this._scoreboard.removePlayerScore(newPlayer.toPlayerModel());
       this._removePlayer(newPlayer);
       this._connectedSockets.delete(socket);
     });
@@ -144,6 +151,11 @@ export default class Town {
     // location, inform the CoveyTownController
     socket.on('playerMovement', (movementData: PlayerLocation) => {
       this._updatePlayerLocation(newPlayer, movementData);
+    });
+
+    // Set up listener to process updates on pet x,y location, and emit back updated location of pet.
+    socket.on('petMovement', (movementData: PlayerLocation) => {
+      this._updatePetLocation(newPlayer, movementData);
     });
 
     // Set up a listener to process updates to interactables.
@@ -174,6 +186,36 @@ export default class Town {
         // updatemodel if theres an existing poster session area with the same ID
         if (existingPosterSessionAreaArea) {
           existingPosterSessionAreaArea.updateModel(update);
+        }
+      } else if (isCarnivalGameArea(update)) {
+        newPlayer.townEmitter.emit('interactableUpdate', update);
+        const existingCarnivalGameArea = <CarnivalGameArea>(
+          this._interactables.find(
+            area => area.id === update.id && area instanceof CarnivalGameArea,
+          )
+        );
+        if (existingCarnivalGameArea) {
+          existingCarnivalGameArea.updateModel(update);
+        }
+      }
+    });
+
+    // Set up listener to update GameSession in Carnival Game Area, and emit back updated GameSession to the client
+    socket.on('updateGame', key => {
+      const carnivalGameArea = this._interactables.find(
+        conv => conv.id === newPlayer.location.interactableID,
+      );
+      if (carnivalGameArea instanceof CarnivalGameArea) {
+        const game = carnivalGameArea.getGame(newPlayer.id);
+
+        if (game.isOver()) {
+          carnivalGameArea.notifyScoreBoard(newPlayer.id);
+          this._broadcastEmitter.emit('gameUpdated', game.toModel());
+          // Emit to client gameUpdated with game isOver state = true;
+        } else {
+          // Emit to Client gameUpdate;
+          game.onTick(key);
+          this._broadcastEmitter.emit('gameUpdated', game.toModel());
         }
       }
     });
@@ -227,6 +269,17 @@ export default class Town {
     player.location = location;
 
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
+  }
+
+  private _updatePetLocation(player: Player, movementData: PlayerLocation) {
+    if (player.pet) {
+      // Only emit socket event when player has a pet
+      player.pet.nextMovement(movementData);
+      this._broadcastEmitter.emit('petMoved', {
+        playerId: player.id,
+        pet: player.pet?.toPetModel(),
+      });
+    }
   }
 
   /**
@@ -348,6 +401,36 @@ export default class Town {
   }
 
   /**
+   * Creates a new carnival game area in this town if there is not currently an active
+   * carnival game area with the same ID. The carnival area ID must match the name of a
+   * carnival game area that exists in this town's map, and the carnival game area must not
+   * already have a video set.
+   *
+   * If successful creating the carnival game area, this method:
+   *    Adds any players who are in the region defined by the carnival game area to it
+   *    Notifies all players in the town that the carnival game area has been updated by
+   *      emitting an interactableUpdate event
+   *
+   * @param viewingArea Information describing the carnival game area to create.
+   *
+   * @returns True if the carnival game area was created or false if there is no known
+   * carnival game area with the specified ID or if there is already an active carnival game area
+   * with the specified ID or if there is no pet rule specify
+   */
+  public addCarnivalGameArea(carnivalGameArea: CarnivalGameAreaModel): boolean {
+    const area = this._interactables.find(
+      eachArea => eachArea.id === carnivalGameArea.id,
+    ) as CarnivalGameArea;
+    if (!area || carnivalGameArea.petRule.length === 0) {
+      return false;
+    }
+    area.updateModel(carnivalGameArea);
+    area.addPlayersWithinBounds(this._players);
+    this._broadcastEmitter.emit('interactableUpdate', area.toModel());
+    return true;
+  }
+
+  /**
    * Fetch a player's session based on the provided session token. Returns undefined if the
    * session token is not valid.
    *
@@ -420,10 +503,17 @@ export default class Town {
       .filter(eachObject => eachObject.type === 'PosterSessionArea')
       .map(eachPSAreaObj => PosterSessionArea.fromMapObject(eachPSAreaObj, this._broadcastEmitter));
 
+    const carnivalGameAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'CarnivalGameArea')
+      .map(eachCarnAreaObj =>
+        CarnivalGameArea.fromMapObject(eachCarnAreaObj, this._broadcastEmitter),
+      );
+
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
-      .concat(posterSessionAreas);
+      .concat(posterSessionAreas)
+      .concat(carnivalGameAreas);
     this._validateInteractables();
   }
 

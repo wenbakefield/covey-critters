@@ -467,6 +467,48 @@ export default class TownGameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    // Create the red_snake's walking animations from the texture atlas.
+    anims.create({
+      key: 'red-snake-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'red-snake-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'red-snake-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'red-snake-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
     const camera = this.cameras.main;
     camera.startFollow(this.coveyTownController.ourPlayer.gameObjects.sprite);
     camera.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -510,11 +552,40 @@ export default class TownGameScene extends Phaser.Scene {
           backgroundColor: '#ffffff',
         },
       );
-      player.gameObjects = {
-        sprite,
-        label,
-        locationManagedByGameScene: false,
-      };
+
+      if (player.pet !== undefined) {
+        const petSprite = this.physics.add
+          .sprite(player.pet.location.x, player.pet.location.y, 'atlas', `${player.pet.species}-1`)
+          .setSize(30, 40)
+          .setOffset(0, 24);
+        const petLabel = this.add.text(
+          player.pet.location.x,
+          player.pet.location.y - 20,
+          player.pet.name,
+          {
+            font: '18px monospace',
+            color: '#000000',
+            // padding: {x: 20, y: 10},
+            backgroundColor: '#ffffff',
+          },
+        );
+        player.gameObjects = {
+          sprite,
+          label,
+          locationManagedByGameScene: false,
+          petGameObject: {
+            sprite: petSprite,
+            label: petLabel,
+            locationManagedByGameScene: false,
+          },
+        };
+      } else {
+        player.gameObjects = {
+          sprite,
+          label,
+          locationManagedByGameScene: false,
+        };
+      }
     }
   }
 

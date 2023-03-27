@@ -23,6 +23,7 @@ import {
   SocketData,
   ViewingArea,
   PosterSessionArea,
+  CarnivalGameArea,
 } from './types/CoveyTownSocket';
 
 /**
@@ -206,4 +207,8 @@ export function isPosterSessionArea(interactable: Interactable): interactable is
 
 export function isConversationArea(interactable: Interactable): interactable is ConversationArea {
   return 'topic' in interactable;
+}
+
+export function isCarnivalGameArea(interactable: Interactable): interactable is CarnivalGameArea {
+  return 'petRule' in interactable;
 }
