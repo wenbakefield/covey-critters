@@ -42,15 +42,4 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
-      - run: |
-          heroku login -i
-          heroku git:remote -a $HEROKU_APP_NAME
-          heroku config:set NODE_ENV=production
-          npm install && cd townService && npm run-script build
-          heroku container:push web
-          heroku container:release web
-          heroku container:push web -a $HEROKU_APP_NAME
-          heroku container:release web -a $HEROKU_APP_NAME
-          heroku ps:scale web=1 -a $HEROKU_APP_NAME
-          heroku open -a $HEROKU_APP_NAME
-          heroku logs --tail -a $HEROKU_APP_NAME
+          appdir: 'townService'# <- This will point to the api folder in your project
