@@ -42,7 +42,7 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
-        run: |
+      - run: |
           heroku login -i
           heroku git:remote -a $HEROKU_APP_NAME
           heroku config:set NODE_ENV=production
