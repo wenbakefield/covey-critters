@@ -20,7 +20,6 @@ export default function SocialSidebar(): JSX.Element {
         Players In This Town
       </Heading>
       <PlayersList />
-      <ScoreBoardView />
       <ConversationAreasList />
     </VStack>
   );
