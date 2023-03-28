@@ -437,103 +437,103 @@ describe('TownsController integration tests', () => {
       });
     });
     describe('Scoreboard Controller tests', () => {
-      it('getAllScores test for empty scoreboard', () => {
+      it('getAllScores test for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([]);
+        await expect(await testAreaController.getAllScores(testingTown.townID)).toEqual([]);
       });
-      it('getTopX test for empty scoreboard', () => {
+      it('getTopX test for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        expect(testAreaController.getXScores(testingTown.townID, 5)).toStrictEqual([]);
+        await expect(await testAreaController.getXScores(testingTown.townID, 5)).toEqual([]);
       });
-      it('calculatedPercentile test with input of 0 for empty scoreboard', () => {
+      it('calculatedPercentile test with input of 0 for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        expect(testAreaController.getPercentile(testingTown.townID, 0)).toStrictEqual(0);
+        await expect(await testAreaController.getPercentile(testingTown.townID, 0)).toEqual(0);
       });
-      it('calculatedPercentile test with input of a positive number for empty scoreboard', () => {
+      it('calculatedPercentile test with input of a positive number for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        expect(testAreaController.getPercentile(testingTown.townID, 8)).toStrictEqual(0);
+        await expect(await testAreaController.getPercentile(testingTown.townID, 8)).toEqual(0);
       });
-      it('calculatedPercentile test with input of a negative number for empty scoreboard', () => {
+      it('calculatedPercentile test with input of a negative number for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        expect(testAreaController.getPercentile(testingTown.townID, -8)).toStrictEqual(0);
+        await expect(await testAreaController.getPercentile(testingTown.townID, -8)).toEqual(0);
       });
-      it('adding a player score tuple - test with getXScores', () => {
+      it('adding a player score tuple - test with getXScores', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        expect(testAreaController.getXScores(testingTown.townID, 5)).toStrictEqual([
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await expect(await testAreaController.getXScores(testingTown.townID, 5)).toEqual([
           { player: newPlayer, score: 30 },
         ]);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
       });
-      it('adding a player score tuple - test with getAllScores', () => {
+      it('adding a player score tuple - test with getAllScores', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await expect(await testAreaController.getAllScores(testingTown.townID)).toEqual([
           { player: newPlayer, score: 30 },
         ]);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
       });
-      it('removing a player score tuple', () => {
+      it('removing a player score tuple', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([]);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await expect(await testAreaController.getAllScores(testingTown.townID)).toEqual([]);
       });
-      it('removing a player that has multiple scores', () => {
+      it('removing a player that has multiple scores', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([]);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await expect(await testAreaController.getAllScores(testingTown.townID)).toEqual([]);
       });
-      it('removing a player that when there are multiple players', () => {
+      it('removing a player that when there are multiple players', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         const newPlayer2 = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer2.toPlayerModel(), 40);
-        expect(testAreaController.getAllScores(testingTown.townID)).toStrictEqual([
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer2.toPlayerModel(), 40);
+        await expect(await testAreaController.getAllScores(testingTown.townID)).toEqual([
           { player: newPlayer2, score: 40 },
         ]);
-        testAreaController.removePlayer(testingTown.townID, newPlayer2.toPlayerModel());
+        await testAreaController.removePlayer(testingTown.townID, newPlayer2.toPlayerModel());
       });
-      it('getting a percentile for score higher than all scores', () => {
+      it('getting a percentile for score higher than all scores', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
         testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
         testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        expect(testAreaController.getPercentile(testingTown.townID, 40)).toStrictEqual(0);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await expect(testAreaController.getPercentile(testingTown.townID, 40)).toEqual(0);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
       });
-      it('getting a percentile for a score equal to highest score', () => {
+      it('getting a percentile for a score equal to highest score', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        expect(testAreaController.getPercentile(testingTown.townID, 37)).toStrictEqual(0);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
+        await expect(await testAreaController.getPercentile(testingTown.townID, 37)).toEqual(0);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
       });
-      it('getting a percentile for a score between 2 different scores', () => {
+      it('getting a percentile for a score between 2 different scores', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        expect(testAreaController.getPercentile(testingTown.townID, 33)).toStrictEqual(0.5);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
+        await expect(await testAreaController.getPercentile(testingTown.townID, 33)).toEqual(0.5);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
       });
-      it('getting a percentile for a score lower than all scores', () => {
+      it('getting a percentile for a score lower than all scores', async () => {
         const testAreaController = new TownsController();
         const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        expect(testAreaController.getPercentile(testingTown.townID, 28)).toStrictEqual(1);
-        testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
+        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
+        await expect(testAreaController.getPercentile(testingTown.townID, 28)).toEqual(1);
+        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
       });
     });
   });

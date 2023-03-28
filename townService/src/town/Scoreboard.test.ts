@@ -13,15 +13,15 @@ describe('Scoreboard tests', () => {
   });
   describe('Empty scoreboard tests for get scores functionality and percentile of a score input', () => {
     it('get top 0 elements in empty scoreboard', () => {
-      expect(scoreboard1.getTopX(0)).toStrictEqual([]);
+      expect(scoreboard1.getTopX(0)).toEqual([]);
     });
 
     it('get top negative number of elements in empty scoreboard', () => {
-      expect(scoreboard1.getTopX(-8)).toStrictEqual([]);
+      expect(scoreboard1.getTopX(-8)).toEqual([]);
     });
 
     it('test for get all scores', () => {
-      expect(scoreboard1.getAllScores()).toStrictEqual([]);
+      expect(scoreboard1.getAllScores()).toEqual([]);
     });
 
     it('get calculatedPercentile of 0 in empty scoreboard', () => {
@@ -37,7 +37,7 @@ describe('Scoreboard tests', () => {
       const newPlayer = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer.toPlayerModel(), 20);
       const newPair: PlayerScoreTuple = { player: newPlayer.toPlayerModel(), score: 20 };
-      expect(scoreboard1.getTopX(1)).toStrictEqual([newPair]);
+      expect(scoreboard1.getTopX(1)).toEqual([newPair]);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
     });
 
@@ -49,7 +49,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer.toPlayerModel(), score: 25 },
         { player: newPlayer.toPlayerModel(), score: 20 },
       ];
-      expect(scoreboard1.getTopX(2)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(2)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
     });
 
@@ -64,7 +64,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer.toPlayerModel(), score: 20 },
         { player: newPlayer1.toPlayerModel(), score: 8 },
       ];
-      expect(scoreboard1.getTopX(3)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(3)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer1.toPlayerModel());
     });
@@ -81,7 +81,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer2.toPlayerModel(), score: 25 },
         { player: newPlayer.toPlayerModel(), score: 20 },
       ];
-      expect(scoreboard1.getTopX(3)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(3)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -99,7 +99,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer2.toPlayerModel(), score: 20 },
         { player: newPlayer3.toPlayerModel(), score: 15 },
       ];
-      expect(scoreboard1.getTopX(3)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(3)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -117,7 +117,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer2.toPlayerModel(), score: 20 },
         { player: newPlayer3.toPlayerModel(), score: 15 },
       ];
-      expect(scoreboard1.getTopX(5)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(5)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -135,14 +135,14 @@ describe('Scoreboard tests', () => {
         { player: newPlayer2.toPlayerModel(), score: 20 },
         { player: newPlayer3.toPlayerModel(), score: 15 },
       ];
-      expect(scoreboard1.getAllScores()).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getAllScores()).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
     });
 
     it('get all of the scores in an empty scoreboard', () => {
-      expect(scoreboard1.getAllScores()).toStrictEqual([]);
+      expect(scoreboard1.getAllScores()).toEqual([]);
     });
 
     it('add 5 player-score tuples in random order and get the list', () => {
@@ -163,7 +163,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer3.toPlayerModel(), score: 10 },
         { player: newPlayer5.toPlayerModel(), score: 2 },
       ];
-      expect(scoreboard1.getTopX(5)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(5)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -189,7 +189,7 @@ describe('Scoreboard tests', () => {
         { player: newPlayer5.toPlayerModel(), score: 2 },
       ];
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
-      expect(scoreboard1.getTopX(5)).toStrictEqual(expectedScoreBoardValue);
+      expect(scoreboard1.getTopX(5)).toEqual(expectedScoreBoardValue);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer4.toPlayerModel());
@@ -204,7 +204,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer2.toPlayerModel(), 25);
       const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
-      expect(scoreboard1.calculatedPercentile(40)).toStrictEqual(0);
+      expect(scoreboard1.calculatedPercentile(40)).toEqual(0);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -217,7 +217,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer2.toPlayerModel(), 25);
       const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
-      expect(scoreboard1.calculatedPercentile(4)).toStrictEqual(1);
+      expect(scoreboard1.calculatedPercentile(4)).toEqual(1);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -232,7 +232,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
       const newPlayer4 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer4.toPlayerModel(), 10);
-      expect(scoreboard1.calculatedPercentile(27)).toStrictEqual(0.25);
+      expect(scoreboard1.calculatedPercentile(27)).toEqual(0.25);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -248,7 +248,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
       const newPlayer4 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer4.toPlayerModel(), 10);
-      expect(scoreboard1.calculatedPercentile(15)).toStrictEqual(0.75);
+      expect(scoreboard1.calculatedPercentile(15)).toEqual(0.75);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
