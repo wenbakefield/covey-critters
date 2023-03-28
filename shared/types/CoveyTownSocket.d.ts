@@ -135,7 +135,7 @@ export interface ClientToServerEvents {
   playerMovement: (movementData: PlayerLocation) => void;
   petMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
-  updateGame: (player: Player, key: string) => void;
+  updateGame: (key: string) => void;
 }
 
 export interface PlayerScoreTuple{
