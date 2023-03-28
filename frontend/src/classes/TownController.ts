@@ -30,6 +30,7 @@ import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
 import PosterSessionAreaController from './PosterSessionAreaController';
+import ScoreboardController from './ScoreboardController';
 import CarnivalGameAreaController from './CarnivalGameAreaController';
 import PetController from './PetController';
 import CarnivalGameArea from '../components/Town/interactables/CarnivalGameArea';
@@ -226,6 +227,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   private _posterSessionAreas: PosterSessionAreaController[] = [];
 
+  private _scoreboardController: ScoreboardController;
+
   private _carnivalGameAreas: CarnivalGameAreaController[] = [];
 
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
@@ -233,6 +236,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._townID = townID;
     this._userName = userName;
     this._loginController = loginController;
+    this._scoreboardController = new ScoreboardController([]);
 
     /*
         The event emitter will show a warning if more than this number of listeners are registered, as it
@@ -842,6 +846,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       posterSessionArea.id,
       this.sessionToken,
     );
+  }
+
+  public async initalizeScoreboard(): Promise<void> {
+    const updatePlayerScoreTuple = await this._townsService.getAllScores(this.townID);
+    this._scoreboardController.scoreboard = updatePlayerScoreTuple;
+  }
+
+  public get scoreboardController() {
+    return this._scoreboardController;
   }
 
   /**

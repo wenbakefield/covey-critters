@@ -25,7 +25,7 @@ import {
 } from '../types/CoveyTownSocket';
 import CarnivalGameArea from './CarnivalGameArea';
 import ConversationArea from './ConversationArea';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import Town from './Town';
 
 const mockTwilioVideo = mockDeep<TwilioVideo>();
