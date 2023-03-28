@@ -392,7 +392,7 @@ export class TownsController extends Controller {
   }
 
   @Get('{townID}/Scoreboard')
-  public getAllScores(@Path() townID: string): PlayerScoreTuple[] {
+  public async getAllScores(@Path() townID: string): Promise<PlayerScoreTuple[]> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
@@ -401,7 +401,10 @@ export class TownsController extends Controller {
   }
 
   @Get('{townID}/Scoreboard/{topNumber}')
-  public getXScores(@Path() townID: string, @Path() topNumber: number): PlayerScoreTuple[] {
+  public async getXScores(
+    @Path() townID: string,
+    @Path() topNumber: number,
+  ): Promise<PlayerScoreTuple[]> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
@@ -410,7 +413,7 @@ export class TownsController extends Controller {
   }
 
   @Delete('{townID}/Scoreboard/{Player}')
-  public removePlayer(@Path() townID: string, @Body() player: Player): void {
+  public async removePlayer(@Path() townID: string, @Body() player: Player): Promise<void> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
@@ -419,11 +422,11 @@ export class TownsController extends Controller {
   }
 
   @Post('{townID}/Scoreboard/{Player}/{score}')
-  public addPlayerScore(
+  public async addPlayerScore(
     @Path() townID: string,
     @Body() player: Player,
     @Path() score: number,
-  ): void {
+  ): Promise<void> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
@@ -432,7 +435,7 @@ export class TownsController extends Controller {
   }
 
   @Get('{townID}/Scoreboard/percentile/{score}')
-  public getPercentile(@Path() townID: string, @Path() score: number): number {
+  public async getPercentile(@Path() townID: string, @Path() score: number): Promise<number> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
