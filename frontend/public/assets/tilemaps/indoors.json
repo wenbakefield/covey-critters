@@ -499,10 +499,10 @@
                  "y":1104.66683333333
                 }, 
                 {
-                 "type":"ConversationArea",
+                 "type":"CarnivalGameArea",
                  "height":125.333,
                  "id":29,
-                 "name":"Basement Lounge",
+                 "name":"Get a Pet!",
                  "rotation":0,
                  "visible":true,
                  "width":134.000333333333,

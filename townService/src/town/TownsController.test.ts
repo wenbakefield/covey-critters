@@ -8,6 +8,7 @@ import {
   TownEmitter,
   ViewingArea,
   CarnivalGameArea,
+  PetRule,
 } from '../types/CoveyTownSocket';
 import TownsStore from '../lib/TownsStore';
 import {
@@ -377,6 +378,41 @@ describe('TownsController integration tests', () => {
         await expect(
           controller.createCarnivalGameArea(testingTown.townID, sessionToken, carnivalGameArea),
         ).rejects.toThrow();
+      });
+
+      it('Modify the CarnivalGameArea if a new petRule is created', async () => {
+        const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+        if (!carnivalGameArea) {
+          fail('Expected at least one carnival game area to be returned in the initial join data');
+        } else {
+          const newCarnivalGameArea: CarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+          const addPetRule: PetRule = {
+            percentileRangeMax: 20,
+            percentileRangeMin: 10,
+            petSelection: [],
+          };
+          const petRule = await controller.changePetRule(
+            testingTown.townID,
+            newCarnivalGameArea.id,
+            addPetRule,
+            sessionToken,
+          );
+          expect(petRule.length).toEqual(2);
+        }
       });
     });
 

@@ -189,6 +189,8 @@ describe('CarnivalGameArea', () => {
       testArea.addPetRule(newPetRule);
       expect(testArea.petRule.length).toEqual(1);
       expect(testArea.petRule).toEqual([newPetRule]);
+      const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
+      expect(lastEmittedUpdate).toStrictEqual({ id: testArea.id, petRule: [newPetRule] });
     });
     it('Add multiple pet rule that does not overlaps with other rules', () => {
       expect(testArea.petRule.length).toEqual(0);
@@ -250,7 +252,7 @@ describe('CarnivalGameArea', () => {
       petRule: newPetRule,
     });
     expect(testArea.id).toBe(id);
-    expect(testArea.petRule).toBe(newPetRule);
+    expect(testArea.petRule).toStrictEqual(newPetRule);
   });
   describe('fromMapObject', () => {
     it('Throws an error if the width or height are missing', () => {

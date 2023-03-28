@@ -8,6 +8,8 @@ import ConversationArea from './interactables/ConversationArea';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
 import PosterSessionArea from './interactables/PosterSessionArea';
+import CarnivalGameArea from './interactables/CarnivalGameArea';
+import PetController from '../../classes/PetController';
 
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,6 +22,8 @@ function interactableTypeForObjectType(type: string): any {
     return ViewingArea;
   } else if (type == 'PosterSessionArea') {
     return PosterSessionArea;
+  } else if (type == 'CarnivalGameArea') {
+    return CarnivalGameArea;
   } else {
     throw new Error(`Unknown object type: ${type}`);
   }
@@ -533,6 +537,27 @@ export default class TownGameScene extends Phaser.Scene {
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
+  }
+
+  createPetSprites(pet: PetController) {
+    if (!pet.gameObjects) {
+      const sprite = this.physics.add
+        .sprite(pet.location.x, pet.location.y, 'atlas', pet.species)
+        .setSize(15, 20) // Set the size of the sprite here
+        .setOffset(0, 24);
+      const label = this.add.text(pet.location.x, pet.location.y - 20, pet.species, {
+        font: '18px monospace',
+        color: '#000000',
+        // padding: {x: 20, y: 10},
+        backgroundColor: '#ffffff',
+      });
+      pet.gameObjects = {
+        sprite: sprite,
+        label: label,
+        locationManagedByGameScene: false,
+      };
+      return sprite;
+    }
   }
 
   createPlayerSprites(player: PlayerController) {

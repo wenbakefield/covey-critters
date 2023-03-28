@@ -28,6 +28,7 @@ import {
   CarnivalGameArea,
   GameSession,
   Pet,
+  PetRule,
 } from '../types/CoveyTownSocket';
 import CarnivalGameAreaReal from './CarnivalGameArea';
 import PosterSessionAreaReal from './PosterSessionArea';
@@ -319,7 +320,7 @@ export class TownsController extends Controller {
    * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
    * @param requestBody The new viewing area to create
    */
-  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}timeLimitReach/{playerId}')
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}/timeLimitReach/{playerId}')
   @Response<InvalidParametersError>(400, 'Invalid values specified')
   public async timeLimitReached(
     @Path() townID: string,
@@ -348,6 +349,54 @@ export class TownsController extends Controller {
     };
     game.updateFromModel(updateGame);
     return updateGame;
+  }
+
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}/changePetRule')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async changePetRule(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Body() requestBody: PetRule,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<PetRule[]> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid Town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid Player Session Token');
+    }
+    const carnivalArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invalid Carnival Game Area');
+    }
+    (<CarnivalGameAreaReal>carnivalArea).addPetRule(requestBody);
+    return (<CarnivalGameAreaReal>carnivalArea).petRule;
+  }
+
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}/initializeGame')
+  @Response<InvalidParametersError>(400, 'Invalid Value Specified')
+  public async initializeCarnivalGame(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Body() gameModel: GameSession,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<void> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid Town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid Player Session Token');
+    }
+    const carnivalArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invalid Carnival Game Area');
+    }
+    const game = (<CarnivalGameAreaReal>carnivalArea).getGame(player.id);
+    game.updateFromModel(gameModel);
   }
 
   @Get('{townID}/Pet/')
