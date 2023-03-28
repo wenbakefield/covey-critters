@@ -723,7 +723,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         });
         this._userID = initialData.userID;
         this._ourPlayer = this.players.find(eachPlayer => eachPlayer.id == this.userID);
-        this.initalizeScoreboard();
         this.emit('connect', initialData.providerVideoToken);
         resolve();
       });
