@@ -23,6 +23,8 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
+  Player,
+  PlayerScoreTuple,
   CarnivalGameArea,
   GameSession,
   Pet,
@@ -30,6 +32,8 @@ import {
 } from '../types/CoveyTownSocket';
 import CarnivalGameAreaReal from './CarnivalGameArea';
 import PosterSessionAreaReal from './PosterSessionArea';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
+import IScoreBoard from '../lib/IScoreBoard';
 import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 
 /**
@@ -41,6 +45,8 @@ import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 // eslint-disable-next-line import/prefer-default-export
 export class TownsController extends Controller {
   private _townsStore: CoveyTownsStore = CoveyTownsStore.getInstance();
+
+  private _scoreboard: IScoreBoard = SingletonScoreboardFactory.instance();
 
   /**
    * List all towns that are set to be publicly available
@@ -432,6 +438,58 @@ export class TownsController extends Controller {
         player.pet.setPetName(name);
       }
     }
+  }
+
+  @Get('{townID}/Scoreboard')
+  public async getAllScores(@Path() townID: string): Promise<PlayerScoreTuple[]> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    return this._scoreboard.getAllScores();
+  }
+
+  @Get('{townID}/Scoreboard/{topNumber}')
+  public async getXScores(
+    @Path() townID: string,
+    @Path() topNumber: number,
+  ): Promise<PlayerScoreTuple[]> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    return this._scoreboard.getTopX(topNumber);
+  }
+
+  @Delete('{townID}/Scoreboard/{Player}')
+  public async removePlayer(@Path() townID: string, @Body() player: Player): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    this._scoreboard.removePlayerScore(player);
+  }
+
+  @Post('{townID}/Scoreboard/{Player}/{score}')
+  public async addPlayerScore(
+    @Path() townID: string,
+    @Body() player: Player,
+    @Path() score: number,
+  ): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    this._scoreboard.notifyScoreBoard(player, score);
+  }
+
+  @Get('{townID}/Scoreboard/percentile/{score}')
+  public async getPercentile(@Path() townID: string, @Path() score: number): Promise<number> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    return this._scoreboard.calculatedPercentile(score);
   }
 
   @Patch('{townID}/CarnivalArea/{carnivalAreaId}/assignPet/{name}')

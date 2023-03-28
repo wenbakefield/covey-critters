@@ -101,7 +101,9 @@ describe('CarnivalGameArea', () => {
     it('Should push the scored to the scoreboard when the game is ended or overide', () => {
       expect(testArea.scoreBoard.getTopX(10)).toEqual([]);
       testArea.notifyScoreBoard(newPlayer.id, true);
-      expect(testArea.scoreBoard.getTopX(10)).toEqual([[newPlayer.toPlayerModel(), 0]]);
+      expect(testArea.scoreBoard.getTopX(10)).toEqual([
+        { player: newPlayer.toPlayerModel(), score: 0 },
+      ]);
     });
     it('Should throw an error if the player is not in the interactable', () => {
       expect(() => testArea.notifyScoreBoard('no-exist-player')).toThrow();

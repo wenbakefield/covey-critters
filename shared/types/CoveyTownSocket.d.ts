@@ -137,3 +137,8 @@ export interface ClientToServerEvents {
   interactableUpdate: (update: Interactable) => void;
   updateGame: (key: string) => void;
 }
+
+export interface PlayerScoreTuple{
+  player: Player;
+  score: number; 
+}
