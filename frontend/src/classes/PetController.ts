@@ -93,9 +93,7 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       label.setX(this._model.x);
       label.setY(this._model.y - 20);
 
-      // TODO: add different pet sprites
-      // sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
-      // What is the key for this one @Ben
+      sprite.anims.play(`${this.species}-right-walk`, true);
     }
   }
 
