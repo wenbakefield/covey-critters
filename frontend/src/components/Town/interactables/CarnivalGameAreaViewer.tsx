@@ -76,9 +76,12 @@ export function CarnivalGame({
     await townController.initializeGame(controller, gameController.toModel());
     const game = controller.getGameSessionByID(townController.ourPlayer.id);
     console.log(`play game is created ${game}`);
+<<<<<<< HEAD
     townController.emitGameOnTick('32');
     const updateGame = await townController.carnivalGameTimeLimitReach(controller);
     console.log(updateGame);
+=======
+>>>>>>> b55299c (FIx Socket Lag during player enters the game)
   }
 
   return (
