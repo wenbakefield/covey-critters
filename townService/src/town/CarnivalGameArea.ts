@@ -9,6 +9,7 @@ import {
   CarnivalGameArea as CarnivalGameAreaModel,
   Pet as PetModel,
   PlayerLocation,
+  GameSession,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
 import IScoreBoard from '../lib/IScoreBoard';
@@ -184,7 +185,8 @@ export default class CarnivalGameArea extends InteractableArea {
     this._occupants.push(player);
     player.location.interactableID = this.id;
     // Create GameSession
-    this._addGame(player);
+    const newGame = new SBGame(player, 100, 100);
+    this.addGameSessionToCarnival(player, newGame.toModel()); // Default Game created when player join
     this._townEmiiter.emit('playerMoved', player.toPlayerModel());
     this._emitAreaChanged();
   }
@@ -214,11 +216,16 @@ export default class CarnivalGameArea extends InteractableArea {
    * @param player Represent the player that will associate with the GameSession
    * @param _gameType Represent the type of Game implements IGameSession
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private _addGame(player: Player, _gameType?: number) {
-    const spaceBarGame = new SBGame(player, 100, 100);
-    player.townEmitter.emit('gameUpdated', spaceBarGame.toModel());
-    this._gameSession.push(spaceBarGame);
+  public addGameSessionToCarnival(player: Player, gameModel: GameSession) {
+    const existingGame = this._gameSession.find(game => game.getPlayer().id === player.id);
+    if (!existingGame) {
+      const spaceBarGame = new SBGame(player, gameModel.scoreLimit, gameModel.timeLimit);
+      this._gameSession.push(spaceBarGame);
+      player.townEmitter.emit('gameUpdated', spaceBarGame.toModel());
+    } else {
+      existingGame.updateFromModel(gameModel);
+      player.townEmitter.emit('gameUpdated', gameModel);
+    }
   }
 
   /**

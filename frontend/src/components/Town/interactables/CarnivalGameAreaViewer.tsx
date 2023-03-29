@@ -10,11 +10,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import {
-  useCarnivalGameAreaController,
-  useInteractable,
-  usePosterSessionAreaController,
-} from '../../../classes/TownController';
+import { useCarnivalGameAreaController, useInteractable } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
 import SelectPosterModal from './SelectPosterModal';
 import CarnivalGameAreaController, {
@@ -24,6 +20,7 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
+import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
 const SCORE_LIMIT = 100;
 const TIME_LIMIT_SECONDS = 120;
@@ -68,14 +65,17 @@ export function CarnivalGame({
   }
 
   //
-  function playGame() {
+  async function playGame() {
+    console.log('play game is pressed');
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
       TIME_LIMIT_SECONDS,
     );
     controller.addGameSession(gameController);
-    townController.initializeGame(controller, gameController.toModel());
+    await townController.initializeGame(controller, gameController.toModel());
+    const game = controller.getGameSessionByID(townController.ourPlayer.id);
+    console.log(`play game is created ${game}`);
   }
 
   return (
@@ -95,6 +95,7 @@ export function CarnivalGame({
             <Button colorScheme='blue' mr={3} onClick={playGame}>
               Play Game
             </Button>
+            <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
           </ModalFooter>
         }
         {/* </form> */}
@@ -134,19 +135,7 @@ export function CarnivalGameAreaViewer({
   }, [carnivalGameAreaController, townController]);
 
   if (rule.length === 0) {
-    return (
-      <NewCarnivalGameArea />
-      //   <SelectPosterModal
-      //     isOpen={selectIsOpen}
-      //     close={() => {
-      //       setSelectIsOpen(false);
-      //       // forces game to emit "posterSessionArea" event again so that
-      //       // repoening the modal works as expected
-      //       townController.interactEnd(carnivalGameArea);
-      //     }}
-      //     posterSessionArea={carnivalGameArea}
-      //   />
-    );
+    return <NewCarnivalGameArea />;
   }
   return (
     <>

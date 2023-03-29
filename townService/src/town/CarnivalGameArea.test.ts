@@ -23,6 +23,20 @@ describe('CarnivalGameArea', () => {
     testArea = new CarnivalGameArea({ id, petRule: [] }, testAreaBox, townEmitter);
     newPlayer = new Player(nanoid(), mock<TownEmitter>());
     testArea.add(newPlayer);
+    testArea.addGameSessionToCarnival(newPlayer, {
+      playerId: newPlayer.id,
+      score: 1,
+      scoreLimit: 100,
+      isOver: false,
+      timeLimit: 100,
+    });
+    expect(testArea.getGame(newPlayer.id).toModel()).toEqual({
+      playerId: newPlayer.id,
+      score: 1,
+      scoreLimit: 100,
+      isOver: false,
+      timeLimit: 100,
+    });
   });
 
   describe('remove', () => {
@@ -80,7 +94,7 @@ describe('CarnivalGameArea', () => {
       const gameSession = testArea.getGame(newPlayer.id);
       expect(gameSession).not.toBeUndefined();
       expect(gameSession.isOver()).toEqual(false);
-      expect(gameSession.getScore()).toEqual(0);
+      expect(gameSession.getScore()).toEqual(1);
     });
   });
   describe('getGame', () => {
@@ -102,7 +116,7 @@ describe('CarnivalGameArea', () => {
       expect(testArea.scoreBoard.getTopX(10)).toEqual([]);
       testArea.notifyScoreBoard(newPlayer.id, true);
       expect(testArea.scoreBoard.getTopX(10)).toEqual([
-        { player: newPlayer.toPlayerModel(), score: 0 },
+        { player: newPlayer.toPlayerModel(), score: 1 },
       ]);
     });
     it('Should throw an error if the player is not in the interactable', () => {

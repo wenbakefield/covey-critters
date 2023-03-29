@@ -1,5 +1,4 @@
 import { nanoid } from 'nanoid';
-import PetController from '../../../../classes/PetController';
 import { Pet } from '../../../../generated/client';
 
 export function generateDefaultPet(species: string[]): Pet[] {
