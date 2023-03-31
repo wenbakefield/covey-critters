@@ -6,6 +6,7 @@ import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import NewConversationModal from './interactables/NewCoversationModal';
 import TownGameScene from './TownGameScene';
 import PosterViewerWrapper from './interactables/PosterViewer';
+import CarnivalGameAreaViewerWrapper from './interactables/CarnivalGameAreaViewer';
 
 export default function TownMap(): JSX.Element {
   const coveyTownController = useTownController();
@@ -48,6 +49,7 @@ export default function TownMap(): JSX.Element {
 
   return (
     <div id='app-container'>
+      <CarnivalGameAreaViewerWrapper />
       <NewConversationModal />
       <PosterViewerWrapper />
       <div id='map-container' />

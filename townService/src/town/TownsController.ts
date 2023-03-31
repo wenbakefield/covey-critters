@@ -23,10 +23,17 @@ import {
   TownSettingsUpdate,
   ViewingArea,
   PosterSessionArea,
+  Player,
+  PlayerScoreTuple,
   CarnivalGameArea,
   GameSession,
+  Pet,
+  PetRule,
 } from '../types/CoveyTownSocket';
+import CarnivalGameAreaReal from './CarnivalGameArea';
 import PosterSessionAreaReal from './PosterSessionArea';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
+import IScoreBoard from '../lib/IScoreBoard';
 import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 
 /**
@@ -38,6 +45,8 @@ import { isPosterSessionArea, isCarnivalGameArea } from '../TestUtils';
 // eslint-disable-next-line import/prefer-default-export
 export class TownsController extends Controller {
   private _townsStore: CoveyTownsStore = CoveyTownsStore.getInstance();
+
+  private _scoreboard: IScoreBoard = SingletonScoreboardFactory.instance();
 
   /**
    * List all towns that are set to be publicly available
@@ -311,16 +320,203 @@ export class TownsController extends Controller {
    * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
    * @param requestBody The new viewing area to create
    */
-  @Patch('{townID}/CarnivalGameArea/timeLimitReach/{playerId}')
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}/timeLimitReach/{playerId}')
   @Response<InvalidParametersError>(400, 'Invalid values specified')
   public async timeLimitReached(
     @Path() townID: string,
-    @Body() requestBody: GameSession,
+    @Path() carnivalAreaId: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<GameSession> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    const player = town.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const carnivalArea = town.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invali carnival area ID');
+    }
+    const game = (<CarnivalGameAreaReal>carnivalArea).getGame(player.id);
+    const updateGame = {
+      playerId: player.id,
+      score: game.getScore(),
+      scoreLimit: game.getScoreLimit(),
+      isOver: true,
+      timeLimit: game.getTimeLimit(),
+    };
+    game.updateFromModel(updateGame);
+    return updateGame;
+  }
+
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}/changePetRule')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async changePetRule(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Body() requestBody: PetRule,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<PetRule[]> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid Town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid Player Session Token');
+    }
+    const carnivalArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invalid Carnival Game Area');
+    }
+    (<CarnivalGameAreaReal>carnivalArea).addPetRule(requestBody);
+    return (<CarnivalGameAreaReal>carnivalArea).petRule;
+  }
+
+  @Patch('{townID}/CarnivalGameArea/{carnivalAreaId}/initializeGame')
+  @Response<InvalidParametersError>(400, 'Invalid Value Specified')
+  public async initializeCarnivalGame(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Body() gameModel: GameSession,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<void> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid Town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid Player Session Token');
+    }
+    const carnivalArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
+      throw new InvalidParametersError('Invalid Carnival Game Area');
+    }
+    const game = (<CarnivalGameAreaReal>carnivalArea).getGame(player.id);
+    game.updateFromModel(gameModel);
+  }
+
+  @Get('{townID}/Pet/')
+  @Response<InvalidParametersError>(400, 'Invalid values specified')
+  public async getPetFromPlayerId(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<Pet | undefined> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else if (player.pet) {
+        return player.pet.toPetModel();
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  @Patch('{townID}/Pet/rename/{name}')
+  @Response<InvalidParametersError>(400, 'Invalid town values')
+  public async renamePet(
+    @Path() townID: string,
+    @Path() name: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else if (player.pet) {
+        player.pet.setPetName(name);
+      }
+    }
+  }
+
+  @Get('{townID}/Scoreboard')
+  public async getAllScores(@Path() townID: string): Promise<PlayerScoreTuple[]> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    return this._scoreboard.getAllScores();
+  }
+
+  @Get('{townID}/Scoreboard/{topNumber}')
+  public async getXScores(
+    @Path() townID: string,
+    @Path() topNumber: number,
+  ): Promise<PlayerScoreTuple[]> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    return this._scoreboard.getTopX(topNumber);
+  }
+
+  @Delete('{townID}/Scoreboard/{Player}')
+  public async removePlayer(@Path() townID: string, @Body() player: Player): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    this._scoreboard.removePlayerScore(player);
+  }
+
+  @Post('{townID}/Scoreboard/{Player}/{score}')
+  public async addPlayerScore(
+    @Path() townID: string,
+    @Body() player: Player,
+    @Path() score: number,
   ): Promise<void> {
     const town = this._townsStore.getTownByID(townID);
     if (!town) {
       throw new InvalidParametersError('Invalid values specified');
     }
+    this._scoreboard.notifyScoreBoard(player, score);
+  }
+
+  @Get('{townID}/Scoreboard/percentile/{score}')
+  public async getPercentile(@Path() townID: string, @Path() score: number): Promise<number> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid values specified');
+    }
+    return this._scoreboard.calculatedPercentile(score);
+  }
+
+  @Patch('{townID}/CarnivalArea/{carnivalAreaId}/assignPet/{name}')
+  @Response<InvalidParametersError>(400, 'Invalid town values')
+  public async assignPet(
+    @Path() townID: string,
+    @Path() carnivalAreaId: string,
+    @Path() name: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<Pet | undefined> {
+    const curTown = this._townsStore.getTownByID(townID);
+    if (!curTown) {
+      throw new InvalidParametersError('Invalid town ID');
+    }
+    const player = curTown.getPlayerBySessionToken(sessionToken);
+    if (!player) {
+      throw new InvalidParametersError('Invalid session ID');
+    }
+    const carnivalGameArea = curTown.getInteractable(carnivalAreaId);
+    if (!carnivalGameArea || !isCarnivalGameArea(carnivalGameArea)) {
+      throw new InvalidParametersError('Invalid poster session ID');
+    }
+    if (isCarnivalGameArea(carnivalGameArea)) {
+      const pet = (<CarnivalGameAreaReal>carnivalGameArea).assignPetToPlayer(player.id, name);
+      return pet;
+    }
+    return undefined;
   }
 
   /**

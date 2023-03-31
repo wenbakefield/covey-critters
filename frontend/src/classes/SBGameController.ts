@@ -93,6 +93,14 @@ export default class SpaceBarGameController extends (EventEmitter as new () => T
     this.isOver = gameModel.isOver;
   }
 
+  static fromModel(gameModel: GameSession) {
+    return new SpaceBarGameController(
+      gameModel.playerId,
+      gameModel.scoreLimit,
+      gameModel.timeLimit,
+    );
+  }
+
   private _emitGameChanged() {
     this.emit('gameChanged', this.toModel());
   }

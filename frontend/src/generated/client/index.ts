@@ -11,13 +11,15 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { CarnivalGameArea } from './models/CarnivalGameArea';
 export type { ConversationArea } from './models/ConversationArea';
+export { Direction } from './models/Direction';
 export type { GameSession } from './models/GameSession';
 export type { InvalidParametersError } from './models/InvalidParametersError';
-export { MovementType } from './models/MovementType';
 export type { Pet } from './models/Pet';
 export type { PetRule } from './models/PetRule';
+export type { Player } from './models/Player';
+export type { PlayerLocation } from './models/PlayerLocation';
+export type { PlayerScoreTuple } from './models/PlayerScoreTuple';
 export type { PosterSessionArea } from './models/PosterSessionArea';
-export { Species } from './models/Species';
 export type { Town } from './models/Town';
 export type { TownCreateParams } from './models/TownCreateParams';
 export type { TownCreateResponse } from './models/TownCreateResponse';

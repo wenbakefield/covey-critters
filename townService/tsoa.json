@@ -1,6 +1,12 @@
 {
   "entryFile": "src/Server.ts",
   "noImplicitAdditionalProperties": "throw-on-extras",
+  "compilerOptions" : {
+    "paths": {
+      "baseUrl": "./",
+      "CarnivalGameArea": ["../shared/types/CoveyTownSocket.d.ts"]
+    }
+  },
   "controllerPathGlobs": ["src/**/*Controller.ts"],
   "spec": {
     "outputDirectory": "../shared/generated/",
@@ -11,5 +17,6 @@
   "routes": {
     "routesDir": "generated",
     "basePath": "/"
-  }
+  },
+  "additionalProperties" : true
 }

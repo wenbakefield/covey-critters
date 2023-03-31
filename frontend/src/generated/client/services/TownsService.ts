@@ -4,6 +4,10 @@
 import type { CarnivalGameArea } from '../models/CarnivalGameArea';
 import type { ConversationArea } from '../models/ConversationArea';
 import type { GameSession } from '../models/GameSession';
+import type { Pet } from '../models/Pet';
+import type { PetRule } from '../models/PetRule';
+import type { Player } from '../models/Player';
+import type { PlayerScoreTuple } from '../models/PlayerScoreTuple';
 import type { PosterSessionArea } from '../models/PosterSessionArea';
 import type { Town } from '../models/Town';
 import type { TownCreateParams } from '../models/TownCreateParams';
@@ -290,24 +294,278 @@ export class TownsService {
     /**
      * Tells the backend when the game session has reached the time limit so that it will send the score to the scoreboard
      * @param townId
-     * @param requestBody The new viewing area to create
-     * @returns void
+     * @param carnivalAreaId
+     * @param xSessionToken
+     * @returns GameSession Ok
      * @throws ApiError
      */
     public timeLimitReached(
         townId: string,
-        requestBody: GameSession,
-    ): CancelablePromise<void> {
+        carnivalAreaId: string,
+        xSessionToken: string,
+    ): CancelablePromise<GameSession> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/towns/{townID}/CarnivalGameArea/timeLimitReach/{playerId}',
+            url: '/towns/{townID}/CarnivalGameArea/{carnivalAreaId}/timeLimitReach/{playerId}',
             path: {
                 'townID': townId,
+                'carnivalAreaId': carnivalAreaId,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
+            },
+            errors: {
+                400: `Invalid values specified`,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param carnivalAreaId
+     * @param xSessionToken
+     * @param requestBody
+     * @returns PetRule Ok
+     * @throws ApiError
+     */
+    public changePetRule(
+        townId: string,
+        carnivalAreaId: string,
+        xSessionToken: string,
+        requestBody: PetRule,
+    ): CancelablePromise<Array<PetRule>> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/towns/{townID}/CarnivalGameArea/{carnivalAreaId}/changePetRule',
+            path: {
+                'townID': townId,
+                'carnivalAreaId': carnivalAreaId,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
                 400: `Invalid values specified`,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param carnivalAreaId
+     * @param xSessionToken
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public initializeCarnivalGame(
+        townId: string,
+        carnivalAreaId: string,
+        xSessionToken: string,
+        requestBody: GameSession,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/towns/{townID}/CarnivalGameArea/{carnivalAreaId}/initializeGame',
+            path: {
+                'townID': townId,
+                'carnivalAreaId': carnivalAreaId,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Invalid Value Specified`,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param xSessionToken
+     * @returns Pet Ok
+     * @throws ApiError
+     */
+    public getPetFromPlayerId(
+        townId: string,
+        xSessionToken: string,
+    ): CancelablePromise<Pet> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/towns/{townID}/Pet',
+            path: {
+                'townID': townId,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
+            },
+            errors: {
+                400: `Invalid values specified`,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param name
+     * @param xSessionToken
+     * @returns void
+     * @throws ApiError
+     */
+    public renamePet(
+        townId: string,
+        name: string,
+        xSessionToken: string,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/towns/{townID}/Pet/rename/{name}',
+            path: {
+                'townID': townId,
+                'name': name,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
+            },
+            errors: {
+                400: `Invalid town values`,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @returns PlayerScoreTuple Ok
+     * @throws ApiError
+     */
+    public getAllScores(
+        townId: string,
+    ): CancelablePromise<Array<PlayerScoreTuple>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/towns/{townID}/Scoreboard',
+            path: {
+                'townID': townId,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param topNumber
+     * @returns PlayerScoreTuple Ok
+     * @throws ApiError
+     */
+    public getXScores(
+        townId: string,
+        topNumber: number,
+    ): CancelablePromise<Array<PlayerScoreTuple>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/towns/{townID}/Scoreboard/{topNumber}',
+            path: {
+                'townID': townId,
+                'topNumber': topNumber,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public removePlayer(
+        townId: string,
+        requestBody: Player,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'DELETE',
+            url: '/towns/{townID}/Scoreboard/{Player}',
+            path: {
+                'townID': townId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @param townId
+     * @param score
+     * @param requestBody
+     * @returns void
+     * @throws ApiError
+     */
+    public addPlayerScore(
+        townId: string,
+        score: number,
+        requestBody: Player,
+    ): CancelablePromise<void> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/towns/{townID}/Scoreboard/{Player}/{score}',
+            path: {
+                'townID': townId,
+                'score': score,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @param townId
+     * @param score
+     * @returns number Ok
+     * @throws ApiError
+     */
+    public getPercentile(
+        townId: string,
+        score: number,
+    ): CancelablePromise<number> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/towns/{townID}/Scoreboard/percentile/{score}',
+            path: {
+                'townID': townId,
+                'score': score,
+            },
+        });
+    }
+
+    /**
+     * @param townId
+     * @param carnivalAreaId
+     * @param name
+     * @param xSessionToken
+     * @returns Pet Ok
+     * @throws ApiError
+     */
+    public assignPet(
+        townId: string,
+        carnivalAreaId: string,
+        name: string,
+        xSessionToken: string,
+    ): CancelablePromise<Pet> {
+        return this.httpRequest.request({
+            method: 'PATCH',
+            url: '/towns/{townID}/CarnivalArea/{carnivalAreaId}/assignPet/{name}',
+            path: {
+                'townID': townId,
+                'carnivalAreaId': carnivalAreaId,
+                'name': name,
+            },
+            headers: {
+                'X-Session-Token': xSessionToken,
+            },
+            errors: {
+                400: `Invalid town values`,
             },
         });
     }

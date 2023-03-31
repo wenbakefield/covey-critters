@@ -34,6 +34,10 @@ export default class SBGame implements IGameSession {
     return this._timeLimit;
   }
 
+  public getScoreLimit(): number {
+    return this._maxScore;
+  }
+
   public onTick(key: string): void {
     if (key === '32') {
       this._spaceBarCount += 1;

@@ -11,8 +11,8 @@ import {
   PlayerLocation,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import IScoreBoard from './IScoreBoard';
-import SingletonScoreboardFactory from './Scoreboard';
+import IScoreBoard from '../lib/IScoreBoard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import SBGame from './SBGame';
 import PetFactory from '../lib/PetFactory';
 
@@ -53,7 +53,7 @@ export default class CarnivalGameArea extends InteractableArea {
   }
 
   public updateModel(updatedModel: CarnivalGameAreaModel) {
-    this._petRule = updatedModel.petRule;
+    updatedModel.petRule.map(rule => this.addPetRule(rule));
   }
 
   /**
@@ -123,6 +123,7 @@ export default class CarnivalGameArea extends InteractableArea {
   public addPetRule(petRule: PetRule) {
     this._deleteExistingPetRule(petRule);
     this._petRule.push(petRule);
+    this._emitAreaChanged();
   }
 
   private _deleteExistingPetRule(petRule: PetRule) {

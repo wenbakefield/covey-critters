@@ -25,6 +25,12 @@ export default interface IPet {
   setPetLocation(x: number, y: number): void;
 
   /**
+   * Given a new name for pet change the petName
+   * @param name represent the new pet name
+   */
+  setPetName(name: string): void;
+
+  /**
    * Initilize the Pet Location
    * @param playerLocation represent player coordinate
    */

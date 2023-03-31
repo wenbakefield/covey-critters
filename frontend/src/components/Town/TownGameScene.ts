@@ -8,6 +8,8 @@ import ConversationArea from './interactables/ConversationArea';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
 import PosterSessionArea from './interactables/PosterSessionArea';
+import CarnivalGameArea from './interactables/CarnivalGameArea';
+import PetController from '../../classes/PetController';
 
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,6 +22,8 @@ function interactableTypeForObjectType(type: string): any {
     return ViewingArea;
   } else if (type == 'PosterSessionArea') {
     return PosterSessionArea;
+  } else if (type == 'CarnivalGameArea') {
+    return CarnivalGameArea;
   } else {
     throw new Error(`Unknown object type: ${type}`);
   }
@@ -467,6 +471,48 @@ export default class TownGameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    // Create the red_snake's walking animations from the texture atlas.
+    anims.create({
+      key: 'red-snake-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'red-snake-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'red-snake-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'red-snake-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'red-snake-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
     const camera = this.cameras.main;
     camera.startFollow(this.coveyTownController.ourPlayer.gameObjects.sprite);
     camera.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -493,6 +539,27 @@ export default class TownGameScene extends Phaser.Scene {
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
   }
 
+  createPetSprites(pet: PetController) {
+    if (!pet.gameObjects) {
+      const sprite = this.physics.add
+        .sprite(pet.location.x, pet.location.y, 'atlas', pet.species)
+        .setSize(15, 20) // Set the size of the sprite here
+        .setOffset(0, 24);
+      const label = this.add.text(pet.location.x, pet.location.y - 20, pet.species, {
+        font: '18px monospace',
+        color: '#000000',
+        // padding: {x: 20, y: 10},
+        backgroundColor: '#ffffff',
+      });
+      pet.gameObjects = {
+        sprite: sprite,
+        label: label,
+        locationManagedByGameScene: false,
+      };
+      return sprite;
+    }
+  }
+
   createPlayerSprites(player: PlayerController) {
     if (!player.gameObjects) {
       const sprite = this.physics.add
@@ -510,11 +577,40 @@ export default class TownGameScene extends Phaser.Scene {
           backgroundColor: '#ffffff',
         },
       );
-      player.gameObjects = {
-        sprite,
-        label,
-        locationManagedByGameScene: false,
-      };
+
+      if (player.pet !== undefined) {
+        const petSprite = this.physics.add
+          .sprite(player.pet.location.x, player.pet.location.y, 'atlas', `${player.pet.species}-1`)
+          .setSize(30, 40)
+          .setOffset(0, 24);
+        const petLabel = this.add.text(
+          player.pet.location.x,
+          player.pet.location.y - 20,
+          player.pet.name,
+          {
+            font: '18px monospace',
+            color: '#000000',
+            // padding: {x: 20, y: 10},
+            backgroundColor: '#ffffff',
+          },
+        );
+        player.gameObjects = {
+          sprite,
+          label,
+          locationManagedByGameScene: false,
+          petGameObject: {
+            sprite: petSprite,
+            label: petLabel,
+            locationManagedByGameScene: false,
+          },
+        };
+      } else {
+        player.gameObjects = {
+          sprite,
+          label,
+          locationManagedByGameScene: false,
+        };
+      }
     }
   }
 

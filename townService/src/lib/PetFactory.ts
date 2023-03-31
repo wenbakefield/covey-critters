@@ -22,10 +22,10 @@ export default class PetFactory {
       } else {
         const newPet = new Pet(petModel.name, petModel.species, petModel.movementType);
         switch (petModel.movementType) {
-          case MovementType.OffsetPlayer:
+          case 'offsetPlayer':
             return newPet;
             break;
-          case MovementType.OrbitPlayer:
+          case 'orbitPlayer':
             return new OrbitingMovement(newPet);
             break;
           default:

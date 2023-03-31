@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import { Pet as PetModel } from '../types/CoveyTownSocket';
+import { Pet, Pet as PetModel } from '../types/CoveyTownSocket';
 
 export type PetEvents = {
   /**
@@ -19,8 +19,17 @@ export type PetEvents = {
   petNameChange: (name: string) => void;
 };
 
+export type PetGameObjects = {
+  sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  label: Phaser.GameObjects.Text;
+  // Should locationMangedByGameScene
+  locationManagedByGameScene: boolean /* For the local player, the game scene will calculate the current location, and we should NOT apply updates when we receive events */;
+};
+
 export default class PetController extends (EventEmitter as new () => TypedEmitter<PetEvents>) {
   private _model: PetModel;
+
+  public gameObjects?: PetGameObjects;
 
   constructor(petModel: PetModel) {
     super();
@@ -59,6 +68,7 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       if (this._model.x !== x || this._model.y !== y) {
         this._model.x = x;
         this._model.y = y;
+        this._updateGameComponentLocation();
         this.emit('petMovementChange', x, y);
       }
     } else {
@@ -66,7 +76,30 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     }
   }
 
+  public get species() {
+    return this._model.species;
+  }
+
   public toModel(): PetModel {
     return this._model;
+  }
+
+  private _updateGameComponentLocation() {
+    if (this.gameObjects && !this.gameObjects.locationManagedByGameScene) {
+      const { sprite, label } = this.gameObjects;
+      if (!sprite.anims) return;
+      sprite.setX(this._model.x);
+      sprite.setY(this._model.y);
+      label.setX(this._model.x);
+      label.setY(this._model.y - 20);
+
+      // TODO: add different pet sprites
+      // sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
+      // What is the key for this one @Ben
+    }
+  }
+
+  static fromModel(petModel: Pet): PetController {
+    return new PetController(petModel);
   }
 }

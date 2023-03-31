@@ -101,7 +101,9 @@ describe('CarnivalGameArea', () => {
     it('Should push the scored to the scoreboard when the game is ended or overide', () => {
       expect(testArea.scoreBoard.getTopX(10)).toEqual([]);
       testArea.notifyScoreBoard(newPlayer.id, true);
-      expect(testArea.scoreBoard.getTopX(10)).toEqual([[newPlayer.toPlayerModel(), 0]]);
+      expect(testArea.scoreBoard.getTopX(10)).toEqual([
+        { player: newPlayer.toPlayerModel(), score: 0 },
+      ]);
     });
     it('Should throw an error if the player is not in the interactable', () => {
       expect(() => testArea.notifyScoreBoard('no-exist-player')).toThrow();
@@ -133,9 +135,9 @@ describe('CarnivalGameArea', () => {
         petSelection: [
           {
             id: nanoid(),
-            name: 'Dragon',
-            species: Species.dragon,
-            movementType: MovementType.OffsetPlayer,
+            name: 'brown-cobra',
+            species: 'brown-cobra',
+            movementType: 'offsetPlayer',
             x: 0,
             y: 0,
           },
@@ -147,8 +149,8 @@ describe('CarnivalGameArea', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         id: actualPetModel!.id,
         name: 'lemmy',
-        species: Species.dragon,
-        movementType: MovementType.OffsetPlayer,
+        species: 'brown-cobra',
+        movementType: 'offsetPlayer',
         x: -40,
         y: -20,
       };
@@ -164,9 +166,9 @@ describe('CarnivalGameArea', () => {
         petSelection: [
           {
             id: nanoid(),
-            name: 'Dragon',
-            species: Species.dragon,
-            movementType: MovementType.OffsetPlayer,
+            name: 'brown-cobra',
+            species: 'brown-cobra',
+            movementType: 'offsetPlayer',
             x: 0,
             y: 0,
           },
@@ -187,6 +189,8 @@ describe('CarnivalGameArea', () => {
       testArea.addPetRule(newPetRule);
       expect(testArea.petRule.length).toEqual(1);
       expect(testArea.petRule).toEqual([newPetRule]);
+      const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
+      expect(lastEmittedUpdate).toStrictEqual({ id: testArea.id, petRule: [newPetRule] });
     });
     it('Add multiple pet rule that does not overlaps with other rules', () => {
       expect(testArea.petRule.length).toEqual(0);
@@ -248,7 +252,7 @@ describe('CarnivalGameArea', () => {
       petRule: newPetRule,
     });
     expect(testArea.id).toBe(id);
-    expect(testArea.petRule).toBe(newPetRule);
+    expect(testArea.petRule).toStrictEqual(newPetRule);
   });
   describe('fromMapObject', () => {
     it('Throws an error if the width or height are missing', () => {
