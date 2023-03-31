@@ -467,6 +467,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           const x = petMoved.pet.x;
           const y = petMoved.pet.y;
           playerToUpdate.pet.location = { x, y };
+          playerToUpdate.pet.rotation = petMoved.pet.rotation;
           playerToUpdate.pet.name = petMoved.pet.name;
           this.emit('petMoved', playerToUpdate.pet); // Should this be emitted
         } else {

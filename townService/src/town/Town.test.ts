@@ -770,6 +770,7 @@ describe('Town', () => {
         movementType: 'offsetPlayer',
         x: 0,
         y: 0,
+        rotation: 'front',
       };
       const newModel: CarnivalGameAreaModel = {
         id: 'Name5',
@@ -821,6 +822,7 @@ describe('Town', () => {
             movementType: 'offsetPlayer',
             x: 10,
             y: 80,
+            rotation: 'front',
           };
           expect(lastEvent.pet).toEqual(expectedPet);
         });

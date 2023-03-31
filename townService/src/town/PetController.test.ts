@@ -97,6 +97,7 @@ describe('PetController integration tests', () => {
               species: 'black-bear',
               x: 0,
               y: 0,
+              rotation: 'front',
             },
           ],
         },

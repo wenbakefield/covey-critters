@@ -154,6 +154,7 @@ describe('CarnivalGameArea', () => {
             movementType: 'offsetPlayer',
             x: 0,
             y: 0,
+            rotation: 'front',
           },
         ],
       };
@@ -167,6 +168,7 @@ describe('CarnivalGameArea', () => {
         movementType: 'offsetPlayer',
         x: -40,
         y: -20,
+        rotation: 'front',
       };
       expect(actualPetModel).toEqual(expectedPetModel);
     });
@@ -185,6 +187,7 @@ describe('CarnivalGameArea', () => {
             movementType: 'offsetPlayer',
             x: 0,
             y: 0,
+            rotation: 'front',
           },
         ],
       };

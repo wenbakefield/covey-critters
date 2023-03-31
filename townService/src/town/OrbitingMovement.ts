@@ -18,7 +18,7 @@ export default class OrbitingMovement extends PetDecorator {
    * @param playerLocation represent the player location on the map
    * @returns next (x,y) coordinate where the pet is moving
    */
-  public nextMovement(playerLocation: PlayerLocation): [number, number] {
+  public nextMovement(playerLocation: PlayerLocation): [number, number, string] {
     const playerX = playerLocation.x;
     const playerY = playerLocation.y;
     const [petX, petY] = this.getPetLocation();
@@ -29,10 +29,12 @@ export default class OrbitingMovement extends PetDecorator {
     let [r, theta] = this._covertToPolarCoor(relx, rely);
     r = this._radius; // Maintain radius if the player moved
     theta += this._orbitalSpeedDeg;
+    const rotation = theta <= 180 ? 'left' : 'right';
     [relx, rely] = this._covertToCartesianCoor(r, theta);
     [relx, rely] = [relx + playerX, rely + playerY];
     this.setPetLocation(relx, rely);
-    return [relx, rely];
+    this.setPetRotation(rotation);
+    return [relx, rely, rotation];
   }
 
   private _covertToPolarCoor(x: number, y: number): [number, number] {
