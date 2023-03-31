@@ -63,6 +63,7 @@ export interface Pet {
   movementType: string;
   x: number;
   y: number;
+  rotation: string;
 }
 
 export interface PetRule {

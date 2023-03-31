@@ -10,6 +10,7 @@ export function generateDefaultPet(species: string[]): Pet[] {
       movementType: 'offsetPlayer',
       x: 0,
       y: 0,
+      rotation: 'front',
     };
   });
 }

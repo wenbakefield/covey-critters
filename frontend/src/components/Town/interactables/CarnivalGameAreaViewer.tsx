@@ -76,11 +76,13 @@ export function CarnivalGame({
     await townController.initializeGame(controller, gameController.toModel());
     const game = controller.getGameSessionByID(townController.ourPlayer.id);
     console.log(`play game is created ${game}`);
+    townController.emitGameOnTick('32');
   }
 
   return (
     <Modal
       isOpen={isOpen}
+      size={'6xl'}
       onClose={() => {
         close();
         townController.unPause();

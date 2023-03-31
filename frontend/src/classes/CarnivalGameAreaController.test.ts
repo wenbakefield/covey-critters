@@ -56,6 +56,7 @@ describe('[T2] CarnivalGameControllerArea', () => {
               movementType: 'orbitalPlayer',
               x: 0,
               y: 0,
+              rotation: 'right',
             },
           ],
         },
