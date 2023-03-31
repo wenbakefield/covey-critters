@@ -3,6 +3,7 @@ import React from 'react';
 import ConversationAreasList from './ConversationAreasList';
 import ScoreBoardView from './ScoreboardScoresList';
 import PlayersList from './PlayersList';
+import PlayerSpecificScoreBoardView from './PlayerSpecificScoresList';
 
 export default function SocialSidebar(): JSX.Element {
   return (
@@ -22,6 +23,7 @@ export default function SocialSidebar(): JSX.Element {
       <PlayersList />
       <ConversationAreasList />
       <ScoreBoardView />
+      <PlayerSpecificScoreBoardView />
     </VStack>
   );
 }
