@@ -167,7 +167,7 @@ describe('CarnivalGameArea', () => {
         species: 'brown-cobra',
         movementType: 'offsetPlayer',
         x: -40,
-        y: 20,
+        y: -20,
         rotation: 'front',
       };
       expect(actualPetModel).toEqual(expectedPetModel);

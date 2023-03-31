@@ -77,11 +77,15 @@ export function CarnivalGame({
     const game = controller.getGameSessionByID(townController.ourPlayer.id);
     console.log(`play game is created ${game}`);
 <<<<<<< HEAD
+<<<<<<< HEAD
     townController.emitGameOnTick('32');
     const updateGame = await townController.carnivalGameTimeLimitReach(controller);
     console.log(updateGame);
 =======
 >>>>>>> b55299c (FIx Socket Lag during player enters the game)
+=======
+    townController.emitGameOnTick('32');
+>>>>>>> bb0dd53 (Add Direction Component to Pet Model)
   }
 
   return (

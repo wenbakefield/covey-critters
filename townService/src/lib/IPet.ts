@@ -33,7 +33,7 @@ export default interface IPet {
    * Given a new rotiation set the pet rotation
    * @param rotation new rotation.
    */
-  setPetRotation(rotation: string): void;
+  setPetRotation(rotation: Direction): void;
 
   /**
    * Given a new name for pet change the petName

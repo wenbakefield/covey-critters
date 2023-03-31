@@ -50,7 +50,7 @@ export default abstract class PetDecorator implements IPet {
    * Fiven new pet Rotation set the pet rotation to this rotation
    * @param rotation represent new rotation
    */
-  setPetRotation(rotation: string): void {
+  setPetRotation(rotation: Direction): void {
     this._pet.setPetRotation(rotation);
   }
 
