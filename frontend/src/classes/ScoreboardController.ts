@@ -21,13 +21,8 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
   }
 
   set scoreboard(newScoreBoard: PlayerScoreTuple[]) {
-    if (
-      newScoreBoard.length !== this._scoreboard.length ||
-      _.xor(newScoreBoard, this._scoreboard).length > 0
-    ) {
-      this.emit('scoreboardChange', newScoreBoard);
-      this._scoreboard = newScoreBoard;
-    }
+    this._scoreboard = newScoreBoard;
+    this.emit('scoreboardChange', newScoreBoard);
   }
 
   public getXScores(topNumber: number): PlayerScoreTuple[] {
@@ -45,7 +40,9 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
   }
 
   public removePlayer(player: PlayerModel): void {
-    const filteredList = this._scoreboard.filter(tuple => tuple.player.id !== player.id);
+    const filteredList: PlayerScoreTuple[] = this._scoreboard.filter(
+      tuple => tuple.player.id !== player.id,
+    );
     this._scoreboard = filteredList;
     this.emit('scoreboardChange', filteredList);
   }

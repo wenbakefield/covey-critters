@@ -24,6 +24,7 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
+import ScoreboardController from '../../../classes/ScoreboardController';
 
 const SCORE_LIMIT = 100;
 const TIME_LIMIT_SECONDS = 120;
@@ -68,14 +69,15 @@ export function CarnivalGame({
   }
 
   //
-  function playGame() {
+  async function playGame() {
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
       TIME_LIMIT_SECONDS,
     );
-    controller.addGameSession(gameController);
-    townController.initializeGame(controller, gameController.toModel());
+    //controller.addGameSession(gameController);
+    //townController.initializeGame(controller, gameController.toModel());
+    //await townController.addPlayerScore(5);
   }
 
   return (
@@ -89,7 +91,6 @@ export function CarnivalGame({
       <ModalContent>
         {<ModalHeader>{'Carnival Game Area'}</ModalHeader>}
         <ModalCloseButton />
-        <ModalBody pb={6}>{/* />*/}</ModalBody>
         {
           <ModalFooter>
             <Button colorScheme='blue' mr={3} onClick={playGame}>
@@ -97,7 +98,6 @@ export function CarnivalGame({
             </Button>
           </ModalFooter>
         }
-        {/* </form> */}
       </ModalContent>
     </Modal>
   );

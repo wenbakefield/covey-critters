@@ -450,14 +450,41 @@ export class TownsController extends Controller {
     return this._scoreboard.getTopX(topNumber);
   }
 
-  @Delete('Scoreboard/{Player}')
-  public async removePlayer(@Body() player: Player): Promise<void> {
-    this._scoreboard.removePlayerScore(player);
+  @Delete('{townID}/Scoreboard/removeScore')
+  public async removePlayer(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+  ): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else {
+        this._scoreboard.removePlayerScore(player.toPlayerModel());
+      }
+    }
   }
 
-  @Post('Scoreboard/{Player}/{score}')
-  public async addPlayerScore(@Body() player: Player, @Path() score: number): Promise<void> {
-    this._scoreboard.notifyScoreBoard(player, score);
+  @Post('{townID}/Scoreboard/addScore/{score}')
+  public async addPlayerScore(
+    @Path() townID: string,
+    @Header('X-Session-Token') sessionToken: string,
+    @Path() score: number,
+  ): Promise<void> {
+    const town = this._townsStore.getTownByID(townID);
+    if (!town) {
+      throw new InvalidParametersError('Invalid town values specified');
+    } else {
+      const player = town.getPlayerBySessionToken(sessionToken);
+      if (!player) {
+        throw new InvalidParametersError('Invalid Player SessionToken specified');
+      } else {
+        this._scoreboard.notifyScoreBoard(player.toPlayerModel(), score);
+      }
+    }
   }
 
   @Get('Scoreboard/percentile/{score}')

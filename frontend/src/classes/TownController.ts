@@ -19,6 +19,7 @@ import {
   PosterSessionArea as PosterSessionAreaModel,
   CarnivalGameArea as CarnivalGameAreaModel,
   GameSession,
+  Player,
 } from '../types/CoveyTownSocket';
 import {
   isConversationArea,
@@ -250,6 +251,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket = io(url, { auth: { userName, townID } });
     this._townsService = new TownsServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
+    this.initalizeScoreboard();
   }
 
   public get sessionToken() {
@@ -946,6 +948,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       posterSessionArea.id,
       this.sessionToken,
     );
+  }
+
+  public async addPlayerScore(score: number) {
+    await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
+    this.initalizeScoreboard();
+  }
+
+  public async removePlayer() {
+    await this._townsService.removePlayer(this.townID, this.sessionToken);
+    this.initalizeScoreboard();
   }
 
   public async initalizeScoreboard(): Promise<void> {
