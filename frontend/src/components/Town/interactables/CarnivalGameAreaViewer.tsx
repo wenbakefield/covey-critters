@@ -20,6 +20,7 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
+import ScoreboardController from '../../../classes/ScoreboardController';
 import SBGameModal from './SBGameModal';
 import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
@@ -67,7 +68,7 @@ export function CarnivalGame({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();
-  function playGame() {
+  async function playGame() {
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
@@ -117,7 +118,6 @@ export function CarnivalGame({
             <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
           </ModalFooter>
         }
-        {/* </form> */}
       </ModalContent>
     </Modal>
   );
