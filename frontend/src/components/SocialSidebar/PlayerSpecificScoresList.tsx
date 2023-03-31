@@ -1,4 +1,14 @@
-import { Box, Heading, ListItem, UnorderedList } from '@chakra-ui/react';
+import {
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  Box,
+  Heading,
+  ListItem,
+  UnorderedList,
+} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { useScoreBoard } from '../../classes/ScoreboardController';
 import useTownController from '../../hooks/useTownController';
@@ -11,28 +21,38 @@ export default function PlayerSpecificScoreBoardView(): JSX.Element {
   const townController = useTownController();
   townController.initalizeScoreboard();
   const scoreboardController = townController.scoreboardController;
+  const fullScoreboard = useScoreBoard(scoreboardController);
   let scoreboard = useScoreBoard(scoreboardController);
   const handleSubmit = () => {
+    scoreboard = [];
+    fullScoreboard.forEach(tuple => {
+      scoreboard.push(tuple);
+    });
     scoreboard = scoreboard.filter(tuple => tuple.player.userName === playerusername);
   };
   return (
     <Box>
       <Heading as='h3' fontSize='m'>
-        {'Searched username and scores in Carnival game'}
+        Searched username and scores in Carnival game
       </Heading>
-      <form onClick={handleSubmit}>
-        <label>
-          Enter player username:
-          <input
-            type='username of player'
-            value={playerusername}
-            onChange={e => setPlayerusername(e.target.value)}
-          />
-        </label>
-        <input type='submit' />
-      </form>
+      <div>
+        <form>
+          <FormControl>
+            <FormLabel>Enter username:</FormLabel>
+            <Input
+              type='playerusername'
+              placeholder='username'
+              onChange={event => setPlayerusername(event.currentTarget.value)}
+            />
+          </FormControl>
+          <Button width='full' mt={4} type='submit' onClick={() => handleSubmit}>
+            Search
+          </Button>
+        </form>
+      </div>
       <UnorderedList>
         {scoreboard.map(playerScoreTuple => {
+          console.log(playerScoreTuple.player.userName);
           return (
             <ListItem key={playerScoreTuple.player.id}>
               <h4>
