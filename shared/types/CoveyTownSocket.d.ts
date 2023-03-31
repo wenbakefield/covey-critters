@@ -52,7 +52,7 @@ export type ChatMessage = {
   interactableId?: string;
 };
 
-export type MovementType = 'offsetPlayer' | 'orbitPlayer';
+export type MovementType = 'offsetPlayer' | 'orbitPlayer' | 'followPlayer';
 
 export type Species = 'black-bear' | 'brown-bear' | 'brown-cobra' | 'brown-mouse' | 'brown-sheep' | 'brown-snake' | 'brown-wolf' | 'dark-gray-wolf' | 'dark-wolf' | 'gray-mouse' | 'gray-wolf' | 'green-cobra' | 'green-snake' | 'light-wolf' | 'pigeon' | 'red-snake' | 'seagull' | 'white-mouse' | 'white-sheep';
 

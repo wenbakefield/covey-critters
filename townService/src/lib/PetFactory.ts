@@ -1,3 +1,4 @@
+import FollowPlayerMovement from '../town/FollowPlayerMovement';
 import OrbitingMovement from '../town/OrbitingMovement';
 import Pet from '../town/Pet';
 import { MovementType, Pet as PetModel, PlayerLocation } from '../types/CoveyTownSocket';
@@ -27,6 +28,9 @@ export default class PetFactory {
             break;
           case 'orbitPlayer':
             return new OrbitingMovement(newPet);
+            break;
+          case 'followPlayer':
+            return new FollowPlayerMovement(newPet, 15);
             break;
           default:
             throw new Error('Unable to create Pet from Pet Model');

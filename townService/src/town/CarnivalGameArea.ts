@@ -240,13 +240,17 @@ export default class CarnivalGameArea extends InteractableArea {
   }
 
   /**
-   *
+   * Export this CarnivalGameArea to Model
    */
   public toModel(): Interactable {
     return {
       id: this.id,
       petRule: this._petRule,
     };
+  }
+
+  public get isActive(): boolean {
+    return this.petRule.length !== 0;
   }
 
   /**

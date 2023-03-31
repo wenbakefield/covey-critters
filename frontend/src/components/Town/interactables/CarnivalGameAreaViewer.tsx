@@ -77,6 +77,8 @@ export function CarnivalGame({
     const game = controller.getGameSessionByID(townController.ourPlayer.id);
     console.log(`play game is created ${game}`);
     townController.emitGameOnTick('32');
+    const updateGame = await townController.carnivalGameTimeLimitReach(controller);
+    console.log(updateGame);
   }
 
   return (

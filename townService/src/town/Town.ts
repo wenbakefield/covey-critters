@@ -252,7 +252,6 @@ export default class Town {
     const prevInteractable = this._interactables.find(
       conv => conv.id === player.location.interactableID,
     );
-
     if (!prevInteractable?.contains(location)) {
       if (prevInteractable) {
         // Remove from old area
