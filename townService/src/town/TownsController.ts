@@ -440,55 +440,28 @@ export class TownsController extends Controller {
     }
   }
 
-  @Get('{townID}/Scoreboard')
-  public async getAllScores(@Path() townID: string): Promise<PlayerScoreTuple[]> {
-    const town = this._townsStore.getTownByID(townID);
-    if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
-    }
+  @Get('Scoreboard')
+  public async getAllScores(): Promise<PlayerScoreTuple[]> {
     return this._scoreboard.getAllScores();
   }
 
-  @Get('{townID}/Scoreboard/{topNumber}')
-  public async getXScores(
-    @Path() townID: string,
-    @Path() topNumber: number,
-  ): Promise<PlayerScoreTuple[]> {
-    const town = this._townsStore.getTownByID(townID);
-    if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
-    }
+  @Get('Scoreboard/{topNumber}')
+  public async getXScores(@Path() topNumber: number): Promise<PlayerScoreTuple[]> {
     return this._scoreboard.getTopX(topNumber);
   }
 
-  @Delete('{townID}/Scoreboard/{Player}')
-  public async removePlayer(@Path() townID: string, @Body() player: Player): Promise<void> {
-    const town = this._townsStore.getTownByID(townID);
-    if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
-    }
+  @Delete('Scoreboard/{Player}')
+  public async removePlayer(@Body() player: Player): Promise<void> {
     this._scoreboard.removePlayerScore(player);
   }
 
-  @Post('{townID}/Scoreboard/{Player}/{score}')
-  public async addPlayerScore(
-    @Path() townID: string,
-    @Body() player: Player,
-    @Path() score: number,
-  ): Promise<void> {
-    const town = this._townsStore.getTownByID(townID);
-    if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
-    }
+  @Post('Scoreboard/{Player}/{score}')
+  public async addPlayerScore(@Body() player: Player, @Path() score: number): Promise<void> {
     this._scoreboard.notifyScoreBoard(player, score);
   }
 
-  @Get('{townID}/Scoreboard/percentile/{score}')
-  public async getPercentile(@Path() townID: string, @Path() score: number): Promise<number> {
-    const town = this._townsStore.getTownByID(townID);
-    if (!town) {
-      throw new InvalidParametersError('Invalid values specified');
-    }
+  @Get('Scoreboard/percentile/{score}')
+  public async getPercentile(@Path() score: number): Promise<number> {
     return this._scoreboard.calculatedPercentile(score);
   }
 
