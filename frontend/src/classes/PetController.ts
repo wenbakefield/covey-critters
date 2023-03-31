@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import { Pet, Pet as PetModel } from '../types/CoveyTownSocket';
+import { Direction, Pet, Pet as PetModel } from '../types/CoveyTownSocket';
 
 export type PetEvents = {
   /**
@@ -100,17 +100,6 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       }
     } else {
       throw new Error('Unable to retrieve pet location');
-    }
-  }
-
-  public get gameObjects(): PetGameObjects | undefined {
-    return this._gameObjects;
-  }
-
-  public set gameObjects(petGameObject: PetGameObjects | undefined) {
-    if (petGameObject) {
-      this.removePetSprite();
-      this._gameObjects = petGameObject;
     }
   }
 
