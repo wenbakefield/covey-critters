@@ -32,7 +32,7 @@ export default class Pet implements IPet {
     species: string,
     movementType = 'offsetPlayer',
     x_offset = -40, // default value for pet location
-    y_offset = -20,
+    y_offset = 20,
   ) {
     // May need to change to Factory in the Future to accomodate different MovementPattern
     this._id = nanoid();

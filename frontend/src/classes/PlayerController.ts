@@ -57,6 +57,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   set pet(value: PetController | undefined) {
     if (this.pet !== value && value !== undefined) {
+      this._pet?.removePetSprite();
       this._pet = value;
       this.emit('petChange', value);
     }

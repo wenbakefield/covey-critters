@@ -7,7 +7,7 @@ export function generateDefaultPet(species: string[]): Pet[] {
       id: nanoid(),
       name: eachSpecies,
       species: eachSpecies,
-      movementType: 'offsetPlayer',
+      movementType: 'followPlayer',
       x: 0,
       y: 0,
       rotation: 'front',

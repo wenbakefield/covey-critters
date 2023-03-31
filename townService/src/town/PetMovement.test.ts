@@ -21,6 +21,7 @@ describe('Testing Pet Decorator and Factory', () => {
         movementType: 'offsetPlayer',
         x: 0,
         y: 0,
+        rotation: 'front',
       };
       pet = PetFactory.spawnPet(petModelOrbital, initialPlayerLocation);
     });
@@ -28,7 +29,21 @@ describe('Testing Pet Decorator and Factory', () => {
     it('Checking if the pet is spawn in the correct default location', () => {
       const exportPet = pet.toPetModel();
       expect(exportPet?.x).toEqual(10);
-      expect(exportPet?.y).toEqual(80);
+      expect(exportPet?.y).toEqual(120);
+      expect(exportPet.rotation).toEqual('front');
+    });
+
+    it('Checking the nextmovembet for pet for offsetMovement movement type', () => {
+      pet.nextMovement({
+        x: 40,
+        y: 80,
+        rotation: 'left',
+        moving: true,
+      });
+      const exportPet = pet.toPetModel();
+      expect(exportPet?.x).toEqual(0);
+      expect(exportPet?.y).toEqual(100);
+      expect(exportPet.rotation).toEqual('left');
     });
   });
 
@@ -47,6 +62,7 @@ describe('Testing Pet Decorator and Factory', () => {
         movementType: 'orbitPlayer',
         x: 0,
         y: 0,
+        rotation: 'front',
       };
       pet = PetFactory.spawnPet(petModelOrbital, initialPlayerLocation);
     });
@@ -68,6 +84,7 @@ describe('Testing Pet Decorator and Factory', () => {
       exportPet = pet.toPetModel();
       expect(exportPet?.x).toEqual(79.98341810019362);
       expect(exportPet?.y).toEqual(100.81424875367055);
+      expect(exportPet.rotation).toEqual('left');
     });
 
     it('Move the pet to next location when player is not moving and check the location', () => {
@@ -79,6 +96,7 @@ describe('Testing Pet Decorator and Factory', () => {
       exportPet = pet.toPetModel();
       expect(exportPet?.x).toEqual(69.98781654038191);
       expect(exportPet?.y).toEqual(100.69798993405001);
+      expect(exportPet.rotation).toEqual('left');
     });
   });
 });

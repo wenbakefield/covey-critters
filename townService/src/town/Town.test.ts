@@ -821,7 +821,7 @@ describe('Town', () => {
             species: 'brown-cobra',
             movementType: 'offsetPlayer',
             x: 10,
-            y: 80,
+            y: 120,
             rotation: 'front',
           };
           expect(lastEvent.pet).toEqual(expectedPet);

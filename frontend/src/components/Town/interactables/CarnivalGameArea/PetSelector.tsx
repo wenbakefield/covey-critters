@@ -26,21 +26,16 @@ export function PetPickerDialog(props: {
 
   async function assignPlayerAPet(ourPlayer: PlayerController) {
     const game = carnivalGameAreaController.getGameSessionByID(townController.ourPlayer.id);
-    console.log(game);
     if (game) {
-      console.log('game exists');
       if (game.isOver) {
-        console.log('game is not over');
         const recievedPet = await townController.assignPetToPlayer(
           carnivalGameAreaController,
           props.petName,
         );
         if (recievedPet) {
           // Want to update player controller to assign Pet Controller
-          console.log('pet is recieved');
           const newPetController = PetController.fromModel(recievedPet);
           ourPlayer.pet = newPetController;
-          console.log(ourPlayer);
           setPet(recievedPet);
         }
       }
