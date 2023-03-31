@@ -81,11 +81,14 @@ export function CarnivalGame({
     townController.emitGameOnTick('32');
     const updateGame = await townController.carnivalGameTimeLimitReach(controller);
     console.log(updateGame);
+<<<<<<< HEAD
 =======
 >>>>>>> b55299c (FIx Socket Lag during player enters the game)
 =======
     townController.emitGameOnTick('32');
 >>>>>>> bb0dd53 (Add Direction Component to Pet Model)
+=======
+>>>>>>> 1e7d72f (Add FollowPlayer Movement and adjust OffsetPlayer)
   }
 
   return (

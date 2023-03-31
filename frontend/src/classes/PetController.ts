@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import { Direction, Pet, Pet as PetModel } from '../types/CoveyTownSocket';
+import { Pet, Pet as PetModel } from '../types/CoveyTownSocket';
 
 export type PetEvents = {
   /**
