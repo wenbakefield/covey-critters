@@ -25,7 +25,6 @@ import {
   PosterSessionArea as PosterSessionAreaModel,
   CarnivalGameArea as CarnivalGameAreaModel,
   GameSession,
-  Player,
 } from '../types/CoveyTownSocket';
 import {
   isConversationArea,
