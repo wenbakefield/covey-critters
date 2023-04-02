@@ -1,5 +1,6 @@
 import {
   Button,
+  Container,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,7 +13,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useCarnivalGameAreaController, useInteractable } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
-import SelectPosterModal from './SelectPosterModal';
 import CarnivalGameAreaController, {
   usePetRule,
 } from '../../../classes/CarnivalGameAreaController';
@@ -20,10 +20,10 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
-import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
+import SBGameModal from './SBGameModal';
 
-const SCORE_LIMIT = 100;
-const TIME_LIMIT_SECONDS = 120;
+const SCORE_LIMIT = 500;
+const TIME_LIMIT_SECONDS = 100;
 
 /**
  * The PosterImage component does the following:
@@ -64,27 +64,41 @@ export function CarnivalGame({
     }
   }
 
-  //
-  async function playGame() {
-    console.log('play game is pressed');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();
+  function playGame() {
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
       TIME_LIMIT_SECONDS,
     );
     controller.addGameSession(gameController);
-    await townController.initializeGame(controller, gameController.toModel());
-    const game = controller.getGameSessionByID(townController.ourPlayer.id);
-    console.log(`play game is created ${game}`);
-    townController.emitGameOnTick('32');
-    const updateGame = await townController.carnivalGameTimeLimitReach(controller);
-    console.log(updateGame);
+    townController.initializeGame(controller, gameController.toModel());
+    setSBGameController(gameController);
+    setIsPlaying(true);
+  }
+
+  function renderGame() {
+    if (isPlaying && sbGameController) {
+      return (
+        <SBGameModal
+          isOpen={isOpen}
+          close={() => {
+            close();
+            townController.unPause();
+          }}
+          SBGameController={sbGameController}
+        />
+      );
+    } else {
+      return <Container />;
+    }
   }
 
   return (
     <Modal
       isOpen={isOpen}
-      size={'6xl'}
+      size={'2xl'}
       onClose={() => {
         close();
         townController.unPause();
@@ -93,13 +107,12 @@ export function CarnivalGame({
       <ModalContent>
         {<ModalHeader>{'Carnival Game Area'}</ModalHeader>}
         <ModalCloseButton />
-        <ModalBody pb={6}>{/* />*/}</ModalBody>
+        <ModalBody pb={6}>{renderGame()}</ModalBody>
         {
           <ModalFooter>
             <Button colorScheme='blue' mr={3} onClick={playGame}>
               Play Game
             </Button>
-            <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
           </ModalFooter>
         }
         {/* </form> */}
@@ -139,7 +152,19 @@ export function CarnivalGameAreaViewer({
   }, [carnivalGameAreaController, townController]);
 
   if (rule.length === 0) {
-    return <NewCarnivalGameArea />;
+    return (
+      <NewCarnivalGameArea />
+      //   <SelectPosterModal
+      //     isOpen={selectIsOpen}
+      //     close={() => {
+      //       setSelectIsOpen(false);
+      //       // forces game to emit "posterSessionArea" event again so that
+      //       // repoening the modal works as expected
+      //       townController.interactEnd(carnivalGameArea);
+      //     }}
+      //     posterSessionArea={carnivalGameArea}
+      //   />
+    );
   }
   return (
     <>
