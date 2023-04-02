@@ -8,7 +8,13 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { Pet, PetRule, TownsService, TownsServiceClient } from '../generated/client';
+import {
+  Pet,
+  PetRule,
+  PlayerScoreTuple,
+  TownsService,
+  TownsServiceClient,
+} from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -950,12 +956,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     );
   }
 
-  public async addPlayerScore(score: number) {
+  public async addPlayerScore(score: number): Promise<void> {
     await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
     this.initalizeScoreboard();
   }
 
-  public async removePlayer() {
+  public async removePlayer(): Promise<void> {
     await this._townsService.removePlayer(this.townID, this.sessionToken);
     this.initalizeScoreboard();
   }
@@ -967,6 +973,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   public get scoreboardController() {
     return this._scoreboardController;
+  }
+
+  public async getPercentile(score: number): Promise<number> {
+    const percentile = await this._townsService.getPercentile(score);
+    return percentile;
+  }
+
+  public async getTopXScoreboard(top: number): Promise<PlayerScoreTuple[]> {
+    const list = await this._townsService.getXScores(top);
+    return list;
   }
 
   /**

@@ -77,7 +77,7 @@ export function CarnivalGame({
     );
     //controller.addGameSession(gameController);
     //townController.initializeGame(controller, gameController.toModel());
-    //await townController.addPlayerScore(5);
+    await townController.addPlayerScore(5);
   }
 
   return (

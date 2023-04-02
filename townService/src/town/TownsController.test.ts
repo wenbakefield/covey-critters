@@ -500,11 +500,9 @@ describe('TownsController integration tests', () => {
       });
       it('adding a player score tuple - test with getXScores', async () => {
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        const newPlayerScoreTuple = { player: newPlayer.toPlayerModel(), score: 30 };
         await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
         const listOfExpectedScores = await testAreaController.getXScores(5);
-        expect(listOfExpectedScores).toEqual([newPlayerScoreTuple]);
+        expect(listOfExpectedScores).toEqual([{ MockedPlayer }]);
         // await testAreaController.removePlayer(newPlayer.toPlayerModel());
       });
       /*
