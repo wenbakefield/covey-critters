@@ -13,7 +13,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import { useSpaceBarGameController } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
-import { SBGame as SBGameModel } from '../../../types/CoveyTownSocket';
 import * as Phaser from 'phaser';
 
 export default function SBGameModal({

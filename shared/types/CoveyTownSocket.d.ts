@@ -111,14 +111,6 @@ export interface CarnivalGameArea {
   petRule: PetRule[];
 }
 
-export interface SBGame {
-    playerId: string,
-    score: number,
-    scoreLimit: number,
-    isOver: boolean,
-    timeLimit: number, 
-}
-
 export interface PetOwnerMap {
   playerId: string
   pet: Pet
