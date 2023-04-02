@@ -7,8 +7,8 @@ import TypedEmitter from 'typed-emitter';
 import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
-import { LoginController } from '../contexts/LoginControllerContext';
 import { Pet, PetRule, TownsService, TownsServiceClient } from '../generated/client';
+import { LoginController } from '../contexts/LoginControllerContext';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -20,13 +20,21 @@ import {
   CarnivalGameArea as CarnivalGameAreaModel,
   GameSession,
 } from '../types/CoveyTownSocket';
-import { isConversationArea, isViewingArea, isPosterSessionArea } from '../types/TypeUtils';
+import {
+  isConversationArea,
+  isViewingArea,
+  isPosterSessionArea,
+  isCarnivalGameArea,
+} from '../types/TypeUtils';
 import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
 import PosterSessionAreaController from './PosterSessionAreaController';
 import ScoreboardController from './ScoreboardController';
 import CarnivalGameAreaController from './CarnivalGameAreaController';
+import PetController from './PetController';
+import CarnivalGameArea from '../components/Town/interactables/CarnivalGameArea';
+import SpaceBarGameController from './SBGameController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY = 300;
 
@@ -91,6 +99,11 @@ export type TownEvents = {
    * the town controller's record of poster session areas.
    */
   posterSessionAreasChanged: (newPosterSessionAreas: PosterSessionAreaController[]) => void;
+  /**
+   * An even that indicates that the set of carnival game area has changed. This event is emitted after updating
+   * the town controller's record of carnival game areas
+   */
+  carnivalAreasChanged: (newCarnivalAreas: CarnivalGameAreaController[]) => void;
   /**
    * An event that indicates that a new chat message has been received, which is the parameter passed to the listener
    */
@@ -347,6 +360,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this.emit('posterSessionAreasChanged', newPosterSessionAreas);
   }
 
+  public get carnivalGameAreas() {
+    return this._carnivalGameAreas;
+  }
+
+  public set carnivalGameAreas(newCarnivalGameAreas: CarnivalGameAreaController[]) {
+    this._carnivalGameAreas = newCarnivalGameAreas;
+    this.emit('carnivalAreasChanged', newCarnivalGameAreas);
+  }
+
   /**
    * Begin interacting with an interactable object. Emits an event to all listeners.
    * @param interactedObj
@@ -489,6 +511,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         if (relArea) {
           relArea.updateFrom(interactable);
         }
+      } else if (isCarnivalGameArea(interactable)) {
+        const relArea = this.carnivalGameAreas.find(area => area.id == interactable.id);
+        if (relArea) {
+          relArea.updateFrom(interactable);
+        }
       }
     });
 
@@ -534,6 +561,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.emit('playerMovement', newLocation);
     const ourPlayer = this._ourPlayer;
     assert(ourPlayer);
+    // May be add a check to see if player has a pet?
+    if (ourPlayer.pet) {
+      this._socket.emit('petMovement', newLocation);
+      this.emit('petMoved', ourPlayer.pet);
+    }
     ourPlayer.location = newLocation;
     this.emit('playerMoved', ourPlayer);
   }
@@ -673,6 +705,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this._conversationAreas = [];
         this._viewingAreas = [];
         this._posterSessionAreas = [];
+        this._carnivalGameAreas = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
             this._conversationAreasInternal.push(
@@ -685,6 +718,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._viewingAreas.push(new ViewingAreaController(eachInteractable));
           } else if (isPosterSessionArea(eachInteractable)) {
             this._posterSessionAreas.push(new PosterSessionAreaController(eachInteractable));
+          } else if (isCarnivalGameArea(eachInteractable)) {
+            this.carnivalGameAreas.push(new CarnivalGameAreaController(eachInteractable));
           }
         });
         this._userID = initialData.userID;
