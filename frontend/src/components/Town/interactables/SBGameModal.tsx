@@ -54,7 +54,10 @@ export default function SBGameModal({
   // Timer
   const [timeLeft, setTimeLeft] = useState(sbGameController.timeLimit);
   useEffect(() => {
-    if (!timeLeft) return;
+    if (!timeLeft) {
+      coveyTownController.addPlayerScore(count);
+      return;
+    }
     const intervalId = setInterval(() => {
       setTimeLeft(timeLeft - 1);
     }, 1000);
