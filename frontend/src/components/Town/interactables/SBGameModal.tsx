@@ -19,7 +19,6 @@ import * as Phaser from 'phaser';
 import CarnivalGameAreaController from '../../../classes/CarnivalGameAreaController';
 import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
-const SPEED = 1;
 const SPRITE_SPWAN_X = 50;
 const SPRITE_SPWAN_Y = 100;
 
@@ -37,6 +36,8 @@ export default function SBGameModal({
   const sbGameController = useSpaceBarGameController(coveyTownController.ourPlayer.id);
   const [count, setCount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const speed = 500 / sbGameController.scoreLimit;
+
   const onClose = () => {
     close();
     setShowPopup(false);
@@ -100,7 +101,7 @@ export default function SBGameModal({
         coveyTownController.emitGameOnTick('32');
         const score = sbGameController.score;
         setCount(score);
-        sprite.setX(SPRITE_SPWAN_X + score * SPEED);
+        sprite.setX(SPRITE_SPWAN_X + score * speed);
       }
     }
 
