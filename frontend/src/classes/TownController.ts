@@ -256,7 +256,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket = io(url, { auth: { userName, townID } });
     this._townsService = new TownsServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
-    this.initalizeScoreboard();
+    this._scoreboardController.scoreboard = []; // alternative to: this.initalizeScoreboard(); error here
   }
 
   public get sessionToken() {
