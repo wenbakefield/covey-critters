@@ -99,6 +99,7 @@ export function CarnivalGame({
     <Modal
       isOpen={isOpen}
       size={'6xl'}
+
       onClose={() => {
         close();
         townController.unPause();

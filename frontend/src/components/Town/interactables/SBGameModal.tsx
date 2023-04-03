@@ -133,6 +133,7 @@ export default function SBGameModal({
     };
   }, []);
 
+
   useEffect(() => {
     if (count === sbGameController.scoreLimit || timeLeft === 0) {
       setShowPopup(true);
