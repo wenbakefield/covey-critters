@@ -334,6 +334,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private set _players(newPlayers: PlayerController[]) {
     this.emit('playersChanged', newPlayers);
     this._playersInternal = newPlayers;
+    console.log('sessiontoken:');
+    console.log(this.sessionToken);
   }
 
   public get conversationAreas() {
@@ -958,12 +960,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   public async addPlayerScore(score: number): Promise<void> {
     await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
-    this.initalizeScoreboard();
   }
 
   public async removePlayer(): Promise<void> {
     await this._townsService.removePlayer(this.townID, this.sessionToken);
-    this.initalizeScoreboard();
   }
 
   public async initalizeScoreboard(): Promise<void> {
