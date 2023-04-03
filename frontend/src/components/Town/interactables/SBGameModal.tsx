@@ -10,7 +10,7 @@ import {
   Button,
 } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
-import {
+import TownController, {
   useCarnivalGameAreaController,
   useSpaceBarGameController,
 } from '../../../classes/TownController';
@@ -133,10 +133,13 @@ export default function SBGameModal({
     };
   }, []);
 
-
   useEffect(() => {
-    if (count === sbGameController.scoreLimit || timeLeft === 0) {
+    async function terminateGame() {
+      await coveyTownController.carnivalGameTimeLimitReach(controller);
       setShowPopup(true);
+    }
+    if (count === sbGameController.scoreLimit || timeLeft === 0) {
+      terminateGame();
     }
   }, [count, sbGameController.scoreLimit, showPopup, timeLeft]);
 
