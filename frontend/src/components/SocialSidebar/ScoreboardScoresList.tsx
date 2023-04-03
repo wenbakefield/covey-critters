@@ -13,6 +13,7 @@ export default function ScoreBoardView(): JSX.Element {
 
   useEffect(() => {
     async function loadScoreBoard() {
+      console.log('scoreboad initialize');
       await townController.initalizeScoreboard();
     }
     loadScoreBoard();
