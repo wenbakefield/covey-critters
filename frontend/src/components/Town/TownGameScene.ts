@@ -198,6 +198,7 @@ export default class TownGameScene extends Phaser.Scene {
   }
 
   update() {
+    this.assignPlayerPetSprite(this.coveyTownController.ourPlayer);
     if (this._paused) {
       return;
     }
@@ -310,6 +311,33 @@ export default class TownGameScene extends Phaser.Scene {
     return gameObjects as Interactable[];
   }
 
+  assignPlayerPetSprite(playerController: PlayerController) {
+    if (playerController.pet) {
+      if (!playerController.pet.gameObjects) {
+        const species = playerController.pet.species;
+        const petName = playerController.pet.name;
+        const location = playerController.location;
+        const rotation = playerController.pet.rotation;
+        const sprite = this.physics.add
+          .sprite(location.x, location.y, 'atlas', `${species}-${rotation}-walk`)
+          .setSize(15, 20)
+          .setOffset(0, 24);
+        const label = this.add.text(location.x - 7, location.y - 20, petName, {
+          font: '11px monospace',
+          color: '#000000',
+          padding: { x: 0, y: 0 },
+          backgroundColor: '#ffffff',
+        });
+
+        playerController.pet.gameObjects = {
+          sprite: sprite,
+          label: label,
+          locationManagedByGameScene: false,
+        };
+      }
+    }
+  }
+
   create() {
     this._map = this.make.tilemap({ key: 'map' });
 
@@ -403,7 +431,7 @@ export default class TownGameScene extends Phaser.Scene {
       .text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
         font: '18px monospace',
         color: '#000000',
-        // padding: {x: 20, y: 10},
+        padding: { x: 0, y: 0 },
         backgroundColor: '#ffffff',
       })
       .setDepth(6);
@@ -471,7 +499,637 @@ export default class TownGameScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    // Create the red_snake's walking animations from the texture atlas.
+    // Create the black-bear's walking animations from the texture atlas.
+    anims.create({
+      key: 'black-bear-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'black-bear-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'black-bear-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'black-bear-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'black-bear-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'black-bear-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'black-bear-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'black-bear-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the brown-bear's walking animations from the texture atlas.
+    anims.create({
+      key: 'brown-bear-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-bear-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-bear-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-bear-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-bear-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-bear-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-bear-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-bear-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the brown-cobra's walking animations from the texture atlas.
+    anims.create({
+      key: 'brown-cobra-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-cobra-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-cobra-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-cobra-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-cobra-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-cobra-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-cobra-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-cobra-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the brown-mouse's walking animations from the texture atlas.
+    anims.create({
+      key: 'brown-mouse-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-mouse-',
+        start: 7,
+        end: 10,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-mouse-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-mouse-',
+        start: 12,
+        end: 15,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-mouse-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-mouse-',
+        start: 2,
+        end: 5,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-mouse-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-mouse-',
+        start: 17,
+        end: 20,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the brown-sheep's walking animations from the texture atlas.
+    anims.create({
+      key: 'brown-sheep-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-sheep-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-sheep-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-sheep-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-sheep-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-sheep-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-sheep-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-sheep-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the brown-snake's walking animations from the texture atlas.
+    anims.create({
+      key: 'brown-snake-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-snake-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-snake-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-snake-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-snake-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-snake-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-snake-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-snake-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the brown-wolf's walking animations from the texture atlas.
+    anims.create({
+      key: 'brown-wolf-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-wolf-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-wolf-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-wolf-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-wolf-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-wolf-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-wolf-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-wolf-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the dark-gray-wolf's walking animations from the texture atlas.
+    anims.create({
+      key: 'dark-gray-wolf-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-gray-wolf-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'dark-gray-wolf-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-gray-wolf-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'dark-gray-wolf-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-gray-wolf-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'dark-gray-wolf-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-gray-wolf-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the dark-wolf's walking animations from the texture atlas.
+    anims.create({
+      key: 'dark-wolf-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-wolf-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'dark-wolf-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-wolf-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'dark-wolf-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-wolf-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'dark-wolf-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'dark-wolf-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the gray-mouse's walking animations from the texture atlas.
+    anims.create({
+      key: 'gray-mouse-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-mouse-',
+        start: 7,
+        end: 10,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'gray-mouse-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-mouse-',
+        start: 12,
+        end: 15,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'gray-mouse-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-mouse-',
+        start: 2,
+        end: 5,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'gray-mouse-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-mouse-',
+        start: 17,
+        end: 20,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the gray-wolf's walking animations from the texture atlas.
+    anims.create({
+      key: 'gray-wolf-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-wolf-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'gray-wolf-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-wolf-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'gray-wolf-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-wolf-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'gray-wolf-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-wolf-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the green-cobra's walking animations from the texture atlas.
+    anims.create({
+      key: 'green-cobra-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-cobra-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'green-cobra-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-cobra-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'green-cobra-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-cobra-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'green-cobra-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-cobra-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the green-snake's walking animations from the texture atlas.
+    anims.create({
+      key: 'green-snake-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-snake-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'green-snake-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-snake-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'green-snake-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-snake-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'green-snake-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'green-snake-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the light-wolf's walking animations from the texture atlas.
+    anims.create({
+      key: 'light-wolf-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'light-wolf-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'light-wolf-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'light-wolf-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'light-wolf-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'light-wolf-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'light-wolf-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'light-wolf-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the pigeon's flying animations from the texture atlas.
+    anims.create({
+      key: 'pigeon-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'pigeon-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'pigeon-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'pigeon-',
+        start: 21,
+        end: 24,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'pigeon-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'pigeon-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'pigeon-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'pigeon-',
+        start: 29,
+        end: 32,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the red-snake's walking animations from the texture atlas.
     anims.create({
       key: 'red-snake-front-walk',
       frames: anims.generateFrameNames('atlas', {
@@ -513,6 +1171,132 @@ export default class TownGameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    // Create the seagull's flying animations from the texture atlas.
+    anims.create({
+      key: 'seagull-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'seagull-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'seagull-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'seagull-',
+        start: 21,
+        end: 24,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'seagull-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'seagull-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'seagull-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'seagull-',
+        start: 29,
+        end: 32,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the white-mouse's walking animations from the texture atlas.
+    anims.create({
+      key: 'white-mouse-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'gray-mouse-',
+        start: 7,
+        end: 10,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'white-mouse-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-mouse-',
+        start: 12,
+        end: 15,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'white-mouse-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-mouse-',
+        start: 2,
+        end: 5,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'white-mouse-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-mouse-',
+        start: 17,
+        end: 20,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // Create the white-sheep's walking animations from the texture atlas.
+    anims.create({
+      key: 'white-sheep-front-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-sheep-',
+        start: 5,
+        end: 8,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'white-sheep-back-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-sheep-',
+        start: 9,
+        end: 12,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'white-sheep-right-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-sheep-',
+        start: 1,
+        end: 4,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'white-sheep-left-walk',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'white-sheep-',
+        start: 13,
+        end: 16,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
     const camera = this.cameras.main;
     camera.startFollow(this.coveyTownController.ourPlayer.gameObjects.sprite);
     camera.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -539,27 +1323,6 @@ export default class TownGameScene extends Phaser.Scene {
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
   }
 
-  createPetSprites(pet: PetController) {
-    if (!pet.gameObjects) {
-      const sprite = this.physics.add
-        .sprite(pet.location.x, pet.location.y, 'atlas', pet.species)
-        .setSize(15, 20) // Set the size of the sprite here
-        .setOffset(0, 24);
-      const label = this.add.text(pet.location.x, pet.location.y - 20, pet.species, {
-        font: '18px monospace',
-        color: '#000000',
-        // padding: {x: 20, y: 10},
-        backgroundColor: '#ffffff',
-      });
-      pet.gameObjects = {
-        sprite: sprite,
-        label: label,
-        locationManagedByGameScene: false,
-      };
-      return sprite;
-    }
-  }
-
   createPlayerSprites(player: PlayerController) {
     if (!player.gameObjects) {
       const sprite = this.physics.add
@@ -573,44 +1336,15 @@ export default class TownGameScene extends Phaser.Scene {
         {
           font: '18px monospace',
           color: '#000000',
-          // padding: {x: 20, y: 10},
+          padding: { x: 0, y: 0 },
           backgroundColor: '#ffffff',
         },
       );
-
-      if (player.pet !== undefined) {
-        const petSprite = this.physics.add
-          .sprite(player.pet.location.x, player.pet.location.y, 'atlas', `${player.pet.species}-1`)
-          .setSize(30, 40)
-          .setOffset(0, 24);
-        const petLabel = this.add.text(
-          player.pet.location.x,
-          player.pet.location.y - 20,
-          player.pet.name,
-          {
-            font: '18px monospace',
-            color: '#000000',
-            padding: { x: 0, y: 0 },
-            backgroundColor: '#ffffff',
-          },
-        );
-        player.gameObjects = {
-          sprite,
-          label,
-          locationManagedByGameScene: false,
-          petGameObject: {
-            sprite: petSprite,
-            label: petLabel,
-            locationManagedByGameScene: false,
-          },
-        };
-      } else {
-        player.gameObjects = {
-          sprite,
-          label,
-          locationManagedByGameScene: false,
-        };
-      }
+      player.gameObjects = {
+        sprite,
+        label,
+        locationManagedByGameScene: true,
+      };
     }
   }
 
