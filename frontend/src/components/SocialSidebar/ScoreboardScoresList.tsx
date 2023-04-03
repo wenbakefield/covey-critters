@@ -11,7 +11,6 @@ export default function ScoreBoardView(): JSX.Element {
   townController.initalizeScoreboard();
   const scoreboardController = townController.scoreboardController;
   const scoreboard = useScoreBoard(scoreboardController);
-  console.log(scoreboard);
   return (
     <Box>
       <Heading as='h3' fontSize='m'>
