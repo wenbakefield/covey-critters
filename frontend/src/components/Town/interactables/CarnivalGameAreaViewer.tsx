@@ -1,5 +1,6 @@
 import {
   Button,
+  Container,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,7 +13,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useCarnivalGameAreaController, useInteractable } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
-import SelectPosterModal from './SelectPosterModal';
 import CarnivalGameAreaController, {
   usePetRule,
 } from '../../../classes/CarnivalGameAreaController';
@@ -20,10 +20,10 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
-import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
+import SBGameModal from './SBGameModal';
 
-const SCORE_LIMIT = 100;
-const TIME_LIMIT_SECONDS = 120;
+const SCORE_LIMIT = 500;
+const TIME_LIMIT_SECONDS = 100;
 
 /**
  * The PosterImage component does the following:
@@ -64,22 +64,42 @@ export function CarnivalGame({
     }
   }
 
-  //
-  async function playGame() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();
+  function playGame() {
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
       TIME_LIMIT_SECONDS,
     );
     controller.addGameSession(gameController);
-    await townController.initializeGame(controller, gameController.toModel());
-    const game = controller.getGameSessionByID(townController.ourPlayer.id);
+    townController.initializeGame(controller, gameController.toModel());
+    setSBGameController(gameController);
+    setIsPlaying(true);
+  }
+
+  function renderGame() {
+    if (isPlaying && sbGameController) {
+      return (
+        <SBGameModal
+          controller={controller}
+          isOpen={isOpen}
+          close={() => {
+            close();
+            townController.unPause();
+          }}
+        />
+      );
+    } else {
+      return <Container />;
+    }
   }
 
   return (
     <Modal
       isOpen={isOpen}
       size={'6xl'}
+
       onClose={() => {
         close();
         townController.unPause();
@@ -88,7 +108,7 @@ export function CarnivalGame({
       <ModalContent>
         {<ModalHeader>{'Carnival Game Area'}</ModalHeader>}
         <ModalCloseButton />
-        <ModalBody pb={6}>{/* />*/}</ModalBody>
+        <ModalBody pb={6}>{renderGame()}</ModalBody>
         {
           <ModalFooter>
             <Button colorScheme='blue' mr={3} onClick={playGame}>

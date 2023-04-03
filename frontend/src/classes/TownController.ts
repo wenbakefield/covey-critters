@@ -7,8 +7,8 @@ import TypedEmitter from 'typed-emitter';
 import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
-import { LoginController } from '../contexts/LoginControllerContext';
 import { Pet, PetRule, TownsService, TownsServiceClient } from '../generated/client';
+import { LoginController } from '../contexts/LoginControllerContext';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
