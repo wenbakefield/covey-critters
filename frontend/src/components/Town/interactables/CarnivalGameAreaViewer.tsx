@@ -118,6 +118,7 @@ export function CarnivalGame({
             <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
           </ModalFooter>
         }
+        {/* </form> */}
       </ModalContent>
     </Modal>
   );
