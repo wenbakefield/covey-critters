@@ -133,7 +133,6 @@ export default function SBGameModal({
     };
   }, []);
 
-
   useEffect(() => {
     async function terminateGame() {
       await coveyTownController.carnivalGameTimeLimitReach(controller);
