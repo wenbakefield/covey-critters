@@ -82,12 +82,12 @@ export function CarnivalGame({
     if (isPlaying && sbGameController) {
       return (
         <SBGameModal
+          controller={controller}
           isOpen={isOpen}
           close={() => {
             close();
             townController.unPause();
           }}
-          SBGameController={sbGameController}
         />
       );
     } else {
@@ -98,7 +98,7 @@ export function CarnivalGame({
   return (
     <Modal
       isOpen={isOpen}
-      size={'2xl'}
+      size={'6xl'}
       onClose={() => {
         close();
         townController.unPause();
@@ -152,19 +152,7 @@ export function CarnivalGameAreaViewer({
   }, [carnivalGameAreaController, townController]);
 
   if (rule.length === 0) {
-    return (
-      <NewCarnivalGameArea />
-      //   <SelectPosterModal
-      //     isOpen={selectIsOpen}
-      //     close={() => {
-      //       setSelectIsOpen(false);
-      //       // forces game to emit "posterSessionArea" event again so that
-      //       // repoening the modal works as expected
-      //       townController.interactEnd(carnivalGameArea);
-      //     }}
-      //     posterSessionArea={carnivalGameArea}
-      //   />
-    );
+    return <NewCarnivalGameArea />;
   }
   return (
     <>

@@ -10,22 +10,31 @@ import {
   Button,
 } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
-import SpaceBarGameController from '../../../classes/SBGameController';
-import { useSpaceBarGameController } from '../../../classes/TownController';
+import {
+  useCarnivalGameAreaController,
+  useSpaceBarGameController,
+} from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
 import * as Phaser from 'phaser';
+import CarnivalGameAreaController from '../../../classes/CarnivalGameAreaController';
+import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
+
+const SPEED = 1;
+const SPRITE_SPWAN_X = 50;
+const SPRITE_SPWAN_Y = 100;
 
 export default function SBGameModal({
+  controller,
   isOpen,
   close,
-  SBGameController,
 }: {
+  controller: CarnivalGameAreaController;
   isOpen: boolean;
   close: () => void;
-  SBGameController: SpaceBarGameController;
 }): JSX.Element {
   const coveyTownController = useTownController();
-  const sbGameController = useSpaceBarGameController(SBGameController?.player);
+  const carnivalGameController = useCarnivalGameAreaController(controller.id);
+  const sbGameController = useSpaceBarGameController(coveyTownController.ourPlayer.id);
   const [count, setCount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const onClose = () => {
@@ -57,31 +66,41 @@ export default function SBGameModal({
     // Load game assets
     function preload(this: Phaser.Scene) {
       this.load.image('track', '/assets/game/racetrack.png');
-      this.load.image('sprite', '/assets/atlas/gray-wolf/gray-wolf-1.png');
+      this.load.atlas('atlas', '../assets/atlas/atlas.png', '../assets/atlas/atlas.json');
     }
 
     // Create game objects
-    let sprite: Phaser.GameObjects.Image;
+    let sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     let cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     function create(this: Phaser.Scene) {
       this.add.image(0, 0, 'track').setOrigin(0);
-      sprite = this.add.image(50, 100, 'sprite');
+      const { anims } = this;
+      anims.create({
+        key: 'misa-right-walk',
+        frames: anims.generateFrameNames('atlas', {
+          prefix: 'misa-right-walk.',
+          start: 0,
+          end: 3,
+          zeroPad: 3,
+        }),
+        frameRate: 10,
+        repeat: -1,
+      });
+      sprite = this.physics.add
+        .sprite(SPRITE_SPWAN_X, SPRITE_SPWAN_Y, 'atlas', 'misa-right')
+        .setSize(15, 20);
+      sprite.anims.play(`misa-right-walk`, true);
       cursors = this.input.keyboard.createCursorKeys();
     }
 
-    // Update game state
-    const speed = 1;
-    let spaceKeyIsDown = false;
-
     function update() {
       // Move the sprite only when the spacebar is just down
-      if (cursors.space.isDown && !spaceKeyIsDown) {
-        sprite.x += speed;
+      if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+        console.log('space bar is pressed');
         coveyTownController.emitGameOnTick('32');
-        setCount(prev => prev + 1);
-        spaceKeyIsDown = true;
-      } else if (cursors.space.isUp) {
-        spaceKeyIsDown = false;
+        const score = sbGameController.score;
+        setCount(score);
+        sprite.setX(SPRITE_SPWAN_X + score * SPEED);
       }
     }
 
@@ -96,6 +115,13 @@ export default function SBGameModal({
         create: create,
         update: update,
       },
+      fps: { target: 30 },
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 }, // Top down game, so no gravity
+        },
+      },
     };
 
     // Create Phaser game instance
@@ -105,7 +131,7 @@ export default function SBGameModal({
       // Cleanup game instance
       game.destroy(true);
     };
-  }, [coveyTownController, sbGameController.score]);
+  }, []);
 
   useEffect(() => {
     if (count === sbGameController.scoreLimit || timeLeft === 0) {
@@ -114,34 +140,32 @@ export default function SBGameModal({
   }, [count, sbGameController.scoreLimit, showPopup, timeLeft]);
 
   return (
-    <ModalContent bg='tomato'>
-      <ModalHeader>500 Meter Dash!</ModalHeader>
-      <ModalCloseButton />
-      <ModalBody>
-        <Center color='white'>Time Limit: {timeLeft}</Center>
-        <Center>
-          <div ref={gameRef as React.RefObject<HTMLDivElement>}></div>
-        </Center>
-        <Modal isOpen={showPopup} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader fontSize='lg' fontWeight='bold'>
-              Game Over
-            </ModalHeader>
+    <ModalBody>
+      <Center color='black'>Time Limit: {timeLeft}</Center>
+      <Center>
+        <div ref={gameRef as React.RefObject<HTMLDivElement>}></div>
+      </Center>
+      <Center color='black'>Score: {count}</Center>
+      <Modal isOpen={showPopup} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader fontSize='lg' fontWeight='bold'>
+            Game Over
+          </ModalHeader>
 
-            <ModalBody>Your score was: {count}</ModalBody>
+          <ModalBody>Your score was: {count}</ModalBody>
 
-            <ModalFooter>
-              <Button colorScheme='blue' onClick={onClose}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-        <ModalFooter>
-          <Center color='white'>Score: {count}</Center>
-        </ModalFooter>
-      </ModalBody>
-    </ModalContent>
+          <ModalFooter>
+            <Button colorScheme='blue' onClick={onClose}>
+              Close
+            </Button>
+            <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <ModalFooter>
+        <Center color='white'>Score: {count}</Center>
+      </ModalFooter>
+    </ModalBody>
   );
 }
