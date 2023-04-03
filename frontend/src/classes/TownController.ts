@@ -334,8 +334,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private set _players(newPlayers: PlayerController[]) {
     this.emit('playersChanged', newPlayers);
     this._playersInternal = newPlayers;
-    console.log('sessiontoken:');
-    console.log(this.sessionToken);
   }
 
   public get conversationAreas() {
