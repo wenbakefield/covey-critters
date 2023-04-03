@@ -1,5 +1,6 @@
 import {
   Button,
+  Container,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -24,10 +25,10 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
-import ScoreboardController from '../../../classes/ScoreboardController';
+import SBGameModal from './SBGameModal';
 
-const SCORE_LIMIT = 100;
-const TIME_LIMIT_SECONDS = 120;
+const SCORE_LIMIT = 500;
+const TIME_LIMIT_SECONDS = 100;
 
 /**
  * The PosterImage component does the following:
@@ -68,21 +69,41 @@ export function CarnivalGame({
     }
   }
 
-  //
-  async function playGame() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();
+  function playGame() {
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
       TIME_LIMIT_SECONDS,
     );
-    //controller.addGameSession(gameController);
-    //townController.initializeGame(controller, gameController.toModel());
-    // await townController.addPlayerScore(5); example for how to add score when game finishes.
+    controller.addGameSession(gameController);
+    townController.initializeGame(controller, gameController.toModel());
+    setSBGameController(gameController);
+    setIsPlaying(true);
+  }
+
+  function renderGame() {
+    if (isPlaying && sbGameController) {
+      return (
+        <SBGameModal
+          isOpen={isOpen}
+          close={() => {
+            close();
+            townController.unPause();
+          }}
+          SBGameController={sbGameController}
+        />
+      );
+    } else {
+      return <Container />;
+    }
   }
 
   return (
     <Modal
       isOpen={isOpen}
+      size={'2xl'}
       onClose={() => {
         close();
         townController.unPause();
@@ -91,6 +112,7 @@ export function CarnivalGame({
       <ModalContent>
         {<ModalHeader>{'Carnival Game Area'}</ModalHeader>}
         <ModalCloseButton />
+        <ModalBody pb={6}>{renderGame()}</ModalBody>
         {
           <ModalFooter>
             <Button colorScheme='blue' mr={3} onClick={playGame}>
@@ -98,6 +120,7 @@ export function CarnivalGame({
             </Button>
           </ModalFooter>
         }
+        {/* </form> */}
       </ModalContent>
     </Modal>
   );
