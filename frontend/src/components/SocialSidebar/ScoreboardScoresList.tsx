@@ -1,5 +1,5 @@
 import { Box, Heading, ListItem, UnorderedList } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useScoreBoard } from '../../classes/ScoreboardController';
 import useTownController from '../../hooks/useTownController';
 
@@ -8,9 +8,16 @@ import useTownController from '../../hooks/useTownController';
  */
 export default function ScoreBoardView(): JSX.Element {
   const townController = useTownController();
-  townController.initalizeScoreboard();
   const scoreboardController = townController.scoreboardController;
   const scoreboard = useScoreBoard(scoreboardController);
+
+  useEffect(() => {
+    async function loadScoreBoard() {
+      await townController.initalizeScoreboard();
+    }
+    loadScoreBoard();
+  }, []);
+
   return (
     <Box>
       <Heading as='h3' fontSize='m'>
