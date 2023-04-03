@@ -440,6 +440,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Note that setting the players array will also emit an event that the players in the town have changed.
      */
     this._socket.on('playerDisconnect', disconnectedPlayer => {
+      this.removePlayer();
       this._players = this.players.filter(eachPlayer => eachPlayer.id !== disconnectedPlayer.id);
     });
     /**
