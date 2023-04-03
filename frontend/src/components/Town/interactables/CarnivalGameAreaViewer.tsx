@@ -21,6 +21,7 @@ import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
 import SBGameModal from './SBGameModal';
+import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
 const SCORE_LIMIT = 500;
 const TIME_LIMIT_SECONDS = 100;
