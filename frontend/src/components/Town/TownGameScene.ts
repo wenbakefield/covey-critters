@@ -153,6 +153,13 @@ export default class TownGameScene extends Phaser.Scene {
           label.destroy();
         }
       }
+      if (disconnectedPlayer.pet && disconnectedPlayer.pet.gameObjects) {
+        const { sprite, label } = disconnectedPlayer.pet.gameObjects;
+        if (sprite && label) {
+          sprite.destroy();
+          label.destroy();
+        }
+      }
     });
     // Remove disconnected players from list
     this._players = players;
@@ -325,7 +332,7 @@ export default class TownGameScene extends Phaser.Scene {
         const location = playerController.location;
         const rotation = playerController.pet.rotation;
         const sprite = this.physics.add
-          .sprite(location.x, location.y, 'atlas', `${species}-${rotation}-walk`)
+          .sprite(location.x, location.y, 'atlas', `${species}-1`)
           .setSize(15, 20)
           .setOffset(0, 24)
           .setDepth(6);
