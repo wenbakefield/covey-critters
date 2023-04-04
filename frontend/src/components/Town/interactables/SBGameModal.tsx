@@ -56,6 +56,7 @@ export default function SBGameModal({
   useEffect(() => {
     if (!timeLeft) {
       coveyTownController.addPlayerScore(count);
+      coveyTownController.carnivalGameTimeLimitReach(controller);
       return;
     }
     const intervalId = setInterval(() => {
@@ -139,7 +140,6 @@ export default function SBGameModal({
 
   useEffect(() => {
     async function terminateGame() {
-      await coveyTownController.carnivalGameTimeLimitReach(controller);
       setShowPopup(true);
     }
     if (count === sbGameController.scoreLimit || timeLeft === 0) {
