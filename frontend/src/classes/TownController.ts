@@ -8,7 +8,13 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { Pet, PetRule, TownsService, TownsServiceClient } from '../generated/client';
+import {
+  Pet,
+  PetRule,
+  PlayerScoreTuple,
+  TownsService,
+  TownsServiceClient,
+} from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -250,6 +256,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket = io(url, { auth: { userName, townID } });
     this._townsService = new TownsServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
+    // this._scoreboardController.scoreboard = []; // alternative to: this.initalizeScoreboard(); error here
   }
 
   public get sessionToken() {
@@ -433,6 +440,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Note that setting the players array will also emit an event that the players in the town have changed.
      */
     this._socket.on('playerDisconnect', disconnectedPlayer => {
+      this.removePlayer();
       this._players = this.players.filter(eachPlayer => eachPlayer.id !== disconnectedPlayer.id);
     });
     /**
@@ -948,13 +956,33 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     );
   }
 
+  public async addPlayerScore(score: number): Promise<void> {
+    await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
+    this.initalizeScoreboard();
+  }
+
+  public async removePlayer(): Promise<void> {
+    await this._townsService.removePlayer(this.townID, this.sessionToken);
+    this.initalizeScoreboard();
+  }
+
   public async initalizeScoreboard(): Promise<void> {
-    const updatePlayerScoreTuple = await this._townsService.getAllScores(this.townID);
+    const updatePlayerScoreTuple = await this._townsService.getAllScores();
     this._scoreboardController.scoreboard = updatePlayerScoreTuple;
   }
 
   public get scoreboardController() {
     return this._scoreboardController;
+  }
+
+  public async getPercentile(score: number): Promise<number> {
+    const percentile = await this._townsService.getPercentile(score);
+    return percentile;
+  }
+
+  public async getTopXScoreboard(top: number): Promise<PlayerScoreTuple[]> {
+    const list = await this._townsService.getXScores(top);
+    return list;
   }
 
   /**

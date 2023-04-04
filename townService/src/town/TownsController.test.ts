@@ -473,116 +473,223 @@ describe('TownsController integration tests', () => {
       });
     });
     describe('Scoreboard Controller tests', () => {
+      beforeEach(async () => {
+        testingTown = await createTownForTesting(undefined, true);
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+      });
       it('getAllScores test for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        const getAllScores = await testAreaController.getAllScores(testingTown.townID);
+        const getAllScores = await testAreaController.getAllScores();
         expect(getAllScores).toEqual([]);
       });
       it('getTopX test for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        const getXScores = await testAreaController.getXScores(testingTown.townID, 5);
+        const getXScores = await testAreaController.getXScores(5);
         expect(getXScores).toEqual([]);
       });
       it('calculatedPercentile test with input of 0 for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, 0);
+        const getPercentile = await testAreaController.getPercentile(0);
         expect(getPercentile).toEqual(0);
       });
       it('calculatedPercentile test with input of a positive number for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, 8);
+        const getPercentile = await testAreaController.getPercentile(8);
         expect(getPercentile).toEqual(0);
       });
       it('calculatedPercentile test with input of a negative number for empty scoreboard', async () => {
         const testAreaController = new TownsController();
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, -8);
+        const getPercentile = await testAreaController.getPercentile(-8);
         expect(getPercentile).toEqual(0);
       });
       it('adding a player score tuple - test with getXScores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        const newPlayerScoreTuple = { player: newPlayer.toPlayerModel(), score: 30 };
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        const listOfExpectedScores = await testAreaController.getXScores(testingTown.townID, 5);
-        expect(listOfExpectedScores).toEqual([newPlayerScoreTuple]);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        const listOfRecievedScores = await testAreaController.getXScores(5);
+        const recievedPlayer = listOfRecievedScores[0].player.userName;
+        const recievedScore = listOfRecievedScores[0].score;
+        expect(recievedPlayer).toEqual(player.userName);
+        expect(recievedScore).toEqual(30);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
       });
       it('adding a player score tuple - test with getAllScores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        const newPlayerScoreTuple = { player: newPlayer.toPlayerModel(), score: 30 };
-        const expectedlist = [newPlayerScoreTuple];
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        const allScores = await testAreaController.getAllScores(testingTown.townID);
-        expect(allScores).toEqual(expectedlist);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        const recievedPlayer = listOfRecievedScores[0].player.userName;
+        const recievedScore = listOfRecievedScores[0].score;
+        expect(recievedPlayer).toEqual(player.userName);
+        expect(recievedScore).toEqual(30);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
       });
       it('removing a player score tuple', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
-        const allScores = await testAreaController.getAllScores(testingTown.townID);
-        expect(allScores).toEqual([]);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        expect(listOfRecievedScores).toEqual([]);
       });
       it('removing a player that has multiple scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
-        const getAllScores = await testAreaController.getAllScores(testingTown.townID);
-        expect(getAllScores).toEqual([]);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 60);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        expect(listOfRecievedScores).toEqual([]);
       });
       it('removing a player that when there are multiple players', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        const newPlayer2 = new Player(nanoid(), mock<TownEmitter>());
-        const newPlayerScoreTuple = { player: newPlayer2.toPlayerModel(), score: 40 };
-        const expectedList = [newPlayerScoreTuple];
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer2.toPlayerModel(), 40);
-        const getAllScores = await testAreaController.getAllScores(testingTown.townID);
-        expect(getAllScores).toEqual(expectedList);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer2.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        const recievedPlayer = listOfRecievedScores[0].player.userName;
+        const recievedScore = listOfRecievedScores[0].score;
+        const recievedPlayerTwo = listOfRecievedScores[1].player.userName;
+        const recievedScoreTwo = listOfRecievedScores[1].score;
+        expect(recievedPlayer).toEqual(playerTwo.userName);
+        expect(recievedScore).toEqual(67);
+        expect(recievedPlayerTwo).toEqual(playerThree.userName);
+        expect(recievedScoreTwo).toEqual(23);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
       });
       it('getting a percentile for score higher than all scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, 40);
-        expect(getPercentile).toEqual(0);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        const percentile = await testAreaController.getPercentile(99);
+        expect(percentile).toEqual(0);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
       });
       it('getting a percentile for a score equal to highest score', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, 37);
-        expect(getPercentile).toEqual(0);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        const percentile = await testAreaController.getPercentile(67);
+        expect(percentile).toEqual(0);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
       });
       it('getting a percentile for a score between 2 different scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, 33);
-        expect(getPercentile).toEqual(0.5);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+
+        const percentile = await testAreaController.getPercentile(55);
+        expect(percentile).toEqual(0.5);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
       });
       it('getting a percentile for a score lower than all scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
         const testAreaController = new TownsController();
-        const newPlayer = new Player(nanoid(), mock<TownEmitter>());
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 30);
-        await testAreaController.addPlayerScore(testingTown.townID, newPlayer.toPlayerModel(), 37);
-        const getPercentile = await testAreaController.getPercentile(testingTown.townID, 28);
-        expect(getPercentile).toEqual(1);
-        await testAreaController.removePlayer(testingTown.townID, newPlayer.toPlayerModel());
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        const percentile = await testAreaController.getPercentile(18);
+        expect(percentile).toEqual(1);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
       });
     });
   });
