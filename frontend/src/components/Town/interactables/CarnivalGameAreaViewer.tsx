@@ -23,7 +23,7 @@ import NewCarnivalGameArea from './CarnivalGameAreaModal';
 import SBGameModal from './SBGameModal';
 import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
-const SCORE_LIMIT = 500;
+const SCORE_LIMIT = 10;
 const TIME_LIMIT_SECONDS = 100;
 
 /**

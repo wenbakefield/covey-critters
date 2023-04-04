@@ -64,6 +64,8 @@ export default class TownGameScene extends Phaser.Scene {
 
   private _onGameReadyListeners: Callback[] = [];
 
+  private _layer: Phaser.Tilemaps.TilemapLayer[] = [];
+
   private _gameIsReady = new Promise<void>(resolve => {
     if (this._ready) {
       resolve();
@@ -198,7 +200,7 @@ export default class TownGameScene extends Phaser.Scene {
   }
 
   update() {
-    this.assignPlayerPetSprite(this.coveyTownController.ourPlayer);
+    this.updateEveryPetInTown();
     if (this._paused) {
       return;
     }
@@ -311,6 +313,10 @@ export default class TownGameScene extends Phaser.Scene {
     return gameObjects as Interactable[];
   }
 
+  updateEveryPetInTown() {
+    this._players.map(player => this.assignPlayerPetSprite(player));
+  }
+
   assignPlayerPetSprite(playerController: PlayerController) {
     if (playerController.pet) {
       if (!playerController.pet.gameObjects) {
@@ -321,13 +327,20 @@ export default class TownGameScene extends Phaser.Scene {
         const sprite = this.physics.add
           .sprite(location.x, location.y, 'atlas', `${species}-${rotation}-walk`)
           .setSize(15, 20)
-          .setOffset(0, 24);
-        const label = this.add.text(location.x - 7, location.y - 20, petName, {
-          font: '11px monospace',
-          color: '#000000',
-          padding: { x: 0, y: 0 },
-          backgroundColor: '#ffffff',
-        });
+          .setOffset(0, 24)
+          .setDepth(6);
+        const label = this.add
+          .text(location.x - 7, location.y - 20, petName, {
+            font: '11px monospace',
+            color: '#000000',
+            padding: { x: 0, y: 0 },
+            backgroundColor: '#ffffff',
+          })
+          .setDepth(6);
+        if (this._layer.length !== 0) {
+          console.log(`add sprite to dfferent layers ${this._layer.length}`);
+          this._layer.map(lay => this.physics.add.collider(sprite, lay));
+        }
 
         playerController.pet.gameObjects = {
           sprite: sprite,
@@ -369,6 +382,7 @@ export default class TownGameScene extends Phaser.Scene {
     aboveLayer.setCollisionByProperty({ collides: true });
 
     const veryAboveLayer = this.map.createLayer('Very Above Player', tileset, 0, 0);
+    this._layer.push(belowLayer, wallsLayer, onTheWallsLayer, worldLayer, veryAboveLayer);
     /* By default, everything gets depth sorted on the screen in the order we created things.
          Here, we want the "Above Player" layer to sit on top of the player, so we explicitly give
          it a depth. Higher depths will sit on top of lower depth objects.
@@ -1634,10 +1648,16 @@ export default class TownGameScene extends Phaser.Scene {
           backgroundColor: '#ffffff',
         },
       );
+
+      if (player.pet) {
+        if (player.pet.gameObjects === undefined) {
+          this.assignPlayerPetSprite(player);
+        }
+      }
       player.gameObjects = {
         sprite,
         label,
-        locationManagedByGameScene: true,
+        locationManagedByGameScene: false,
       };
     }
   }
