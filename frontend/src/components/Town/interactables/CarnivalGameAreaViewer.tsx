@@ -11,13 +11,8 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import {
-  useCarnivalGameAreaController,
-  useInteractable,
-  usePosterSessionAreaController,
-} from '../../../classes/TownController';
+import { useCarnivalGameAreaController, useInteractable } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
-import SelectPosterModal from './SelectPosterModal';
 import CarnivalGameAreaController, {
   usePetRule,
 } from '../../../classes/CarnivalGameAreaController';
@@ -25,9 +20,11 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
+import ScoreboardController from '../../../classes/ScoreboardController';
 import SBGameModal from './SBGameModal';
+import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
-const SCORE_LIMIT = 500;
+const SCORE_LIMIT = 10;
 const TIME_LIMIT_SECONDS = 100;
 
 /**
@@ -71,7 +68,7 @@ export function CarnivalGame({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();
-  function playGame() {
+  async function playGame() {
     const gameController = new SpaceBarGameController(
       townController.ourPlayer.id,
       SCORE_LIMIT,
@@ -87,12 +84,12 @@ export function CarnivalGame({
     if (isPlaying && sbGameController) {
       return (
         <SBGameModal
+          controller={controller}
           isOpen={isOpen}
           close={() => {
             close();
             townController.unPause();
           }}
-          SBGameController={sbGameController}
         />
       );
     } else {
@@ -103,7 +100,7 @@ export function CarnivalGame({
   return (
     <Modal
       isOpen={isOpen}
-      size={'2xl'}
+      size={'6xl'}
       onClose={() => {
         close();
         townController.unPause();
@@ -118,6 +115,7 @@ export function CarnivalGame({
             <Button colorScheme='blue' mr={3} onClick={playGame}>
               Play Game
             </Button>
+            <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
           </ModalFooter>
         }
         {/* </form> */}
@@ -157,19 +155,7 @@ export function CarnivalGameAreaViewer({
   }, [carnivalGameAreaController, townController]);
 
   if (rule.length === 0) {
-    return (
-      <NewCarnivalGameArea />
-      //   <SelectPosterModal
-      //     isOpen={selectIsOpen}
-      //     close={() => {
-      //       setSelectIsOpen(false);
-      //       // forces game to emit "posterSessionArea" event again so that
-      //       // repoening the modal works as expected
-      //       townController.interactEnd(carnivalGameArea);
-      //     }}
-      //     posterSessionArea={carnivalGameArea}
-      //   />
-    );
+    return <NewCarnivalGameArea />;
   }
   return (
     <>

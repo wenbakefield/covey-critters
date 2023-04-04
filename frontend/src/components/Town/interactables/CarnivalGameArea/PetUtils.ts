@@ -1,5 +1,4 @@
 import { nanoid } from 'nanoid';
-import PetController from '../../../../classes/PetController';
 import { Pet } from '../../../../generated/client';
 
 export function generateDefaultPet(species: string[]): Pet[] {
@@ -8,9 +7,10 @@ export function generateDefaultPet(species: string[]): Pet[] {
       id: nanoid(),
       name: eachSpecies,
       species: eachSpecies,
-      movementType: 'offsetPlayer',
+      movementType: 'followPlayer',
       x: 0,
       y: 0,
+      rotation: 'front',
     };
   });
 }

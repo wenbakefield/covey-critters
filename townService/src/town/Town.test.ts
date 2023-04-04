@@ -770,6 +770,7 @@ describe('Town', () => {
         movementType: 'offsetPlayer',
         x: 0,
         y: 0,
+        rotation: 'front',
       };
       const newModel: CarnivalGameAreaModel = {
         id: 'Name5',
@@ -820,7 +821,8 @@ describe('Town', () => {
             species: 'brown-cobra',
             movementType: 'offsetPlayer',
             x: 10,
-            y: 80,
+            y: 120,
+            rotation: 'front',
           };
           expect(lastEvent.pet).toEqual(expectedPet);
         });

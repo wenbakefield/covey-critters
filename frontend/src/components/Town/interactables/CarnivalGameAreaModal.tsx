@@ -33,6 +33,7 @@ export default function NewCarnivalGameArea(): JSX.Element {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         },
       ],
     },

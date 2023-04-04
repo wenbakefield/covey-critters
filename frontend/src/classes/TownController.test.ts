@@ -133,6 +133,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         };
         petController = PetController.fromModel(petModel);
         petListener = getEventListener(mockSocket, 'petMoved');
@@ -156,6 +157,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 10,
           y: 20,
+          rotation: 'front',
         };
         petListener({
           playerId: testController.ourPlayer.id,
@@ -175,6 +177,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         };
         petListener({
           playerId: testController.ourPlayer.id,
@@ -222,6 +225,7 @@ describe('TownController', () => {
         species: 'black-bear',
         x: 0,
         y: 0,
+        rotation: 'front',
       });
       const expectPetUpdate = testController.ourPlayer.pet;
       const movedPetListener = jest.fn();
@@ -600,6 +604,7 @@ describe('TownController', () => {
                   species: 'brown-cobra',
                   x: 0,
                   y: 0,
+                  rotation: 'front',
                 },
               ],
             },
@@ -624,6 +629,7 @@ describe('TownController', () => {
                   species: 'brown-cobra',
                   x: 0,
                   y: 0,
+                  rotation: 'front',
                 },
               ],
             },
@@ -719,6 +725,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         },
       };
       emitEventAndExpectListenerFiring(

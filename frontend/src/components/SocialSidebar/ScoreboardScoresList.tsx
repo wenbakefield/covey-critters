@@ -12,10 +12,10 @@ export default function ScoreBoardView(): JSX.Element {
   const scoreboard = useScoreBoard(scoreboardController);
 
   useEffect(() => {
-    async function loadScoreBoard() {
+    async function loadScoreboard() {
       await townController.initalizeScoreboard();
     }
-    loadScoreBoard();
+    loadScoreboard();
   }, []);
 
   return (

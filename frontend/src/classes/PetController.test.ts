@@ -17,6 +17,7 @@ describe('[T2] PetController', () => {
       species: 'brown-cobra',
       x: 0,
       y: 0,
+      rotation: 'right',
     };
     testController = new PetController(petModel);
     testController.addListener('petMovementChange', mockListeners.petMovementChange);

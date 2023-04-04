@@ -395,8 +395,7 @@ export class TownsController extends Controller {
     if (!carnivalArea || !isCarnivalGameArea(carnivalArea)) {
       throw new InvalidParametersError('Invalid Carnival Game Area');
     }
-    const game = (<CarnivalGameAreaReal>carnivalArea).getGame(player.id);
-    game.updateFromModel(gameModel);
+    (<CarnivalGameAreaReal>carnivalArea).addGameSessionToCarnival(player, gameModel);
   }
 
   @Get('{townID}/Pet/')
