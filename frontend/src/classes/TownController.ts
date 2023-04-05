@@ -471,7 +471,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       // TODO Update Pet Movement
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === petMoved.playerId);
       if (playerToUpdate) {
-        if (playerToUpdate.pet && petMoved.pet) {
+        if (playerToUpdate.pet && petMoved.pet && playerToUpdate.pet.id === petMoved.pet.id) {
           const x = petMoved.pet.x;
           const y = petMoved.pet.y;
           playerToUpdate.pet.location = { x, y };

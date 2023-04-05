@@ -43,6 +43,10 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     this._model = petModel;
   }
 
+  public get id() {
+    return this._model.id;
+  }
+
   public get name() {
     if (this._model) {
       return this._model.name;
@@ -147,6 +151,7 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       sprite.destroy();
       label?.removedFromScene();
       label?.destroy();
+      this.gameObjects = undefined;
     }
   }
 
