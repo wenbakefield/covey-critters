@@ -345,7 +345,6 @@ export default class TownGameScene extends Phaser.Scene {
           })
           .setDepth(6);
         if (this._layer.length !== 0) {
-          console.log(`add sprite to dfferent layers ${this._layer.length}`);
           this._layer.map(lay => this.physics.add.collider(sprite, lay));
         }
 

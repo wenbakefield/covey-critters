@@ -53,7 +53,6 @@ export default function SBGameModal({
   useEffect(() => {
     async function terminateGame() {
       const endGame = await coveyTownController.carnivalGameTimeLimitReach(carnivalGameController);
-      console.log(endGame);
     }
 
     if (!timeLeft) {
@@ -105,7 +104,6 @@ export default function SBGameModal({
         Phaser.Input.Keyboard.JustDown(cursors.space) &&
         sbGameController.score < sbGameController.scoreLimit
       ) {
-        console.log('space bar is pressed');
         coveyTownController.emitGameOnTick('32');
         const score = sbGameController.score;
         setCount(score);
@@ -138,7 +136,6 @@ export default function SBGameModal({
 
     return () => {
       // Cleanup game instance
-      console.log('game destroyed');
       game.destroy(true);
     };
   }, []);

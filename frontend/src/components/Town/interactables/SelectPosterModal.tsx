@@ -67,7 +67,6 @@ export default function SelectPosterModal({
 
   const createPoster = useCallback(async () => {
     if (title && posterSessionAreController && posterFileContents) {
-      console.log('posterFileContents: ' + posterFileContents);
       const posterToCreate: PosterSessionAreaModel = {
         title,
         id: posterSessionAreController.id,
