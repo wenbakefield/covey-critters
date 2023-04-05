@@ -111,7 +111,12 @@ describe('PetController integration tests', () => {
 
     describe('Pet and CarnivalGameArea', () => {
       it('Assign Pet to Player', async () => {
-        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
+        const game = await controller.timeLimitReached(
+          testingTown.townID,
+          carnivalGameArea.id,
+          sessionToken,
+        );
+        await controller.addPlayerScore(testingTown.townID, sessionToken, game.score);
         const pet = await controller.assignPet(
           testingTown.townID,
           carnivalGameArea.id,
@@ -125,7 +130,12 @@ describe('PetController integration tests', () => {
       });
 
       it('Retrieve Pet from Player', async () => {
-        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
+        const game = await controller.timeLimitReached(
+          testingTown.townID,
+          carnivalGameArea.id,
+          sessionToken,
+        );
+        await controller.addPlayerScore(testingTown.townID, sessionToken, game.score);
         await controller.assignPet(testingTown.townID, carnivalGameArea.id, 'lemmy', sessionToken);
         const pet = await controller.getPetFromPlayerId(testingTown.townID, sessionToken);
         expect(pet).toBeDefined();
@@ -134,7 +144,12 @@ describe('PetController integration tests', () => {
         expect(pet?.x).not.toEqual(0);
       });
       it('Rename Exiting Pet from Player', async () => {
-        await controller.timeLimitReached(testingTown.townID, carnivalGameArea.id, sessionToken);
+        const game = await controller.timeLimitReached(
+          testingTown.townID,
+          carnivalGameArea.id,
+          sessionToken,
+        );
+        await controller.addPlayerScore(testingTown.townID, sessionToken, game.score);
         await controller.assignPet(testingTown.townID, carnivalGameArea.id, 'lemmy', sessionToken);
         const pet = await controller.getPetFromPlayerId(testingTown.townID, sessionToken);
         expect(pet).toBeDefined();

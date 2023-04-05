@@ -63,15 +63,10 @@ export default class Scoreboard implements IScoreBoard {
 
   // return the calculatedPercentile
   public calculatedPercentile(givenScore: number) {
-    if (this._playersAndScores.length === 0) {
-      return 0;
-    }
-    let betterScoreCount = 0;
-    this._playersAndScores.forEach(tuple => {
-      if (tuple.score > givenScore) {
-        betterScoreCount += 1;
-      }
-    });
-    return betterScoreCount / this._playersAndScores.length;
+    const percentile = (arr: number[], val: number) =>
+      arr.reduce((acc, v) => acc + (v <= val ? 1 : 0), 0) / arr.length;
+
+    const allScore = this._playersAndScores.map(playerScore => playerScore.score);
+    return Number.isNaN(percentile(allScore, givenScore)) ? 0 : percentile(allScore, givenScore);
   }
 }

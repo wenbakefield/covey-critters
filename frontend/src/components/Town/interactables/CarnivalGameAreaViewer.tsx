@@ -25,7 +25,7 @@ import SBGameModal from './SBGameModal';
 import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
 const SCORE_LIMIT = 10;
-const TIME_LIMIT_SECONDS = 100;
+const TIME_LIMIT_SECONDS = 20;
 
 /**
  * The PosterImage component does the following:
@@ -100,7 +100,7 @@ export function CarnivalGame({
   return (
     <Modal
       isOpen={isOpen}
-      size={'6xl'}
+      size={'4xl'}
       onClose={() => {
         close();
         townController.unPause();
@@ -109,13 +109,14 @@ export function CarnivalGame({
       <ModalContent>
         {<ModalHeader>{'Carnival Game Area'}</ModalHeader>}
         <ModalCloseButton />
-        <ModalBody pb={6}>{renderGame()}</ModalBody>
+        <ModalBody color={'gray'} pb={6}>
+          {renderGame()}
+        </ModalBody>
         {
           <ModalFooter>
             <Button colorScheme='blue' mr={3} onClick={playGame}>
               Play Game
             </Button>
-            <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
           </ModalFooter>
         }
         {/* </form> */}

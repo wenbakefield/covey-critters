@@ -750,7 +750,7 @@ describe('Town', () => {
         }
         const lastEvent = getLastEmittedEvent(townEmitter, 'gameUpdated');
         expect(lastEvent).toEqual(endGame);
-        expect(scoreboard.getAllScores()).toHaveLength(1);
+        expect(scoreboard.getAllScores()).toHaveLength(0);
       });
     });
 
@@ -805,6 +805,7 @@ describe('Town', () => {
           const carnivalGame = <CarnivalGameArea>town.getInteractable('Name5');
           const game = carnivalGame.getGame(player.id);
           game.isOver(true); // Overide the game state to end
+          carnivalGame.notifyScoreBoard(playerTestData.player!.id);
           actualPet = carnivalGame.assignPetToPlayer(playerTestData.player!.id, 'lemmy');
         });
 

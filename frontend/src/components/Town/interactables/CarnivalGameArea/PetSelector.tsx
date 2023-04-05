@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PetController from '../../../../classes/PetController';
 import PlayerController from '../../../../classes/PlayerController';
-import { useCarnivalGameAreaController, usePlayers } from '../../../../classes/TownController';
+import {
+  useCarnivalGameAreaController,
+  usePlayers,
+  useSpaceBarGameController,
+} from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import { Button } from '@chakra-ui/react';
-import { Pet } from '../../../../generated/client';
 import CarnivalGameAreaController from '../../../../classes/CarnivalGameAreaController';
 
 export function PetPickerDialog(props: {
   isDisable: boolean;
   controller: CarnivalGameAreaController;
   petName: string;
+  onClick: () => void;
 }): JSX.Element {
-  const [pet, setPet] = useState<Pet | undefined>(undefined);
   const townController = useTownController();
   const carnivalGameAreaController = useCarnivalGameAreaController(props.controller.id);
+  const sbGameController = useSpaceBarGameController(townController.ourPlayer.id);
   const playerControllers = usePlayers();
   const ourPlayerController = playerControllers.find(
     player => player.id === townController.ourPlayer.id,
@@ -25,20 +29,15 @@ export function PetPickerDialog(props: {
   }
 
   async function assignPlayerAPet(ourPlayer: PlayerController) {
-    const game = carnivalGameAreaController.getGameSessionByID(townController.ourPlayer.id);
-    if (game) {
-      if (game.isOver) {
-        const recievedPet = await townController.assignPetToPlayer(
-          carnivalGameAreaController,
-          props.petName,
-        );
-        if (recievedPet) {
-          // Want to update player controller to assign Pet Controller
-          const newPetController = PetController.fromModel(recievedPet);
-          ourPlayer.pet = newPetController;
-          setPet(recievedPet);
-        }
-      }
+    await townController.addPlayerScore(sbGameController.score);
+    const recievedPet = await townController.assignPetToPlayer(
+      carnivalGameAreaController,
+      props.petName,
+    );
+    if (recievedPet) {
+      // Want to update player controller to assign Pet Controller
+      const newPetController = PetController.fromModel(recievedPet);
+      ourPlayer.pet = newPetController;
     }
   }
   return (
@@ -48,6 +47,7 @@ export function PetPickerDialog(props: {
         colorScheme='gray'
         onClick={() => {
           assignPlayerAPet(townController.ourPlayer);
+          props.onClick();
         }}>
         Get Pet!
       </Button>

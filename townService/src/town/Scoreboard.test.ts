@@ -25,11 +25,11 @@ describe('Scoreboard tests', () => {
     });
 
     it('get calculatedPercentile of 0 in empty scoreboard', () => {
-      expect(scoreboard1.calculatedPercentile(0)).toBe(0);
+      expect(scoreboard1.calculatedPercentile(0)).toEqual(0);
     });
 
     it('get calculatedPercentile of a negative number in empty scoreboard', () => {
-      expect(scoreboard1.calculatedPercentile(-8)).toBe(0);
+      expect(scoreboard1.calculatedPercentile(-8)).toEqual(0);
     });
   });
   describe('Tests for adding and removing scores from scoreboard functionality and effects on get', () => {
@@ -204,7 +204,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer2.toPlayerModel(), 25);
       const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
-      expect(scoreboard1.calculatedPercentile(40)).toEqual(0);
+      expect(scoreboard1.calculatedPercentile(40)).toEqual(1);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -217,7 +217,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer2.toPlayerModel(), 25);
       const newPlayer3 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
-      expect(scoreboard1.calculatedPercentile(4)).toEqual(1);
+      expect(scoreboard1.calculatedPercentile(4)).toEqual(0);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -232,7 +232,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
       const newPlayer4 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer4.toPlayerModel(), 10);
-      expect(scoreboard1.calculatedPercentile(27)).toEqual(0.25);
+      expect(scoreboard1.calculatedPercentile(27)).toEqual(0.75);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());
@@ -248,7 +248,7 @@ describe('Scoreboard tests', () => {
       scoreboard1.notifyScoreBoard(newPlayer3.toPlayerModel(), 30);
       const newPlayer4 = new Player(nanoid(), mock<TownEmitter>());
       scoreboard1.notifyScoreBoard(newPlayer4.toPlayerModel(), 10);
-      expect(scoreboard1.calculatedPercentile(15)).toEqual(0.75);
+      expect(scoreboard1.calculatedPercentile(15)).toEqual(0.25);
       scoreboard1.removePlayerScore(newPlayer.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer2.toPlayerModel());
       scoreboard1.removePlayerScore(newPlayer3.toPlayerModel());

@@ -612,7 +612,7 @@ describe('TownsController integration tests', () => {
         await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
 
         const percentile = await testAreaController.getPercentile(99);
-        expect(percentile).toEqual(0);
+        expect(percentile).toEqual(1);
         await testAreaController.removePlayer(testingTown.townID, sessionToken);
         await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
         await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
@@ -639,7 +639,7 @@ describe('TownsController integration tests', () => {
         await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
 
         const percentile = await testAreaController.getPercentile(67);
-        expect(percentile).toEqual(0);
+        expect(percentile).toEqual(1);
         await testAreaController.removePlayer(testingTown.townID, sessionToken);
         await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
         await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
@@ -686,7 +686,7 @@ describe('TownsController integration tests', () => {
         await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
 
         const percentile = await testAreaController.getPercentile(18);
-        expect(percentile).toEqual(1);
+        expect(percentile).toEqual(0);
         await testAreaController.removePlayer(testingTown.townID, sessionToken);
         await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
         await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);

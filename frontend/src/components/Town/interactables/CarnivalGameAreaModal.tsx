@@ -92,7 +92,7 @@ export default function NewCarnivalGameArea(): JSX.Element {
   return (
     <Modal
       isOpen={isOpen}
-      size={'6xl'}
+      size={'5xl'}
       onClose={() => {
         closeModal();
         coveyTownController.unPause();

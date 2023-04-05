@@ -871,6 +871,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
     );
     if (existingController) {
+      console.log('assignPet is called');
       return this._townsService.assignPet(
         this.townID,
         carnivalGameArea.id,
@@ -958,6 +959,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public async addPlayerScore(score: number): Promise<void> {
+    console.log('addPlayer Score');
     await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
     this.initalizeScoreboard();
   }

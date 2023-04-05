@@ -1,13 +1,15 @@
 import {
   Modal,
   ModalBody,
-  ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalFooter,
   ModalOverlay,
   Center,
-  Button,
+  CircularProgress,
+  CircularProgressLabel,
+  Box,
+  Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
 import TownController, {
@@ -19,8 +21,8 @@ import * as Phaser from 'phaser';
 import CarnivalGameAreaController from '../../../classes/CarnivalGameAreaController';
 import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
-const SPRITE_SPWAN_X = 50;
-const SPRITE_SPWAN_Y = 100;
+const SPRITE_SPWAN_X = 75;
+const SPRITE_SPWAN_Y = 150;
 
 export default function SBGameModal({
   controller,
@@ -36,12 +38,7 @@ export default function SBGameModal({
   const sbGameController = useSpaceBarGameController(coveyTownController.ourPlayer.id);
   const [count, setCount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
-  const speed = 500 / sbGameController.scoreLimit;
-
-  const onClose = () => {
-    close();
-    setShowPopup(false);
-  };
+  const speed = 750 / sbGameController.scoreLimit;
 
   useEffect(() => {
     if (isOpen) {
@@ -54,9 +51,13 @@ export default function SBGameModal({
   // Timer
   const [timeLeft, setTimeLeft] = useState(sbGameController.timeLimit);
   useEffect(() => {
+    async function terminateGame() {
+      const endGame = await coveyTownController.carnivalGameTimeLimitReach(carnivalGameController);
+      console.log(endGame);
+    }
+
     if (!timeLeft) {
-      coveyTownController.addPlayerScore(count);
-      coveyTownController.carnivalGameTimeLimitReach(controller);
+      terminateGame();
       return;
     }
     const intervalId = setInterval(() => {
@@ -70,7 +71,7 @@ export default function SBGameModal({
   useEffect(() => {
     // Load game assets
     function preload(this: Phaser.Scene) {
-      this.load.image('track', '/assets/game/racetrack.png');
+      this.load.image('track', '/assets/game/racetrack_resize.png');
       this.load.atlas('atlas', '../assets/atlas/atlas.png', '../assets/atlas/atlas.json');
     }
 
@@ -100,20 +101,23 @@ export default function SBGameModal({
 
     function update() {
       // Move the sprite only when the spacebar is just down
-      if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+      if (
+        Phaser.Input.Keyboard.JustDown(cursors.space) &&
+        sbGameController.score < sbGameController.scoreLimit
+      ) {
         console.log('space bar is pressed');
         coveyTownController.emitGameOnTick('32');
         const score = sbGameController.score;
         setCount(score);
-        sprite.setX(SPRITE_SPWAN_X + score * speed);
+        sprite.setX(SPRITE_SPWAN_X + (score + 1) * speed);
       }
     }
 
     // Define game configuration
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: 600,
-      height: 200,
+      width: 900,
+      height: 300,
       parent: gameRef.current,
       scene: {
         preload: preload,
@@ -134,26 +138,50 @@ export default function SBGameModal({
 
     return () => {
       // Cleanup game instance
+      console.log('game destroyed');
       game.destroy(true);
     };
   }, []);
 
   useEffect(() => {
-    async function terminateGame() {
+    if (
+      sbGameController.score === sbGameController.scoreLimit ||
+      timeLeft === 0 ||
+      sbGameController.isOver
+    ) {
       setShowPopup(true);
     }
-    if (count === sbGameController.scoreLimit || timeLeft === 0) {
-      terminateGame();
-    }
-  }, [count, sbGameController.scoreLimit, showPopup, timeLeft]);
+  }, [
+    sbGameController.isOver,
+    sbGameController.score,
+    sbGameController.scoreLimit,
+    showPopup,
+    timeLeft,
+  ]);
+
+  const onClose = () => {
+    close();
+    setShowPopup(false);
+  };
 
   return (
     <ModalBody>
-      <Center color='black'>Time Limit: {timeLeft}</Center>
+      <Box mb='40px'>
+        <Center>
+          <CircularProgress value={(timeLeft / sbGameController.timeLimit) * 100} color='gray.400'>
+            <CircularProgressLabel>{timeLeft}</CircularProgressLabel>
+          </CircularProgress>
+        </Center>
+        <Center>
+          <Text>
+            <Text fontWeight={'bold'}>Time Left: {timeLeft}</Text>
+          </Text>
+        </Center>
+      </Box>
       <Center>
         <div ref={gameRef as React.RefObject<HTMLDivElement>}></div>
       </Center>
-      <Center color='black'>Score: {count}</Center>
+      <Center color='black'>Score: {sbGameController.score}</Center>
       <Modal isOpen={showPopup} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
@@ -161,19 +189,18 @@ export default function SBGameModal({
             Game Over
           </ModalHeader>
 
-          <ModalBody>Your score was: {count}</ModalBody>
+          <ModalBody>Your score was: {sbGameController.score}</ModalBody>
 
           <ModalFooter>
-            <Button colorScheme='blue' onClick={onClose}>
-              Close
-            </Button>
-            <PetPickerDialog isDisable={false} controller={controller} petName={'lemmy'} />
+            <PetPickerDialog
+              isDisable={false}
+              controller={controller}
+              petName={'lemmy'}
+              onClick={onClose}
+            />
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <ModalFooter>
-        <Center color='white'>Score: {count}</Center>
-      </ModalFooter>
     </ModalBody>
   );
 }

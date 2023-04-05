@@ -145,7 +145,7 @@ describe('CarnivalGameArea', () => {
       game.isOver(true); // Overide if the game is timeout
       const newPetRule: PetRule = {
         percentileRangeMin: 0,
-        percentileRangeMax: 20,
+        percentileRangeMax: 100,
         petSelection: [
           {
             id: nanoid(),
@@ -159,6 +159,7 @@ describe('CarnivalGameArea', () => {
         ],
       };
       testArea.addPetRule(newPetRule);
+      testArea.notifyScoreBoard(newPlayer.id);
       const actualPetModel = testArea.assignPetToPlayer(newPlayer.id, 'lemmy');
       const expectedPetModel: PetModel = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -177,8 +178,8 @@ describe('CarnivalGameArea', () => {
       const game = testArea.getGame(newPlayer.id);
       game.isOver(true); // Overide if the game is timeout
       const newPetRule: PetRule = {
-        percentileRangeMin: 80,
-        percentileRangeMax: 100,
+        percentileRangeMin: 0,
+        percentileRangeMax: 20,
         petSelection: [
           {
             id: nanoid(),

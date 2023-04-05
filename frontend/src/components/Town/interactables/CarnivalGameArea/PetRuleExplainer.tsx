@@ -59,7 +59,7 @@ const SHIBA_INU_PET_RULE: PetRule[] = [
   },
   {
     percentileRangeMin: 80,
-    percentileRangeMax: 101,
+    percentileRangeMax: 100,
     petSelection: generateDefaultPet(['light-wolf']),
   },
 ];

@@ -139,6 +139,15 @@ export default class CarnivalGameArea extends InteractableArea {
 
   private _randomizePet(playerid: string): PetModel {
     const playerPecentile: number = this._getPlayerPercentile(playerid) * 100;
+    console.log(`Player Pecentile: ${playerPecentile}`);
+    if (playerPecentile === 100) {
+      const petRule = this._petRule.find(rule => rule.percentileRangeMax === 100);
+      if (petRule) {
+        const randomPet =
+          petRule.petSelection[Math.floor(Math.random() * petRule.petSelection.length)];
+        return randomPet;
+      }
+    }
     for (let i = 0; i < this._petRule.length; i++) {
       const petRule = this._petRule[i];
       if (
@@ -164,6 +173,7 @@ export default class CarnivalGameArea extends InteractableArea {
       if (gameSession.isOver()) {
         const score = gameSession.getScore();
         const percentile = this._scoreboard.calculatedPercentile(score);
+        console.log(`Player Score: ${score} and percentile ${percentile}`);
         return percentile;
       }
       throw Error('Player has not completed the game');
