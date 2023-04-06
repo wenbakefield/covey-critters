@@ -414,6 +414,293 @@ describe('TownsController integration tests', () => {
           expect(petRule.length).toEqual(2);
         }
       });
+
+      describe('timeLimit Reach', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw TimeLimit Reach if townId is not valid', async () => {
+          await expect(
+            controller.timeLimitReached(nanoid(), newCarnivalGameArea.id, sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw TimeLimit Reach if carnivalId is not valid', async () => {
+          await expect(
+            controller.timeLimitReached(testingTown.townID, nanoid(), sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw TimeLimit Reach if sessiontoken is not valid', async () => {
+          await expect(
+            controller.timeLimitReached(testingTown.townID, newCarnivalGameArea.id, nanoid()),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('changePetRule', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw changePetRule Reach if townId is not valid', async () => {
+          await expect(
+            controller.changePetRule(
+              nanoid(),
+              newCarnivalGameArea.id,
+              { percentileRangeMin: 0, percentileRangeMax: 100, petSelection: [] },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw changePetRule Reach if carnivalId is not valid', async () => {
+          await expect(
+            controller.changePetRule(
+              testingTown.townID,
+              nanoid(),
+              { percentileRangeMin: 0, percentileRangeMax: 100, petSelection: [] },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw changePetRule Reach if sessiontoken is not valid', async () => {
+          await expect(
+            controller.changePetRule(
+              testingTown.townID,
+              newCarnivalGameArea.id,
+              { percentileRangeMin: 0, percentileRangeMax: 100, petSelection: [] },
+              nanoid(),
+            ),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('assignPet', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw assignPet Reach if townId is not valid', async () => {
+          await expect(
+            controller.assignPet(nanoid(), newCarnivalGameArea.id, 'lemmy', sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw assignPet Reach if carnivalId is not valid', async () => {
+          await expect(
+            controller.assignPet(testingTown.townID, nanoid(), 'lemmy', sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw assignPet Reach if sessiontoken is not valid', async () => {
+          await expect(
+            controller.assignPet(testingTown.townID, newCarnivalGameArea.id, 'lemmy', nanoid()),
+          ).rejects.toThrow();
+        });
+        it('Throw assignPet Reach if retrieved is not carnival area', async () => {
+          const viewingArea = interactables.find(isViewingArea) as ViewingArea;
+          await expect(
+            controller.assignPet(testingTown.townID, viewingArea.id, 'lemmy', sessionToken),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('initializeCarnivalGame', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('initializeCarnivalGame should add player to the area', async () => {
+          player.moveTo(2950, 1030);
+          const gameModel = {
+            playerId: nanoid(),
+            score: 0,
+            scoreLimit: 200,
+            timeLimit: 200,
+            isOver: false,
+          };
+          await controller.initializeCarnivalGame(
+            testingTown.townID,
+            newCarnivalGameArea.id,
+            gameModel,
+            sessionToken,
+          );
+          const game = await controller.timeLimitReached(
+            testingTown.townID,
+            newCarnivalGameArea.id,
+            sessionToken,
+          );
+          expect(game.playerId).not.toEqual(gameModel.playerId);
+          expect(game.score).toEqual(0);
+          expect(game.scoreLimit).toEqual(200);
+          expect(game.timeLimit).toEqual(200);
+          expect(game.isOver).toEqual(true);
+        });
+
+        it('Throw initializeCarnivalGame if townId is not valid', async () => {
+          await expect(
+            controller.initializeCarnivalGame(
+              nanoid(),
+              newCarnivalGameArea.id,
+              { playerId: nanoid(), score: 0, scoreLimit: 100, timeLimit: 100, isOver: false },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw initializeCarnivalGame if carnivalId is not valid', async () => {
+          await expect(
+            controller.initializeCarnivalGame(
+              testingTown.townID,
+              nanoid(),
+              { playerId: nanoid(), score: 0, scoreLimit: 100, timeLimit: 100, isOver: false },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw initializeCarnivalGame if sessiontoken is not valid', async () => {
+          await expect(
+            controller.initializeCarnivalGame(
+              testingTown.townID,
+              newCarnivalGameArea.id,
+              { playerId: nanoid(), score: 0, scoreLimit: 100, timeLimit: 100, isOver: false },
+              nanoid(),
+            ),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('getPetFromPlayerId', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw getPetFromPlayerId if townId is not valid', async () => {
+          await expect(controller.getPetFromPlayerId(nanoid(), sessionToken)).rejects.toThrow();
+        });
+
+        it('Throw getPetFromPlayerId if sessiontoken is not valid', async () => {
+          await expect(
+            controller.getPetFromPlayerId(testingTown.townID, nanoid()),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('renamePet', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw getPetFromPlayerId if townId is not valid', async () => {
+          await expect(controller.renamePet(nanoid(), sessionToken, 'lemmy')).rejects.toThrow();
+        });
+
+        it('Throw getPetFromPlayerId if sessiontoken is not valid', async () => {
+          await expect(
+            controller.renamePet(testingTown.townID, nanoid(), 'lemmy'),
+          ).rejects.toThrow();
+        });
+      });
     });
 
     describe('[T1] Create Viewing Area', () => {
