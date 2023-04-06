@@ -69,7 +69,7 @@ describe('Testing Pet Decorator and Factory', () => {
 
     it('Checking if the pet is spawn in the correct default location', () => {
       const exportPet = pet.toPetModel();
-      expect(exportPet?.x).toEqual(70);
+      expect(exportPet?.x).toEqual(90);
       expect(exportPet?.y).toEqual(100);
     });
 
@@ -77,26 +77,26 @@ describe('Testing Pet Decorator and Factory', () => {
       initialPlayerLocation.x = 55;
       pet.nextMovement(initialPlayerLocation);
       let exportPet = pet.toPetModel();
-      expect(exportPet?.x).toEqual(74.99695390312783);
-      expect(exportPet?.y).toEqual(100.34904812874566);
+      expect(exportPet?.x).toEqual(94.84778792366981);
+      expect(exportPet?.y).toEqual(96.51377029009367);
       initialPlayerLocation.x = 60;
       pet.nextMovement(initialPlayerLocation);
       exportPet = pet.toPetModel();
-      expect(exportPet?.x).toEqual(79.98341810019362);
-      expect(exportPet?.y).toEqual(100.81424875367055);
-      expect(exportPet.rotation).toEqual('left');
+      expect(exportPet?.x).toEqual(99.30283162445258);
+      expect(exportPet?.y).toEqual(92.56444848717119);
+      expect(exportPet.rotation).toEqual('front');
     });
 
     it('Move the pet to next location when player is not moving and check the location', () => {
       pet.nextMovement(initialPlayerLocation);
       let exportPet = pet.toPetModel();
-      expect(exportPet?.x).toEqual(69.99695390312783);
-      expect(exportPet?.y).toEqual(100.34904812874566);
+      expect(exportPet?.x).toEqual(89.84778792366981);
+      expect(exportPet?.y).toEqual(96.51377029009367);
       pet.nextMovement(initialPlayerLocation);
       exportPet = pet.toPetModel();
-      expect(exportPet?.x).toEqual(69.98781654038191);
-      expect(exportPet?.y).toEqual(100.69798993405001);
-      expect(exportPet.rotation).toEqual('left');
+      expect(exportPet?.x).toEqual(89.39231012048832);
+      expect(exportPet?.y).toEqual(93.05407289332278);
+      expect(exportPet.rotation).toEqual('front');
     });
   });
 });

@@ -12,7 +12,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { PetRule } from '../../../../generated/client';
-import { generateDefaultPet } from './PetUtils';
+import { generateDefaultPet, generateOrbitingPet } from './PetUtils';
 import { RuleCard } from './RuleCard';
 
 export type Species =
@@ -64,12 +64,28 @@ const SHIBA_INU_PET_RULE: PetRule[] = [
   },
 ];
 
+const FLYING_ANIMAL_RULE: PetRule[] = [
+  {
+    percentileRangeMin: 0,
+    percentileRangeMax: 50,
+    petSelection: generateOrbitingPet(['pigeon']),
+  },
+  {
+    percentileRangeMin: 50,
+    percentileRangeMax: 100,
+    petSelection: generateOrbitingPet(['seagull']),
+  },
+];
+
 interface Rule {
   name: string;
   rule: PetRule[];
 }
 
-const ALL_PET_RULE: Rule[] = [{ name: 'Shiba Inu', rule: SHIBA_INU_PET_RULE }];
+const ALL_PET_RULE: Rule[] = [
+  { name: 'Shiba Inu', rule: SHIBA_INU_PET_RULE },
+  { name: 'Flying Penguins', rule: FLYING_ANIMAL_RULE },
+];
 
 export function PetRuleExplainer(props: { setPetRule: (petRule: PetRule[]) => void }): JSX.Element {
   const [option, setOption] = useState<PetRule[]>([]);
