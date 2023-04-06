@@ -23,6 +23,24 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
     this._scoreboard = newScoreBoard;
     this.emit('scoreboardChange', newScoreBoard);
   }
+
+  public getRankByPlayer(playerId: string): number {
+    const rank = this._scoreboard.findIndex(player => player.player.id === playerId);
+    if (rank !== -1) {
+      return rank + 1;
+    } else {
+      return NaN;
+    }
+  }
+
+  public getHighestScoreByPlayer(playerId: string): number {
+    const player = this._scoreboard.find(playerScore => playerScore.player.id === playerId);
+    if (player) {
+      return player.score;
+    } else {
+      return NaN;
+    }
+  }
 }
 
 export function useScoreBoard(area: ScoreboardController): PlayerScoreTuple[] {

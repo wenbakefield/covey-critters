@@ -10,6 +10,7 @@ import {
   CircularProgressLabel,
   Box,
   Text,
+  Progress,
 } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
 import TownController, {
@@ -178,7 +179,14 @@ export default function SBGameModal({
       <Center>
         <div ref={gameRef as React.RefObject<HTMLDivElement>}></div>
       </Center>
-      <Center color='black'>Score: {sbGameController.score}</Center>
+      <Progress
+        value={(sbGameController.score / sbGameController.scoreLimit) * 100}
+        size='xs'
+        colorScheme='pink'
+      />
+      <Center color='black'>
+        <Text>Score: {sbGameController.score}</Text>
+      </Center>
       <Modal isOpen={showPopup} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>

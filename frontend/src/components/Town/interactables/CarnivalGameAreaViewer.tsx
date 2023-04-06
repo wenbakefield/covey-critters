@@ -9,6 +9,12 @@ import {
   ModalHeader,
   ModalOverlay,
   useToast,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatGroup,
+  Heading,
+  Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { useCarnivalGameAreaController, useInteractable } from '../../../classes/TownController';
@@ -20,12 +26,10 @@ import { PetRule } from '../../../generated/client';
 import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
-import ScoreboardController from '../../../classes/ScoreboardController';
 import SBGameModal from './SBGameModal';
-import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
 
-const SCORE_LIMIT = 10;
-const TIME_LIMIT_SECONDS = 20;
+const SCORE_LIMIT = 500;
+const TIME_LIMIT_SECONDS = 100;
 
 /**
  * The PosterImage component does the following:
@@ -78,6 +82,29 @@ export function CarnivalGame({
     townController.initializeGame(controller, gameController.toModel());
     setSBGameController(gameController);
     setIsPlaying(true);
+    toast({
+      title: 'Press SpaceBar To Start',
+      description: "We've created a game for you. Enjoy!",
+      status: 'success',
+      duration: 4000,
+      isClosable: true,
+    });
+  }
+
+  function renderRank() {
+    const rank = townController.scoreboardController.getRankByPlayer(townController.ourPlayer.id);
+    const ending = rank % 10;
+    const specialCase = rank % 100;
+    if (ending == 1 && specialCase != 11) {
+      return rank + 'st';
+    }
+    if (ending == 2 && specialCase != 12) {
+      return rank + 'nd';
+    }
+    if (ending == 3 && specialCase != 13) {
+      return rank + 'rd';
+    }
+    return rank + 'th';
   }
 
   function renderGame() {
@@ -93,7 +120,31 @@ export function CarnivalGame({
         />
       );
     } else {
-      return <Container />;
+      return (
+        <Container maxW={'full'}>
+          <Text>{`Welcome to SpaceBarGame™ where you will be challenging other players inside the coveyTown by smashing SpaceBar. 
+      This is ${SCORE_LIMIT} Dash Game where you will have ${TIME_LIMIT_SECONDS} seconds to complete the challenge. 
+      You will be rewarded with our amazing collection of pets, where the higher you score the rarer your pet gets. 
+      Click Play Game to Start Now!`}</Text>
+          <Heading mt={'10'} as='h4' size='sm' color={'black'}>
+            Your Statistic:
+          </Heading>
+          <StatGroup mt={'5'} color={'black'}>
+            <Stat>
+              <StatLabel>Rank</StatLabel>
+              <StatNumber>{renderRank()}</StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Highest Score</StatLabel>
+              <StatNumber>
+                {townController.scoreboardController.getHighestScoreByPlayer(
+                  townController.ourPlayer.id,
+                )}
+              </StatNumber>
+            </Stat>
+          </StatGroup>
+        </Container>
+      );
     }
   }
 
@@ -113,7 +164,7 @@ export function CarnivalGame({
           {renderGame()}
         </ModalBody>
         {
-          <ModalFooter>
+          <ModalFooter alignContent={'center'}>
             <Button colorScheme='blue' mr={3} onClick={playGame}>
               Play Game
             </Button>
