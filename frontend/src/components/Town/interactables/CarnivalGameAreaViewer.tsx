@@ -15,6 +15,12 @@ import {
   StatGroup,
   Heading,
   Text,
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { useCarnivalGameAreaController, useInteractable } from '../../../classes/TownController';
@@ -27,9 +33,10 @@ import SpaceBarGameController from '../../../classes/SBGameController';
 import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
 import SBGameModal from './SBGameModal';
+import { RuleCard } from './CarnivalGameArea/RuleCard';
 
-const SCORE_LIMIT = 10;
-const TIME_LIMIT_SECONDS = 5;
+const SCORE_LIMIT = 500;
+const TIME_LIMIT_SECONDS = 100;
 
 /**
  * The PosterImage component does the following:
@@ -54,6 +61,7 @@ export function CarnivalGame({
   isOpen: boolean;
   close: () => void;
 }): JSX.Element {
+  const petRule = usePetRule(controller);
   const townController = useTownController();
   const toast = useToast();
 
@@ -130,6 +138,21 @@ export function CarnivalGame({
               </StatNumber>
             </Stat>
           </StatGroup>
+          <Accordion mt={'5'} allowToggle>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Box flex='1' textAlign='left'>
+                    {'Rule'}
+                  </Box>
+                  <AccordionIcon />
+                </AccordionButton>
+              </h2>
+              <AccordionPanel pb={4}>
+                <RuleCard petRules={petRule} />
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
         </Container>
       );
     }

@@ -6,7 +6,7 @@ import PlayerController from './classes/PlayerController';
 import TownController, { TownEvents } from './classes/TownController';
 import ViewingAreaController from './classes/ViewingAreaController';
 import PosterSessionAreaController from './classes/PosterSessionAreaController';
-import { TownsService } from './generated/client';
+import { PetRule, TownsService } from './generated/client';
 import { CoveyTownSocket, ServerToClientEvents, TownJoinResponse } from './types/CoveyTownSocket';
 import CarnivalGameAreaController from './classes/CarnivalGameAreaController';
 
@@ -144,6 +144,11 @@ export function mockTownController({
   }
   if (carnivalGameAreas) {
     Object.defineProperty(mockedController, 'carnivalGameAreas', { value: carnivalGameAreas });
+    mockedController.changeCarnivalGamePetRule.mockImplementation(
+      async (carnivalGameArea: CarnivalGameAreaController, petRule: PetRule) => {
+        return [petRule];
+      },
+    );
   }
   return mockedController;
 }
