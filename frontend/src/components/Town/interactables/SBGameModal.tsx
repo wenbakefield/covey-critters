@@ -11,8 +11,10 @@ import {
   Box,
   Text,
   Progress,
+  Input,
+  Heading,
 } from '@chakra-ui/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   useCarnivalGameAreaController,
   useSpaceBarGameController,
@@ -39,7 +41,14 @@ export default function SBGameModal({
   const sbGameController = useSpaceBarGameController(coveyTownController.ourPlayer.id);
   const [count, setCount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [petNameIsFilled, setPetNameIsFilled] = useState(true);
+  const [value, setValue] = React.useState('');
   const speed = 750 / sbGameController.scoreLimit;
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    setValue(event.target.value);
+    setPetNameIsFilled(false);
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -195,13 +204,43 @@ export default function SBGameModal({
             Game Over
           </ModalHeader>
 
-          <ModalBody>Your score was: {sbGameController.score}</ModalBody>
+          <ModalBody alignItems={'center'} justifyContent='center'>
+            <Box display='flex' alignContent={'center'} justifyContent='center'>
+              <Center>
+                <Heading fontSize={'xs'} fontWeight={'bold'}>
+                  Your Score
+                </Heading>
+              </Center>
+            </Box>
+            <Box display='flex' alignContent={'center'} justifyContent='center'>
+              <Center mb={'5'} mt={'2'}>
+                <CircularProgress
+                  value={(sbGameController.score / sbGameController.scoreLimit) * 100}
+                  color='gray'
+                  size={'100px'}>
+                  <CircularProgressLabel fontSize={'large'} fontWeight={'bold'}>
+                    {sbGameController.score}
+                  </CircularProgressLabel>
+                </CircularProgress>
+              </Center>
+            </Box>
+            <Text fontSize='sm' mb='3px'>
+              Pet Name:
+            </Text>
+            <Input
+              size={'sm'}
+              value={value}
+              onChange={handleChange}
+              variant='outline'
+              placeholder='Your Pet Name'
+            />
+          </ModalBody>
 
           <ModalFooter>
             <PetPickerDialog
-              isDisable={false}
+              isDisable={petNameIsFilled}
               controller={controller}
-              petName={'lemmy'}
+              petName={value}
               onClick={onClose}
             />
           </ModalFooter>

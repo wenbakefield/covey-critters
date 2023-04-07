@@ -28,8 +28,8 @@ import CarnivalGameAreaInteractable from './CarnivalGameArea';
 import NewCarnivalGameArea from './CarnivalGameAreaModal';
 import SBGameModal from './SBGameModal';
 
-const SCORE_LIMIT = 500;
-const TIME_LIMIT_SECONDS = 100;
+const SCORE_LIMIT = 10;
+const TIME_LIMIT_SECONDS = 5;
 
 /**
  * The PosterImage component does the following:
