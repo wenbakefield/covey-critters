@@ -54,21 +54,8 @@ export function CarnivalGame({
   isOpen: boolean;
   close: () => void;
 }): JSX.Element {
-  const petRule = usePetRule(controller);
   const townController = useTownController();
   const toast = useToast();
-
-  // changePetRule given a new pet rule change the pet rule of the carnivalgamearea.
-  function changePetRule(rule: PetRule) {
-    if (!petRule || !rule) {
-      townController.changeCarnivalGamePetRule(controller, rule);
-    } else {
-      toast({
-        title: `Pet Rule does not exists`,
-        status: 'error',
-      });
-    }
-  }
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();

@@ -33,5 +33,50 @@ describe('[T2] ScoreboardController', () => {
       expect(mockListeners.scoreboardChange).toBeCalled();
       expect(mockListeners.scoreboardChange).toBeCalledWith([]);
     });
+
+    it('return the highest score for the given player if scoredboard is empty', () => {
+      const newPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      expect(testArea.getHighestScoreByPlayer(newPlayer.id)).toEqual(NaN);
+    });
+
+    it('return the highest score for the given player', () => {
+      const newPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      const playerScoreTupleList: PlayerScoreTuple[] = [{ player: newPlayer, score: 30 }];
+      testArea.scoreboard = playerScoreTupleList;
+      expect(testArea.getHighestScoreByPlayer(newPlayer.id)).toEqual(30);
+    });
+
+    it('return the highest score for the given player', () => {
+      const newPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      const playerScoreTupleList: PlayerScoreTuple[] = [
+        { player: newPlayer, score: 60 },
+        { player: newPlayer, score: 30 },
+      ];
+      testArea.scoreboard = playerScoreTupleList;
+      expect(testArea.getHighestScoreByPlayer(newPlayer.id)).toEqual(60);
+    });
+
+    it('return the highest rank for the given player if scoredboard is empty', () => {
+      const newPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      expect(testArea.getRankByPlayer(newPlayer.id)).toEqual(NaN);
+    });
+
+    it('return the highest rank for the given player', () => {
+      const newPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      const playerScoreTupleList: PlayerScoreTuple[] = [{ player: newPlayer, score: 30 }];
+      testArea.scoreboard = playerScoreTupleList;
+      expect(testArea.getRankByPlayer(newPlayer.id)).toEqual(1);
+    });
+
+    it('return the highest score for the given player', () => {
+      const newPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      const secondPlayer: Player = { id: nanoid(), userName: 'username', location: playerLocation };
+      const playerScoreTupleList: PlayerScoreTuple[] = [
+        { player: secondPlayer, score: 60 },
+        { player: newPlayer, score: 30 },
+      ];
+      testArea.scoreboard = playerScoreTupleList;
+      expect(testArea.getRankByPlayer(newPlayer.id)).toEqual(2);
+    });
   });
 });

@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableCaption,
-  TableContainer,
-  Tag,
-  HStack,
-} from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, Tag, HStack } from '@chakra-ui/react';
 import { PetRule } from '../../../../generated/client';
 
 export function RuleCard(props: { petRules: PetRule[] }): JSX.Element {

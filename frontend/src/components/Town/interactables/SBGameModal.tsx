@@ -13,7 +13,7 @@ import {
   Progress,
 } from '@chakra-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
-import TownController, {
+import {
   useCarnivalGameAreaController,
   useSpaceBarGameController,
 } from '../../../classes/TownController';
@@ -53,7 +53,7 @@ export default function SBGameModal({
   const [timeLeft, setTimeLeft] = useState(sbGameController.timeLimit);
   useEffect(() => {
     async function terminateGame() {
-      const endGame = await coveyTownController.carnivalGameTimeLimitReach(carnivalGameController);
+      await coveyTownController.carnivalGameTimeLimitReach(carnivalGameController);
     }
 
     if (!timeLeft) {
@@ -64,7 +64,7 @@ export default function SBGameModal({
       setTimeLeft(timeLeft - 1);
     }, 1000);
     return () => clearInterval(intervalId);
-  }, [timeLeft]);
+  }, [carnivalGameController, coveyTownController, timeLeft]);
 
   // Game
   const gameRef = useRef<HTMLDivElement | undefined>();
@@ -139,6 +139,7 @@ export default function SBGameModal({
       // Cleanup game instance
       game.destroy(true);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -185,7 +186,7 @@ export default function SBGameModal({
         colorScheme='pink'
       />
       <Center color='black'>
-        <Text>Score: {sbGameController.score}</Text>
+        <Text>Score: {count}</Text>
       </Center>
       <Modal isOpen={showPopup} onClose={onClose}>
         <ModalOverlay />

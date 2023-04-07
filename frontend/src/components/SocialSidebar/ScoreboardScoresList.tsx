@@ -8,7 +8,6 @@ import {
   Avatar,
   Flex,
   Divider,
-  Spacer,
   Center,
 } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
@@ -29,6 +28,7 @@ export default function ScoreBoardView(): JSX.Element {
       await townController.initalizeScoreboard();
     }
     loadScoreboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function topPlayerBadge(index: number) {

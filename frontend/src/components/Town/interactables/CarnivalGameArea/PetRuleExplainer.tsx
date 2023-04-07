@@ -88,11 +88,9 @@ const ALL_PET_RULE: Rule[] = [
 ];
 
 export function PetRuleExplainer(props: { setPetRule: (petRule: PetRule[]) => void }): JSX.Element {
-  const [option, setOption] = useState<PetRule[]>([]);
   const [ruleName, setRuleName] = useState('');
 
   function setRule(rule: Rule) {
-    setOption(rule.rule);
     props.setPetRule(rule.rule);
     setRuleName(rule.name);
   }

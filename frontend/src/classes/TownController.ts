@@ -529,24 +529,20 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     this._socket.on('gameUpdated', gameModel => {
       //TODO recieve updated GameModel from backend and emit updateGame back to backend.
-      const game = this._getGameByPlayerID(gameModel.playerId);
+      const game = this.getGameByPlayerID(gameModel.playerId);
       if (game) {
         game.updateFrom(gameModel);
       }
     });
   }
 
-  private _getGameByPlayerID(playerId: string): SpaceBarGameController | undefined {
-    const carnivalGameArea = this._carnivalGameAreas.find(area => {
-      if (!area.getGameSessionByID(playerId)) {
-        return false;
-      } else {
-        return true;
-      }
-    });
+  public getGameByPlayerID(playerId: string): SpaceBarGameController | undefined {
+    const carnivalArea = this._carnivalGameAreas.find(
+      eachArea => eachArea.getGameSessionByID(playerId) !== undefined,
+    );
     // Get The Game if exists else create the new game
-    if (carnivalGameArea) {
-      const game = carnivalGameArea.getGameSessionByID(playerId);
+    if (carnivalArea) {
+      const game = carnivalArea.getGameSessionByID(playerId);
       if (game) {
         return game;
       } else {
@@ -1153,21 +1149,12 @@ export function useCarnivalGameAreaController(
 
 export function useSpaceBarGameController(playerID: string): SpaceBarGameController {
   const townController = useTownController();
-  const carnivalArea = townController.carnivalGameAreas.find(
-    eachArea => eachArea.getGameSessionByID(playerID) !== undefined,
-  );
-  if (!carnivalArea) {
-    throw new Error(
-      `Unable to locate game within Carnival Game Area as player ${playerID} does not exists`,
-    );
+  const gameController = townController.getGameByPlayerID(playerID);
+  if (!gameController) {
+    // This should not be possible
+    throw new Error('Carnival Game Area is found however cannot locate Game Controller');
   } else {
-    const gameController = carnivalArea.getGameSessionByID(playerID);
-    if (!gameController) {
-      // This should not be possible
-      throw new Error('Carnival Game Area is found however cannot locate Game Controller');
-    } else {
-      return gameController;
-    }
+    return gameController;
   }
 }
 

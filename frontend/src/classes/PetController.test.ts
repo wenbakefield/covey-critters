@@ -22,6 +22,8 @@ describe('[T2] PetController', () => {
     testController = new PetController(petModel);
     testController.addListener('petMovementChange', mockListeners.petMovementChange);
     testController.addListener('petNameChange', mockListeners.petNameChange);
+    testController.addListener('petRotationChange', mockListeners.petRotationChange);
+    expect(testController.species).toEqual('brown-cobra');
   });
 
   describe('movementChange', () => {
@@ -33,24 +35,51 @@ describe('[T2] PetController', () => {
       expect(mockListeners.petMovementChange).toBeCalled();
       expect(mockListeners.petNameChange).not.toBeCalled();
       expect(testController.location).toEqual({ x: 10, y: 20 });
+      expect(testController.rotation).toEqual('right');
     });
     it('emit petMovementChange when new location change in x', () => {
       testController.location = { x: 0, y: 20 };
       expect(mockListeners.petMovementChange).toBeCalled();
       expect(mockListeners.petNameChange).not.toBeCalled();
       expect(testController.location).toEqual({ x: 0, y: 20 });
+      expect(testController.rotation).toEqual('right');
     });
     it('emit petMovementChange when new location change in y', () => {
       testController.location = { x: 10, y: 0 };
       expect(mockListeners.petMovementChange).toBeCalled();
       expect(mockListeners.petNameChange).not.toBeCalled();
       expect(testController.location).toEqual({ x: 10, y: 0 });
+      expect(testController.rotation).toEqual('right');
     });
     it('does not emit petMovementChange when new location does not change', () => {
       testController.location = { x: 0, y: 0 };
       expect(mockListeners.petMovementChange).not.toBeCalled();
       expect(mockListeners.petNameChange).not.toBeCalled();
       expect(testController.location).toEqual({ x: 0, y: 0 });
+      expect(testController.rotation).toEqual('right');
+    });
+    it('does petRotationChange when new direction is given', () => {
+      testController.rotation = 'left';
+      expect(mockListeners.petRotationChange).toBeCalled();
+      expect(mockListeners.petMovementChange).not.toBeCalled();
+      expect(testController.rotation).toEqual('left');
+    });
+
+    it('does not petRotationChange when old direction is given', () => {
+      testController.rotation = 'right';
+      expect(mockListeners.petRotationChange).not.toBeCalled();
+      expect(mockListeners.petMovementChange).not.toBeCalled();
+      expect(testController.rotation).toEqual('right');
+    });
+  });
+
+  describe('Sprite and GameObjects', () => {
+    beforeEach(() => {
+      mockClear(mockListeners);
+    });
+
+    it('default sprite is undefined', () => {
+      expect(testController.gameObjects).toBeUndefined();
     });
   });
 

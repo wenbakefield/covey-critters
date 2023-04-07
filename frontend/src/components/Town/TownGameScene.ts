@@ -9,7 +9,6 @@ import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
 import PosterSessionArea from './interactables/PosterSessionArea';
 import CarnivalGameArea from './interactables/CarnivalGameArea';
-import PetController from '../../classes/PetController';
 
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -330,7 +329,6 @@ export default class TownGameScene extends Phaser.Scene {
         const species = playerController.pet.species;
         const petName = playerController.pet.name;
         const location = playerController.location;
-        const rotation = playerController.pet.rotation;
         const sprite = this.physics.add
           .sprite(location.x, location.y, 'atlas', `${species}-1`)
           .setSize(15, 20)
