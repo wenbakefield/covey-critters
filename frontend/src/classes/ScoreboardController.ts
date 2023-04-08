@@ -51,5 +51,5 @@ export function useScoreBoard(area: ScoreboardController): PlayerScoreTuple[] {
       area.removeListener('scoreboardChange', setScoreboard);
     };
   }, [area]);
-  return scoreboard;
+  return scoreboard.slice(0, 5);
 }
