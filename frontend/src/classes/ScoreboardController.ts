@@ -41,6 +41,15 @@ export default class ScoreboardController extends (EventEmitter as new () => Typ
       return NaN;
     }
   }
+
+  public getPredictedPercentile(playerId: string) {
+    const score = this.getHighestScoreByPlayer(playerId);
+    const percentile = (arr: number[], val: number) =>
+      arr.reduce((acc, v) => acc + (v <= val ? 1 : 0), 0) / arr.length;
+
+    const allScore = [...this._scoreboard.map(playerScore => playerScore.score)];
+    return Number.isNaN(percentile(allScore, score)) ? 0 : percentile(allScore, score);
+  }
 }
 
 export function useScoreBoard(area: ScoreboardController): PlayerScoreTuple[] {
@@ -51,5 +60,5 @@ export function useScoreBoard(area: ScoreboardController): PlayerScoreTuple[] {
       area.removeListener('scoreboardChange', setScoreboard);
     };
   }, [area]);
-  return scoreboard;
+  return scoreboard.slice(0, 5);
 }

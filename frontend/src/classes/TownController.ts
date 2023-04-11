@@ -440,8 +440,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Note that setting the players array will also emit an event that the players in the town have changed.
      */
     this._socket.on('playerDisconnect', disconnectedPlayer => {
-      this.removePlayer();
       this._players = this.players.filter(eachPlayer => eachPlayer.id !== disconnectedPlayer.id);
+      this.initalizeScoreboard();
     });
     /**
      * When a player moves, update local state and emit an event to the controller's event listeners
@@ -955,11 +955,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   public async addPlayerScore(score: number): Promise<void> {
     await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
-    this.initalizeScoreboard();
-  }
-
-  public async removePlayer(): Promise<void> {
-    await this._townsService.removePlayer(this.townID, this.sessionToken);
     this.initalizeScoreboard();
   }
 

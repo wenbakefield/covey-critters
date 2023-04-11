@@ -36,6 +36,42 @@ export type Species =
   | 'white-mouse'
   | 'white-sheep';
 
+const ALL_PET: PetRule[] = [
+  {
+    percentileRangeMin: 0,
+    percentileRangeMax: 20,
+    petSelection: generateDefaultPet(['brown-mouse', 'white-mouse']),
+  },
+  {
+    percentileRangeMin: 20,
+    percentileRangeMax: 40,
+    petSelection: generateDefaultPet(['black-bear', 'brown-bear', 'brown-sheep', 'white-sheep']),
+  },
+  {
+    percentileRangeMin: 40,
+    percentileRangeMax: 60,
+    petSelection: generateOrbitingPet([
+      'brown-snake',
+      'red-snake',
+      'green-cobra',
+      'green-snake',
+      'red-snake',
+    ]),
+  },
+  {
+    percentileRangeMin: 60,
+    percentileRangeMax: 80,
+    petSelection: generateDefaultPet(['dark-gray-wolf', 'dark-wolf']),
+  },
+  {
+    percentileRangeMin: 80,
+    percentileRangeMax: 100,
+    petSelection: generateDefaultPet(['light-wolf', 'brown-wolf']).concat(
+      generateOrbitingPet(['seagull', 'pigeon']),
+    ),
+  },
+];
+
 const SHIBA_INU_PET_RULE: PetRule[] = [
   {
     percentileRangeMin: 0,
@@ -83,6 +119,7 @@ interface Rule {
 }
 
 const ALL_PET_RULE: Rule[] = [
+  { name: 'All Pets', rule: ALL_PET },
   { name: 'Shiba Inu', rule: SHIBA_INU_PET_RULE },
   { name: 'Flying Penguins', rule: FLYING_ANIMAL_RULE },
 ];

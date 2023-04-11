@@ -52,7 +52,7 @@ export default class CarnivalGameArea extends Interactable {
     this._labelText = this.scene.add.text(
       this.x - this.displayWidth / 2,
       this.y + this.displayHeight / 2,
-      'Carnival Area',
+      'Covey Critters',
       { color: '#000000' },
     );
     this._updateConversationAreas(this._townController.carnivalGameAreas);
@@ -63,7 +63,7 @@ export default class CarnivalGameArea extends Interactable {
     if (area !== this._carnivalAreaController) {
       if (area === undefined) {
         this._carnivalAreaController = undefined;
-        this._defaultLabelText.text = 'Carnival Area';
+        this._defaultLabelText.text = 'Covey Critters';
       } else {
         this._carnivalAreaController = area;
         if (this.isOverlapping) {

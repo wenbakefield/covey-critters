@@ -47,7 +47,7 @@ describe('Carnival Game Viewer', () => {
   let townController: DeepMockProxy<TownController>;
 
   let renderData: RenderResult;
-  beforeEach(() => {
+  beforeEach(async () => {
     mockClear(mockToast);
     carnivalGameArea = new CarnivalGameAreaController({
       id: `id-${nanoid()}`,
@@ -64,7 +64,9 @@ describe('Carnival Game Viewer', () => {
     addListenerSpy = jest.spyOn(carnivalGameArea, 'addListener');
     removeListenerSpy = jest.spyOn(carnivalGameArea, 'removeListener');
 
-    renderData = render(renderCarnivalArea(carnivalGameArea, townController));
+    await act(async () => {
+      renderData = render(renderCarnivalArea(carnivalGameArea, townController));
+    });
   });
 
   /**

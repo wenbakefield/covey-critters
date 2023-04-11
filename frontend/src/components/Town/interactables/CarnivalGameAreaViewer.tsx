@@ -64,7 +64,9 @@ export function CarnivalGame({
   const petRule = usePetRule(controller);
   const townController = useTownController();
   const toast = useToast();
-
+  const [rank, setRank] = useState(0);
+  const [highestScore, setHighestScore] = useState(0);
+  const [percentile, setPercentile] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [sbGameController, setSBGameController] = useState<SpaceBarGameController>();
   async function playGame() {
@@ -86,8 +88,22 @@ export function CarnivalGame({
     });
   }
 
+  useEffect(() => {
+    async function loadScore() {
+      await townController.initalizeScoreboard();
+      setRank(townController.scoreboardController.getRankByPlayer(townController.ourPlayer.id));
+      setHighestScore(
+        townController.scoreboardController.getHighestScoreByPlayer(townController.ourPlayer.id),
+      );
+      setPercentile(
+        townController.scoreboardController.getPredictedPercentile(townController.ourPlayer.id),
+      );
+    }
+    loadScore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function renderRank() {
-    const rank = townController.scoreboardController.getRankByPlayer(townController.ourPlayer.id);
     const ending = rank % 10;
     const specialCase = rank % 100;
     if (ending == 1 && specialCase != 11) {
@@ -131,10 +147,13 @@ export function CarnivalGame({
             </Stat>
             <Stat>
               <StatLabel>Highest Score</StatLabel>
+              <StatNumber>{highestScore}</StatNumber>
+            </Stat>
+            <Stat>
+              <StatLabel>Percentile</StatLabel>
               <StatNumber>
-                {townController.scoreboardController.getHighestScoreByPlayer(
-                  townController.ourPlayer.id,
-                )}
+                {Math.round(percentile * 100)}
+                th
               </StatNumber>
             </Stat>
           </StatGroup>
