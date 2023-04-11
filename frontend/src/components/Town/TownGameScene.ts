@@ -459,6 +459,38 @@ export default class TownGameScene extends Phaser.Scene {
       locationManagedByGameScene: true,
     };
 
+    // Stray Pet
+    // "x":2943.6665,
+    // "y":1028.66683333333
+    const petSprite1 = this.physics.add
+      .sprite(2985, 1035, 'atlas', 'brown-wolf-1')
+      .setSize(7, 10)
+      .setOffset(0, 24)
+      .setDepth(6);
+    this.physics.add.collider(petSprite1, worldLayer);
+    this.physics.add.collider(petSprite1, wallsLayer);
+    this.physics.add.collider(petSprite1, aboveLayer);
+    this.physics.add.collider(petSprite1, onTheWallsLayer);
+
+    const petSprite2 = this.physics.add
+      .sprite(3007, 1035, 'atlas', 'light-wolf-1')
+      .setSize(7, 10)
+      .setOffset(0, 24)
+      .setDepth(6);
+    this.physics.add.collider(petSprite2, worldLayer);
+    this.physics.add.collider(petSprite2, wallsLayer);
+    this.physics.add.collider(petSprite2, aboveLayer);
+    this.physics.add.collider(petSprite2, onTheWallsLayer);
+
+    const petSprite3 = this.physics.add
+      .sprite(3029, 1035, 'atlas', 'brown-mouse-1')
+      .setSize(7, 10)
+      .setOffset(0, 24)
+      .setDepth(6);
+    this.physics.add.collider(petSprite3, worldLayer);
+    this.physics.add.collider(petSprite3, wallsLayer);
+    this.physics.add.collider(petSprite3, aboveLayer);
+    this.physics.add.collider(petSprite3, onTheWallsLayer);
     this._interactables = this.getInteractables();
 
     this.moveOurPlayerTo({ rotation: 'front', moving: false, x: spawnPoint.x, y: spawnPoint.y });
@@ -680,6 +712,15 @@ export default class TownGameScene extends Phaser.Scene {
         prefix: 'brown-mouse-',
         start: 17,
         end: 20,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    anims.create({
+      key: 'brown-mouse-sit',
+      frames: anims.generateFrameNames('atlas', {
+        prefix: 'brown-mouse-',
+        frames: [7, 8, 9, 10, 16],
       }),
       frameRate: 10,
       repeat: -1,
@@ -1608,6 +1649,9 @@ export default class TownGameScene extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
+    petSprite1.anims.play(`brown-wolf-front-walk`, true);
+    petSprite2.anims.play(`light-wolf-front-walk`, true);
+    petSprite3.anims.play('brown-mouse-sit', true);
 
     const camera = this.cameras.main;
     camera.startFollow(this.coveyTownController.ourPlayer.gameObjects.sprite);

@@ -45,7 +45,7 @@ export default class CarnivalGameArea extends Interactable {
     super.addedToScene();
     this.scene.add.text(
       this.x - this.displayWidth / 2,
-      this.y - this.displayHeight / 2,
+      this.y - this.displayHeight / 2 - 20,
       this.name,
       { color: '#FFFFFF', backgroundColor: '#000000' },
     );
