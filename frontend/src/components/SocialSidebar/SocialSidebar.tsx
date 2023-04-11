@@ -1,6 +1,7 @@
 import { Heading, StackDivider, VStack } from '@chakra-ui/react';
 import React from 'react';
 import ConversationAreasList from './ConversationAreasList';
+import ScoreBoardView from './ScoreboardScoresList';
 import PlayersList from './PlayersList';
 
 export default function SocialSidebar(): JSX.Element {
@@ -20,6 +21,7 @@ export default function SocialSidebar(): JSX.Element {
       </Heading>
       <PlayersList />
       <ConversationAreasList />
+      <ScoreBoardView />
     </VStack>
   );
 }

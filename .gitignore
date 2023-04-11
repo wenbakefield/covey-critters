@@ -107,3 +107,5 @@ shared/generated/*
 townService/generated/*
 frontend/src/generated/*
 frontend/build/*
+
+.vscode/settings.json

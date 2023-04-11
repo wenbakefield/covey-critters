@@ -1,6 +1,12 @@
 import { nanoid } from 'nanoid';
 import IPet from '../lib/IPet';
-import { Species, MovementType, PlayerLocation, Pet as PetModel } from '../types/CoveyTownSocket';
+import {
+  Species,
+  MovementType,
+  PlayerLocation,
+  Pet as PetModel,
+  Direction,
+} from '../types/CoveyTownSocket';
 
 export default class Pet implements IPet {
   private readonly _id: string;
@@ -15,6 +21,8 @@ export default class Pet implements IPet {
 
   private _y?: number;
 
+  private _rotation: Direction;
+
   private _xOffset: number;
 
   private _yOffset: number;
@@ -24,13 +32,14 @@ export default class Pet implements IPet {
     species: string,
     movementType = 'offsetPlayer',
     x_offset = -40, // default value for pet location
-    y_offset = -20,
+    y_offset = 20,
   ) {
     // May need to change to Factory in the Future to accomodate different MovementPattern
     this._id = nanoid();
     this._name = name;
     this._species = species;
     this._movementType = movementType;
+    this._rotation = 'front';
     this._xOffset = x_offset;
     this._yOffset = y_offset;
   }
@@ -49,6 +58,14 @@ export default class Pet implements IPet {
 
   set y(ylocation: number) {
     this._y = ylocation;
+  }
+
+  get rotation(): Direction {
+    return this._rotation;
+  }
+
+  set rotation(rotation: Direction) {
+    this._rotation = rotation;
   }
 
   get id(): string {
@@ -71,10 +88,11 @@ export default class Pet implements IPet {
     return this._species;
   }
 
-  nextMovement(playerLocation: PlayerLocation): [number, number] {
+  nextMovement(playerLocation: PlayerLocation): [number, number, string] {
     this.x = playerLocation.x + this._xOffset;
     this.y = playerLocation.y + this._yOffset;
-    return [playerLocation.x + this._xOffset, playerLocation.y + this._yOffset];
+    this.rotation = playerLocation.rotation;
+    return [playerLocation.x + this._xOffset, playerLocation.y + this._yOffset, this.rotation];
   }
 
   toPetModel(): PetModel {
@@ -85,6 +103,7 @@ export default class Pet implements IPet {
       movementType: this._movementType,
       x: this.x,
       y: this.y,
+      rotation: this.rotation,
     };
   }
 
@@ -92,9 +111,17 @@ export default class Pet implements IPet {
     return [this.x, this.y];
   }
 
+  getPetRotation(): string {
+    return this.rotation;
+  }
+
   setPetLocation(x: number, y: number): void {
     this.x = x;
     this.y = y;
+  }
+
+  setPetRotation(rotation: Direction): void {
+    this.rotation = rotation;
   }
 
   setPetName(name: string): void {
@@ -105,6 +132,7 @@ export default class Pet implements IPet {
     if (this._x === undefined && this._y === undefined) {
       this.x = playerLocation.x + this._xOffset;
       this.y = playerLocation.y + this._yOffset;
+      this.rotation = playerLocation.rotation;
     }
   }
 }

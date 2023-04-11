@@ -25,7 +25,7 @@ import {
 } from '../types/CoveyTownSocket';
 import CarnivalGameArea from './CarnivalGameArea';
 import ConversationArea from './ConversationArea';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 import Town from './Town';
 
 const mockTwilioVideo = mockDeep<TwilioVideo>();
@@ -303,6 +303,23 @@ const testingMaps: TestMapDict = {
             width: 326,
             x: 155,
             y: 566,
+          },
+          {
+            type: 'CarnivalGameArea',
+            height: 237,
+            id: 55,
+            name: 'Name5',
+            properties: [
+              {
+                name: 'carnivalArea',
+                type: 'string',
+              },
+            ],
+            rotation: 0,
+            visible: true,
+            width: 326,
+            x: 600,
+            y: 1200,
           },
         ],
         opacity: 1,
@@ -585,7 +602,7 @@ describe('Town', () => {
     describe('[T1] interactableUpdate callback', () => {
       let interactableUpdateHandler: (update: Interactable) => void;
       beforeEach(() => {
-        town.initializeFromMap(testingMaps.twoConvTwoViewing);
+        town.initializeFromMap(testingMaps.twoConvTwoViewingOneCarn);
         interactableUpdateHandler = getEventListener(playerTestData.socket, 'interactableUpdate');
       });
       it('Should not throw an error for any interactable area that is not a viewing area', () => {
@@ -607,7 +624,7 @@ describe('Town', () => {
         let secondPlayer: MockedPlayer;
         beforeEach(async () => {
           newArea = {
-            id: 'Name4',
+            id: 'Name3',
             elapsedTimeSec: 0,
             isPlaying: true,
             video: nanoid(),
@@ -641,6 +658,47 @@ describe('Town', () => {
             getLastEmittedEvent(playerTestData.socket, 'interactableUpdate'),
           ).toThrowError();
           expect(() => getLastEmittedEvent(townEmitter, 'interactableUpdate')).toThrowError();
+          expect(() =>
+            getLastEmittedEvent(secondPlayer.socket, 'interactableUpdate'),
+          ).toThrowError();
+          expect(() =>
+            getLastEmittedEvent(secondPlayer.socketToRoomMock, 'interactableUpdate'),
+          ).toThrowError();
+        });
+      });
+
+      describe('When called passing a valid carnival area', () => {
+        let newArea: CarnivalGameAreaModel;
+        let secondPlayer: MockedPlayer;
+        beforeEach(async () => {
+          newArea = {
+            id: 'Name5',
+            petRule: [{ percentileRangeMax: 100, percentileRangeMin: 0, petSelection: [] }],
+          };
+          expect(town.addCarnivalGameArea(newArea)).toBe(true);
+          secondPlayer = mockPlayer(town.townID);
+          mockTwilioVideo.getTokenForTown.mockClear();
+          await town.addPlayer(secondPlayer.userName, secondPlayer.socket);
+          mockClear(townEmitter);
+          mockClear(secondPlayer.socket);
+          mockClear(secondPlayer.socketToRoomMock);
+          interactableUpdateHandler(newArea);
+        });
+        it("Should emit the interactable update to the other players in the town using the player's townEmitter, after the carnival area was successfully created", () => {
+          const updatedArea = town.getInteractable(newArea.id);
+          expect(updatedArea.toModel()).toEqual(newArea);
+        });
+        it('Should update the model for the viewing area', () => {
+          const lastUpdate = getLastEmittedEvent(
+            playerTestData.socketToRoomMock,
+            'interactableUpdate',
+          );
+          expect(lastUpdate).toEqual(newArea);
+        });
+        it('Should not emit interactableUpdate events to players directly', () => {
+          expect(() =>
+            getLastEmittedEvent(playerTestData.socket, 'interactableUpdate'),
+          ).toThrowError();
           expect(() =>
             getLastEmittedEvent(secondPlayer.socket, 'interactableUpdate'),
           ).toThrowError();
@@ -750,7 +808,7 @@ describe('Town', () => {
         }
         const lastEvent = getLastEmittedEvent(townEmitter, 'gameUpdated');
         expect(lastEvent).toEqual(endGame);
-        expect(scoreboard.getAllScores()).toHaveLength(1);
+        expect(scoreboard.getAllScores()).toHaveLength(0);
       });
     });
 
@@ -770,6 +828,7 @@ describe('Town', () => {
         movementType: 'offsetPlayer',
         x: 0,
         y: 0,
+        rotation: 'front',
       };
       const newModel: CarnivalGameAreaModel = {
         id: 'Name5',
@@ -804,7 +863,8 @@ describe('Town', () => {
           const carnivalGame = <CarnivalGameArea>town.getInteractable('Name5');
           const game = carnivalGame.getGame(player.id);
           game.isOver(true); // Overide the game state to end
-          actualPet = carnivalGame.assignPetToPlayer(playerTestData.player!.id, 'lemmy');
+          carnivalGame.notifyScoreBoard(player.id);
+          actualPet = carnivalGame.assignPetToPlayer(player.id, 'lemmy');
         });
 
         it('Pet should be spawned', () => {
@@ -815,12 +875,13 @@ describe('Town', () => {
           petMovementCallBack(playerLocation);
           const lastEvent = getLastEmittedEvent(townEmitter, 'petMoved');
           const expectedPet: Pet = {
-            id: actualPet!.id,
+            id: actualPet.id,
             name: 'lemmy',
             species: 'brown-cobra',
             movementType: 'offsetPlayer',
             x: 10,
-            y: 80,
+            y: 120,
+            rotation: 'front',
           };
           expect(lastEvent.pet).toEqual(expectedPet);
         });

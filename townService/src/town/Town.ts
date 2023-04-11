@@ -23,7 +23,7 @@ import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
 import PosterSessionArea from './PosterSessionArea';
 import CarnivalGameArea from './CarnivalGameArea';
-import SingletonScoreboardFactory from './Scoreboard';
+import SingletonScoreboardFactory from '../lib/SingletonScoreboardFactory';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -132,7 +132,6 @@ export default class Town {
     // clean up our listener adapter, and then let the CoveyTownController know that the
     // player's session is disconnected
     socket.on('disconnect', () => {
-      this._scoreboard.removePlayerScore(newPlayer.toPlayerModel());
       this._removePlayer(newPlayer);
       this._connectedSockets.delete(socket);
     });
@@ -209,7 +208,6 @@ export default class Town {
         const game = carnivalGameArea.getGame(newPlayer.id);
 
         if (game.isOver()) {
-          carnivalGameArea.notifyScoreBoard(newPlayer.id);
           this._broadcastEmitter.emit('gameUpdated', game.toModel());
           // Emit to client gameUpdated with game isOver state = true;
         } else {
@@ -231,6 +229,10 @@ export default class Town {
     if (player.location.interactableID) {
       this._removePlayerFromInteractable(player);
     }
+    const deletedPlayers = this._players.filter(p => p.id === player.id);
+    deletedPlayers.forEach(playerToDelete => {
+      this._scoreboard.removePlayerScore(playerToDelete.toPlayerModel());
+    });
     this._players = this._players.filter(p => p.id !== player.id);
     this._broadcastEmitter.emit('playerDisconnect', player.toPlayerModel());
   }
@@ -249,7 +251,6 @@ export default class Town {
     const prevInteractable = this._interactables.find(
       conv => conv.id === player.location.interactableID,
     );
-
     if (!prevInteractable?.contains(location)) {
       if (prevInteractable) {
         // Remove from old area

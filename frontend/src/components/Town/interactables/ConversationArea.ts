@@ -18,7 +18,7 @@ export default class ConversationArea extends Interactable {
     this._townController = scene.coveyTownController;
     this.setTintFill();
     this.setAlpha(0.3);
-    this._townController.addListener('conversationAreasChanged', this._updateConversationAreas);
+    // this._townController.addListener('conversationAreasChanged', this._updateConversationAreas);
   }
 
   private get _topicText() {

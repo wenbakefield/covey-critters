@@ -57,6 +57,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   set pet(value: PetController | undefined) {
     if (this.pet !== value && value !== undefined) {
+      this._pet?.removePetSprite();
       this._pet = value;
       this.emit('petChange', value);
     }
@@ -88,7 +89,6 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
       label.setX(this.location.x);
       label.setY(this.location.y - 20);
 
-      // TODO: add different pet sprites
       if (this.location.moving) {
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
       } else {

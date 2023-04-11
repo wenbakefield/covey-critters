@@ -133,6 +133,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         };
         petController = PetController.fromModel(petModel);
         petListener = getEventListener(mockSocket, 'petMoved');
@@ -156,6 +157,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 10,
           y: 20,
+          rotation: 'front',
         };
         petListener({
           playerId: testController.ourPlayer.id,
@@ -175,6 +177,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         };
         petListener({
           playerId: testController.ourPlayer.id,
@@ -222,6 +225,7 @@ describe('TownController', () => {
         species: 'black-bear',
         x: 0,
         y: 0,
+        rotation: 'front',
       });
       const expectPetUpdate = testController.ourPlayer.pet;
       const movedPetListener = jest.fn();
@@ -588,24 +592,43 @@ describe('TownController', () => {
           eventListener = getEventListener(mockSocket, 'interactableUpdate');
         });
         it('[REE1] interactables and CarnivalGameArea hooks Updates the CarnivalGameArea Model', () => {
+          const petId = nanoid();
           carnivalGameArea.petRule = [
             {
               percentileRangeMin: 0,
               percentileRangeMax: 100,
               petSelection: [
                 {
-                  id: nanoid(),
+                  id: petId,
                   name: 'lemmy',
                   movementType: 'offsetPlayer',
                   species: 'brown-cobra',
                   x: 0,
                   y: 0,
+                  rotation: 'front',
                 },
               ],
             },
           ];
 
           eventListener(carnivalGameArea);
+          expect(carnivalGameAreaController.petRule).toEqual([
+            {
+              percentileRangeMin: 0,
+              percentileRangeMax: 100,
+              petSelection: [
+                {
+                  id: petId,
+                  name: 'lemmy',
+                  movementType: 'offsetPlayer',
+                  species: 'brown-cobra',
+                  x: 0,
+                  y: 0,
+                  rotation: 'front',
+                },
+              ],
+            },
+          ]);
           expect(carnivalGameAreaController.carnivalGameAreaModel()).toEqual(carnivalGameArea);
         });
         it('[REE1] interactableUpdate and carnivalGameArea hooks Emits a petRuleChange event if the number of petRule changes', () => {
@@ -624,6 +647,7 @@ describe('TownController', () => {
                   species: 'brown-cobra',
                   x: 0,
                   y: 0,
+                  rotation: 'front',
                 },
               ],
             },
@@ -647,6 +671,23 @@ describe('TownController', () => {
             };
             spaceBarGameController = SpaceBarGameController.fromModel(spaceBarGame);
             gameListener = getEventListener(mockSocket, 'gameUpdated');
+          });
+
+          it('should not emit if player id is not in town', () => {
+            const newSpaceBarGame = {
+              playerId: nanoid(),
+              score: 0,
+              scoreLimit: 100,
+              isOver: false,
+              timeLimit: 100,
+            };
+            spaceBarGameController = SpaceBarGameController.fromModel(newSpaceBarGame);
+            carnivalGameAreaController.addGameSession(spaceBarGameController);
+            const listener = jest.fn();
+            spaceBarGameController.addListener('gameChanged', listener);
+            gameListener(newSpaceBarGame);
+            expect(spaceBarGameController.toModel()).toEqual(newSpaceBarGame);
+            expect(listener).not.toBeCalledWith(newSpaceBarGame);
           });
           it('SpaceBar game hooks should dispatch gameModel update', () => {
             carnivalGameAreaController.addGameSession(spaceBarGameController);
@@ -719,6 +760,7 @@ describe('TownController', () => {
           species: 'black-bear',
           x: 0,
           y: 0,
+          rotation: 'front',
         },
       };
       emitEventAndExpectListenerFiring(

@@ -8,7 +8,13 @@ import Interactable from '../components/Town/Interactable';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import PosterSesssionArea from '../components/Town/interactables/PosterSessionArea';
 import { LoginController } from '../contexts/LoginControllerContext';
-import { TownsService, TownsServiceClient } from '../generated/client';
+import {
+  Pet,
+  PetRule,
+  PlayerScoreTuple,
+  TownsService,
+  TownsServiceClient,
+} from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -30,6 +36,7 @@ import ConversationAreaController from './ConversationAreaController';
 import PlayerController from './PlayerController';
 import ViewingAreaController from './ViewingAreaController';
 import PosterSessionAreaController from './PosterSessionAreaController';
+import ScoreboardController from './ScoreboardController';
 import CarnivalGameAreaController from './CarnivalGameAreaController';
 import PetController from './PetController';
 import CarnivalGameArea from '../components/Town/interactables/CarnivalGameArea';
@@ -226,6 +233,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
   private _posterSessionAreas: PosterSessionAreaController[] = [];
 
+  private _scoreboardController: ScoreboardController;
+
   private _carnivalGameAreas: CarnivalGameAreaController[] = [];
 
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
@@ -233,6 +242,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._townID = townID;
     this._userName = userName;
     this._loginController = loginController;
+    this._scoreboardController = new ScoreboardController([]);
 
     /*
         The event emitter will show a warning if more than this number of listeners are registered, as it
@@ -246,6 +256,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket = io(url, { auth: { userName, townID } });
     this._townsService = new TownsServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
+    // this._scoreboardController.scoreboard = []; // alternative to: this.initalizeScoreboard(); error here
   }
 
   public get sessionToken() {
@@ -430,6 +441,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      */
     this._socket.on('playerDisconnect', disconnectedPlayer => {
       this._players = this.players.filter(eachPlayer => eachPlayer.id !== disconnectedPlayer.id);
+      this.initalizeScoreboard();
     });
     /**
      * When a player moves, update local state and emit an event to the controller's event listeners
@@ -459,10 +471,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       // TODO Update Pet Movement
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === petMoved.playerId);
       if (playerToUpdate) {
-        if (playerToUpdate == this._ourPlayer && playerToUpdate.pet && petMoved.pet) {
+        if (playerToUpdate.pet && petMoved.pet && playerToUpdate.pet.id === petMoved.pet.id) {
           const x = petMoved.pet.x;
           const y = petMoved.pet.y;
           playerToUpdate.pet.location = { x, y };
+          playerToUpdate.pet.rotation = petMoved.pet.rotation;
           playerToUpdate.pet.name = petMoved.pet.name;
           this.emit('petMoved', playerToUpdate.pet); // Should this be emitted
         } else {
@@ -516,24 +529,20 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     this._socket.on('gameUpdated', gameModel => {
       //TODO recieve updated GameModel from backend and emit updateGame back to backend.
-      const game = this._getGameByPlayerID(gameModel.playerId);
+      const game = this.getGameByPlayerID(gameModel.playerId);
       if (game) {
         game.updateFrom(gameModel);
       }
     });
   }
 
-  private _getGameByPlayerID(playerId: string): SpaceBarGameController | undefined {
-    const carnivalGameArea = this._carnivalGameAreas.find(area => {
-      if (!area.getGameSessionByID(playerId)) {
-        return false;
-      } else {
-        return true;
-      }
-    });
+  public getGameByPlayerID(playerId: string): SpaceBarGameController | undefined {
+    const carnivalArea = this._carnivalGameAreas.find(
+      eachArea => eachArea.getGameSessionByID(playerId) !== undefined,
+    );
     // Get The Game if exists else create the new game
-    if (carnivalGameArea) {
-      const game = carnivalGameArea.getGameSessionByID(playerId);
+    if (carnivalArea) {
+      const game = carnivalArea.getGameSessionByID(playerId);
       if (game) {
         return game;
       } else {
@@ -797,6 +806,98 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   /**
+   * Dispatch Patch request to modify the Pet rule in Carnival Game Area
+   * @param carnivalGameArea represent the carnivalGameArea that need to adjust
+   * @param petRule represent the added pet rule
+   * @returns petRules represent all the rewards condition for the game
+   */
+  public async changeCarnivalGamePetRule(
+    carnivalGameArea: CarnivalGameAreaController,
+    petRule: PetRule,
+  ): Promise<PetRule[]> {
+    const exitingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (exitingController) {
+      return this._townsService.changePetRule(
+        this.townID,
+        carnivalGameArea.id,
+        this.sessionToken,
+        petRule,
+      );
+    } else {
+      throw new Error('Unable to find Carnival Game Area in TownController');
+    }
+  }
+
+  /**
+   * Dispatch Patch request to intialize the game to the townService
+   * @param carnivalGameArea represent the carnivalGameArea.
+   * @param gameModel represent the player's game session
+   */
+  public async initializeGame(
+    carnivalGameArea: CarnivalGameAreaController,
+    gameModel: GameSession,
+  ): Promise<void> {
+    const exitingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (exitingController) {
+      return this._townsService.initializeCarnivalGame(
+        this.townID,
+        carnivalGameArea.id,
+        this.sessionToken,
+        gameModel,
+      );
+    } else {
+      throw new Error('Unable to find Carnival Game Area in TownController');
+    }
+  }
+
+  /**
+   * Dispatch a patch call to assign Player a pet in townService and retrieved the pet that got assigned
+   * @param carnivalGameArea represent the carnivalGameArea that the player is in
+   * @param petName represent the pet name
+   */
+  public async assignPetToPlayer(
+    carnivalGameArea: CarnivalGameAreaController,
+    petName: string,
+  ): Promise<Pet | undefined> {
+    const existingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (existingController) {
+      return this._townsService.assignPet(
+        this.townID,
+        carnivalGameArea.id,
+        petName,
+        this.sessionToken,
+      );
+    }
+  }
+
+  /**
+   * Dispatch a patch call to end the player game session and retrieved the updated gamesession from townservice
+   * @param carnivalGameArea represent the carnival area which the player is in
+   */
+  public async carnivalGameTimeLimitReach(
+    carnivalGameArea: CarnivalGameAreaController,
+  ): Promise<GameSession> {
+    const existingController = this._carnivalGameAreas.find(
+      eachExistingArea => eachExistingArea.id === carnivalGameArea.id,
+    );
+    if (existingController) {
+      return this._townsService.timeLimitReached(
+        this.townID,
+        carnivalGameArea.id,
+        this.sessionToken,
+      );
+    } else {
+      throw new Error(`Unable to retrieve Carnival Game Area with id ${carnivalGameArea.id}`);
+    }
+  }
+
+  /**
    * Emit a viewing area update to the townService
    * @param viewingArea The Viewing Area Controller that is updated and should be emitted
    *    with the event
@@ -812,6 +913,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public emitPosterSessionAreaUpdate(posterSessionArea: PosterSessionAreaController) {
     this._socket.emit('interactableUpdate', posterSessionArea.posterSessionAreaModel());
+  }
+
+  /**
+   * Emit a carnival game area update to the townService
+   * @param carnivalGameArea The Carnival Game Area Controller that is updated snad should be emitted with event.
+   */
+  public emitCarnivalGameAreaUpdate(carnivalGameArea: CarnivalGameAreaController) {
+    this._socket.emit('interactableUpdate', carnivalGameArea.carnivalGameAreaModel());
   }
 
   /**
@@ -842,6 +951,30 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       posterSessionArea.id,
       this.sessionToken,
     );
+  }
+
+  public async addPlayerScore(score: number): Promise<void> {
+    await this._townsService.addPlayerScore(this.townID, this.sessionToken, score);
+    this.initalizeScoreboard();
+  }
+
+  public async initalizeScoreboard(): Promise<void> {
+    const updatePlayerScoreTuple = await this._townsService.getAllScores();
+    this._scoreboardController.scoreboard = updatePlayerScoreTuple;
+  }
+
+  public get scoreboardController() {
+    return this._scoreboardController;
+  }
+
+  public async getPercentile(score: number): Promise<number> {
+    const percentile = await this._townsService.getPercentile(score);
+    return percentile;
+  }
+
+  public async getTopXScoreboard(top: number): Promise<PlayerScoreTuple[]> {
+    const list = await this._townsService.getXScores(top);
+    return list;
   }
 
   /**
@@ -995,6 +1128,29 @@ export function usePosterSessionAreaController(
     throw new Error(`Unable to locate poster session area id ${posterSessionAreaID}`);
   }
   return ret;
+}
+
+export function useCarnivalGameAreaController(
+  carnivalGameAreaID: string,
+): CarnivalGameAreaController {
+  const townController = useTownController();
+  const ret = townController.carnivalGameAreas.find(eachArea => eachArea.id === carnivalGameAreaID);
+  if (!ret) {
+    throw new Error(`Unable to locate carnival game area id ${carnivalGameAreaID}`);
+  } else {
+    return ret;
+  }
+}
+
+export function useSpaceBarGameController(playerID: string): SpaceBarGameController {
+  const townController = useTownController();
+  const gameController = townController.getGameByPlayerID(playerID);
+  if (!gameController) {
+    // This should not be possible
+    throw new Error('Carnival Game Area is found however cannot locate Game Controller');
+  } else {
+    return gameController;
+  }
 }
 
 function samePlayers(a1: PlayerController[], a2: PlayerController[]) {

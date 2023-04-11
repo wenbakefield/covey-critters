@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
+import { DeepMockProxy, mockDeep, mock } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { Town } from '../api/Model';
 import {
@@ -8,6 +8,7 @@ import {
   TownEmitter,
   ViewingArea,
   CarnivalGameArea,
+  PetRule,
 } from '../types/CoveyTownSocket';
 import TownsStore from '../lib/TownsStore';
 import {
@@ -21,6 +22,7 @@ import {
   isCarnivalGameArea,
 } from '../TestUtils';
 import { TownsController } from './TownsController';
+import Player from '../lib/Player';
 
 type TestTownData = {
   friendlyName: string;
@@ -377,6 +379,328 @@ describe('TownsController integration tests', () => {
           controller.createCarnivalGameArea(testingTown.townID, sessionToken, carnivalGameArea),
         ).rejects.toThrow();
       });
+
+      it('Modify the CarnivalGameArea if a new petRule is created', async () => {
+        const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+        if (!carnivalGameArea) {
+          fail('Expected at least one carnival game area to be returned in the initial join data');
+        } else {
+          const newCarnivalGameArea: CarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+          const addPetRule: PetRule = {
+            percentileRangeMax: 20,
+            percentileRangeMin: 10,
+            petSelection: [],
+          };
+          const petRule = await controller.changePetRule(
+            testingTown.townID,
+            newCarnivalGameArea.id,
+            addPetRule,
+            sessionToken,
+          );
+          expect(petRule.length).toEqual(2);
+        }
+      });
+
+      describe('timeLimit Reach', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw TimeLimit Reach if townId is not valid', async () => {
+          await expect(
+            controller.timeLimitReached(nanoid(), newCarnivalGameArea.id, sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw TimeLimit Reach if carnivalId is not valid', async () => {
+          await expect(
+            controller.timeLimitReached(testingTown.townID, nanoid(), sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw TimeLimit Reach if sessiontoken is not valid', async () => {
+          await expect(
+            controller.timeLimitReached(testingTown.townID, newCarnivalGameArea.id, nanoid()),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('changePetRule', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw changePetRule Reach if townId is not valid', async () => {
+          await expect(
+            controller.changePetRule(
+              nanoid(),
+              newCarnivalGameArea.id,
+              { percentileRangeMin: 0, percentileRangeMax: 100, petSelection: [] },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw changePetRule Reach if carnivalId is not valid', async () => {
+          await expect(
+            controller.changePetRule(
+              testingTown.townID,
+              nanoid(),
+              { percentileRangeMin: 0, percentileRangeMax: 100, petSelection: [] },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw changePetRule Reach if sessiontoken is not valid', async () => {
+          await expect(
+            controller.changePetRule(
+              testingTown.townID,
+              newCarnivalGameArea.id,
+              { percentileRangeMin: 0, percentileRangeMax: 100, petSelection: [] },
+              nanoid(),
+            ),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('assignPet', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw assignPet Reach if townId is not valid', async () => {
+          await expect(
+            controller.assignPet(nanoid(), newCarnivalGameArea.id, 'lemmy', sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw assignPet Reach if carnivalId is not valid', async () => {
+          await expect(
+            controller.assignPet(testingTown.townID, nanoid(), 'lemmy', sessionToken),
+          ).rejects.toThrow();
+        });
+
+        it('Throw assignPet Reach if sessiontoken is not valid', async () => {
+          await expect(
+            controller.assignPet(testingTown.townID, newCarnivalGameArea.id, 'lemmy', nanoid()),
+          ).rejects.toThrow();
+        });
+        it('Throw assignPet Reach if retrieved is not carnival area', async () => {
+          const viewingArea = interactables.find(isViewingArea) as ViewingArea;
+          await expect(
+            controller.assignPet(testingTown.townID, viewingArea.id, 'lemmy', sessionToken),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('initializeCarnivalGame', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('initializeCarnivalGame should add player to the area', async () => {
+          player.moveTo(2950, 1030);
+          const gameModel = {
+            playerId: nanoid(),
+            score: 0,
+            scoreLimit: 200,
+            timeLimit: 200,
+            isOver: false,
+          };
+          await controller.initializeCarnivalGame(
+            testingTown.townID,
+            newCarnivalGameArea.id,
+            gameModel,
+            sessionToken,
+          );
+          const game = await controller.timeLimitReached(
+            testingTown.townID,
+            newCarnivalGameArea.id,
+            sessionToken,
+          );
+          expect(game.playerId).not.toEqual(gameModel.playerId);
+          expect(game.score).toEqual(0);
+          expect(game.scoreLimit).toEqual(200);
+          expect(game.timeLimit).toEqual(200);
+          expect(game.isOver).toEqual(true);
+        });
+
+        it('Throw initializeCarnivalGame if townId is not valid', async () => {
+          await expect(
+            controller.initializeCarnivalGame(
+              nanoid(),
+              newCarnivalGameArea.id,
+              { playerId: nanoid(), score: 0, scoreLimit: 100, timeLimit: 100, isOver: false },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw initializeCarnivalGame if carnivalId is not valid', async () => {
+          await expect(
+            controller.initializeCarnivalGame(
+              testingTown.townID,
+              nanoid(),
+              { playerId: nanoid(), score: 0, scoreLimit: 100, timeLimit: 100, isOver: false },
+              sessionToken,
+            ),
+          ).rejects.toThrow();
+        });
+
+        it('Throw initializeCarnivalGame if sessiontoken is not valid', async () => {
+          await expect(
+            controller.initializeCarnivalGame(
+              testingTown.townID,
+              newCarnivalGameArea.id,
+              { playerId: nanoid(), score: 0, scoreLimit: 100, timeLimit: 100, isOver: false },
+              nanoid(),
+            ),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('getPetFromPlayerId', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw getPetFromPlayerId if townId is not valid', async () => {
+          await expect(controller.getPetFromPlayerId(nanoid(), sessionToken)).rejects.toThrow();
+        });
+
+        it('Throw getPetFromPlayerId if sessiontoken is not valid', async () => {
+          await expect(
+            controller.getPetFromPlayerId(testingTown.townID, nanoid()),
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('renamePet', () => {
+        let newCarnivalGameArea: CarnivalGameArea;
+        beforeEach(async () => {
+          const carnivalGameArea = interactables.find(isCarnivalGameArea) as CarnivalGameArea;
+          newCarnivalGameArea = {
+            id: carnivalGameArea.id,
+            petRule: [
+              {
+                percentileRangeMin: 0,
+                percentileRangeMax: 10,
+                petSelection: [],
+              },
+            ],
+          };
+          await controller.createCarnivalGameArea(
+            testingTown.townID,
+            sessionToken,
+            newCarnivalGameArea,
+          );
+        });
+
+        it('Throw getPetFromPlayerId if townId is not valid', async () => {
+          await expect(controller.renamePet(nanoid(), sessionToken, 'lemmy')).rejects.toThrow();
+        });
+
+        it('Throw getPetFromPlayerId if sessiontoken is not valid', async () => {
+          await expect(
+            controller.renamePet(testingTown.townID, nanoid(), 'lemmy'),
+          ).rejects.toThrow();
+        });
+      });
     });
 
     describe('[T1] Create Viewing Area', () => {
@@ -433,6 +757,226 @@ describe('TownsController integration tests', () => {
         await expect(
           controller.createViewingArea(testingTown.townID, sessionToken, viewingArea),
         ).rejects.toThrow();
+      });
+    });
+    describe('Scoreboard Controller tests', () => {
+      beforeEach(async () => {
+        testingTown = await createTownForTesting(undefined, true);
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+      });
+      it('getAllScores test for empty scoreboard', async () => {
+        const testAreaController = new TownsController();
+        const getAllScores = await testAreaController.getAllScores();
+        expect(getAllScores).toEqual([]);
+      });
+      it('getTopX test for empty scoreboard', async () => {
+        const testAreaController = new TownsController();
+        const getXScores = await testAreaController.getXScores(5);
+        expect(getXScores).toEqual([]);
+      });
+      it('calculatedPercentile test with input of 0 for empty scoreboard', async () => {
+        const testAreaController = new TownsController();
+        const getPercentile = await testAreaController.getPercentile(0);
+        expect(getPercentile).toEqual(0);
+      });
+      it('calculatedPercentile test with input of a positive number for empty scoreboard', async () => {
+        const testAreaController = new TownsController();
+        const getPercentile = await testAreaController.getPercentile(8);
+        expect(getPercentile).toEqual(0);
+      });
+      it('calculatedPercentile test with input of a negative number for empty scoreboard', async () => {
+        const testAreaController = new TownsController();
+        const getPercentile = await testAreaController.getPercentile(-8);
+        expect(getPercentile).toEqual(0);
+      });
+      it('adding a player score tuple - test with getXScores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        const listOfRecievedScores = await testAreaController.getXScores(5);
+        const recievedPlayer = listOfRecievedScores[0].player.userName;
+        const recievedScore = listOfRecievedScores[0].score;
+        expect(recievedPlayer).toEqual(player.userName);
+        expect(recievedScore).toEqual(30);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+      });
+      it('adding a player score tuple - test with getAllScores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        const recievedPlayer = listOfRecievedScores[0].player.userName;
+        const recievedScore = listOfRecievedScores[0].score;
+        expect(recievedPlayer).toEqual(player.userName);
+        expect(recievedScore).toEqual(30);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+      });
+      it('removing a player score tuple', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        expect(listOfRecievedScores).toEqual([]);
+      });
+      it('removing a player that has multiple scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 60);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        expect(listOfRecievedScores).toEqual([]);
+      });
+      it('removing a player that when there are multiple players', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        const listOfRecievedScores = await testAreaController.getAllScores();
+        const recievedPlayer = listOfRecievedScores[0].player.userName;
+        const recievedScore = listOfRecievedScores[0].score;
+        const recievedPlayerTwo = listOfRecievedScores[1].player.userName;
+        const recievedScoreTwo = listOfRecievedScores[1].score;
+        expect(recievedPlayer).toEqual(playerTwo.userName);
+        expect(recievedScore).toEqual(67);
+        expect(recievedPlayerTwo).toEqual(playerThree.userName);
+        expect(recievedScoreTwo).toEqual(23);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
+      });
+      it('getting a percentile for score higher than all scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        const percentile = await testAreaController.getPercentile(99);
+        expect(percentile).toEqual(1);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
+      });
+      it('getting a percentile for a score equal to highest score', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        const percentile = await testAreaController.getPercentile(67);
+        expect(percentile).toEqual(1);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
+      });
+      it('getting a percentile for a score between 2 different scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+
+        const percentile = await testAreaController.getPercentile(55);
+        expect(percentile).toEqual(0.5);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+      });
+      it('getting a percentile for a score lower than all scores', async () => {
+        player = mockPlayer(testingTown.townID);
+        await controller.joinTown(player.socket);
+        const initialData = getLastEmittedEvent(player.socket, 'initialize');
+        sessionToken = initialData.sessionToken;
+
+        const playerTwo: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerTwo.socket);
+        const initialDataTwo = getLastEmittedEvent(playerTwo.socket, 'initialize');
+        const sessionTokenTwo: string = initialDataTwo.sessionToken;
+
+        const playerThree: MockedPlayer = mockPlayer(testingTown.townID);
+        await controller.joinTown(playerThree.socket);
+        const initialDataThree = getLastEmittedEvent(playerThree.socket, 'initialize');
+        const sessionTokenThree: string = initialDataThree.sessionToken;
+
+        const testAreaController = new TownsController();
+        await testAreaController.addPlayerScore(testingTown.townID, sessionToken, 30);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenTwo, 67);
+        await testAreaController.addPlayerScore(testingTown.townID, sessionTokenThree, 23);
+
+        const percentile = await testAreaController.getPercentile(18);
+        expect(percentile).toEqual(0);
+        await testAreaController.removePlayer(testingTown.townID, sessionToken);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenTwo);
+        await testAreaController.removePlayer(testingTown.townID, sessionTokenThree);
       });
     });
   });

@@ -12,6 +12,13 @@ export type PetEvents = {
   petMovementChange: (x: number, y: number) => void;
 
   /**
+   * A petRotationChange Event indicate that the pet has rotate.
+   * Listener are passed the new pet rotation.
+   * @param rotation represent the pet rotation in the town.
+   */
+  petRotationChange: (rotation: string) => void;
+
+  /**
    * A petNameChange event indicate the pet name has been changed.
    * Listeners are passed the new pet name
    * @param name represent the new pet name
@@ -21,7 +28,7 @@ export type PetEvents = {
 
 export type PetGameObjects = {
   sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  label: Phaser.GameObjects.Text;
+  label?: Phaser.GameObjects.Text;
   // Should locationMangedByGameScene
   locationManagedByGameScene: boolean /* For the local player, the game scene will calculate the current location, and we should NOT apply updates when we receive events */;
 };
@@ -29,11 +36,15 @@ export type PetGameObjects = {
 export default class PetController extends (EventEmitter as new () => TypedEmitter<PetEvents>) {
   private _model: PetModel;
 
-  public gameObjects?: PetGameObjects;
+  private _gameObjects?: PetGameObjects;
 
   constructor(petModel: PetModel) {
     super();
     this._model = petModel;
+  }
+
+  public get id() {
+    return this._model.id;
   }
 
   public get name() {
@@ -76,6 +87,37 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     }
   }
 
+  public get rotation() {
+    if (this._model) {
+      return this._model.rotation;
+    } else {
+      throw new Error('Unable to retrieve pet roation');
+    }
+  }
+
+  public set rotation(rotation: string) {
+    if (this._model) {
+      if (this._model.rotation !== rotation) {
+        this._model.rotation = rotation;
+        this._updateGameComponentLocation();
+        this.emit('petRotationChange', rotation);
+      }
+    } else {
+      throw new Error('Unable to retrieve pet location');
+    }
+  }
+
+  public get gameObjects(): PetGameObjects | undefined {
+    return this._gameObjects;
+  }
+
+  public set gameObjects(petGameObject: PetGameObjects | undefined) {
+    if (petGameObject) {
+      this.removePetSprite();
+      this._gameObjects = petGameObject;
+    }
+  }
+
   public get species() {
     return this._model.species;
   }
@@ -90,12 +132,26 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       if (!sprite.anims) return;
       sprite.setX(this._model.x);
       sprite.setY(this._model.y);
-      label.setX(this._model.x);
-      label.setY(this._model.y - 20);
+      if (label) {
+        label.setX(this._model.x - 7);
+        label.setY(this._model.y - 20);
+      }
 
       // TODO: add different pet sprites
-      // sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
+      sprite.anims.play(`${this.species}-${this.rotation}-walk`, true);
+      //sprite.anims.play(`red-snake-${this.rotation}-walk`, true);
       // What is the key for this one @Ben
+    }
+  }
+
+  public removePetSprite() {
+    if (this.gameObjects) {
+      const { sprite, label } = this.gameObjects;
+      sprite.removedFromScene();
+      sprite.destroy();
+      label?.removedFromScene();
+      label?.destroy();
+      this.gameObjects = undefined;
     }
   }
 

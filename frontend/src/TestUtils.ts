@@ -6,8 +6,9 @@ import PlayerController from './classes/PlayerController';
 import TownController, { TownEvents } from './classes/TownController';
 import ViewingAreaController from './classes/ViewingAreaController';
 import PosterSessionAreaController from './classes/PosterSessionAreaController';
-import { TownsService } from './generated/client';
+import { PetRule, TownsService } from './generated/client';
 import { CoveyTownSocket, ServerToClientEvents, TownJoinResponse } from './types/CoveyTownSocket';
+import CarnivalGameAreaController from './classes/CarnivalGameAreaController';
 
 //These types copied from socket.io server library so that we don't have to depend on the whole thing to have type-safe tests.
 type SocketReservedEventsMap = {
@@ -87,6 +88,7 @@ type MockedTownControllerProperties = {
   conversationAreas?: ConversationAreaController[];
   viewingAreas?: ViewingAreaController[];
   posterSessionAreas?: PosterSessionAreaController[];
+  carnivalGameAreas?: CarnivalGameAreaController[];
 };
 export function mockTownController({
   friendlyName,
@@ -98,6 +100,7 @@ export function mockTownController({
   conversationAreas,
   viewingAreas,
   posterSessionAreas,
+  carnivalGameAreas,
 }: MockedTownControllerProperties) {
   const mockedController = mockDeep<TownController>();
   if (friendlyName) {
@@ -136,6 +139,14 @@ export function mockTownController({
     mockedController.incrementPosterSessionAreaStars.mockImplementation(
       async (posterSessionArea: PosterSessionAreaController) => {
         return ++posterSessionArea.stars;
+      },
+    );
+  }
+  if (carnivalGameAreas) {
+    Object.defineProperty(mockedController, 'carnivalGameAreas', { value: carnivalGameAreas });
+    mockedController.changeCarnivalGamePetRule.mockImplementation(
+      async (carnivalGameArea: CarnivalGameAreaController, petRule: PetRule) => {
+        return [petRule];
       },
     );
   }

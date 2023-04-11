@@ -23,6 +23,20 @@ describe('CarnivalGameArea', () => {
     testArea = new CarnivalGameArea({ id, petRule: [] }, testAreaBox, townEmitter);
     newPlayer = new Player(nanoid(), mock<TownEmitter>());
     testArea.add(newPlayer);
+    testArea.addGameSessionToCarnival(newPlayer, {
+      playerId: newPlayer.id,
+      score: 1,
+      scoreLimit: 100,
+      isOver: false,
+      timeLimit: 100,
+    });
+    expect(testArea.getGame(newPlayer.id).toModel()).toEqual({
+      playerId: newPlayer.id,
+      score: 1,
+      scoreLimit: 100,
+      isOver: false,
+      timeLimit: 100,
+    });
   });
 
   describe('remove', () => {
@@ -80,7 +94,7 @@ describe('CarnivalGameArea', () => {
       const gameSession = testArea.getGame(newPlayer.id);
       expect(gameSession).not.toBeUndefined();
       expect(gameSession.isOver()).toEqual(false);
-      expect(gameSession.getScore()).toEqual(0);
+      expect(gameSession.getScore()).toEqual(1);
     });
   });
   describe('getGame', () => {
@@ -101,7 +115,9 @@ describe('CarnivalGameArea', () => {
     it('Should push the scored to the scoreboard when the game is ended or overide', () => {
       expect(testArea.scoreBoard.getTopX(10)).toEqual([]);
       testArea.notifyScoreBoard(newPlayer.id, true);
-      expect(testArea.scoreBoard.getTopX(10)).toEqual([[newPlayer.toPlayerModel(), 0]]);
+      expect(testArea.scoreBoard.getTopX(10)).toEqual([
+        { player: newPlayer.toPlayerModel(), score: 1 },
+      ]);
     });
     it('Should throw an error if the player is not in the interactable', () => {
       expect(() => testArea.notifyScoreBoard('no-exist-player')).toThrow();
@@ -129,37 +145,6 @@ describe('CarnivalGameArea', () => {
       game.isOver(true); // Overide if the game is timeout
       const newPetRule: PetRule = {
         percentileRangeMin: 0,
-        percentileRangeMax: 20,
-        petSelection: [
-          {
-            id: nanoid(),
-            name: 'brown-cobra',
-            species: 'brown-cobra',
-            movementType: 'offsetPlayer',
-            x: 0,
-            y: 0,
-          },
-        ],
-      };
-      testArea.addPetRule(newPetRule);
-      const actualPetModel = testArea.assignPetToPlayer(newPlayer.id, 'lemmy');
-      const expectedPetModel: PetModel = {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        id: actualPetModel!.id,
-        name: 'lemmy',
-        species: 'brown-cobra',
-        movementType: 'offsetPlayer',
-        x: -40,
-        y: -20,
-      };
-      expect(actualPetModel).toEqual(expectedPetModel);
-    });
-
-    it('Should not assign player a pet if reward min-max range does not exists', () => {
-      const game = testArea.getGame(newPlayer.id);
-      game.isOver(true); // Overide if the game is timeout
-      const newPetRule: PetRule = {
-        percentileRangeMin: 80,
         percentileRangeMax: 100,
         petSelection: [
           {
@@ -169,6 +154,41 @@ describe('CarnivalGameArea', () => {
             movementType: 'offsetPlayer',
             x: 0,
             y: 0,
+            rotation: 'front',
+          },
+        ],
+      };
+      testArea.addPetRule(newPetRule);
+      testArea.notifyScoreBoard(newPlayer.id);
+      const actualPetModel = testArea.assignPetToPlayer(newPlayer.id, 'lemmy');
+      const expectedPetModel: PetModel = {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: actualPetModel!.id,
+        name: 'lemmy',
+        species: 'brown-cobra',
+        movementType: 'offsetPlayer',
+        x: -40,
+        y: 20,
+        rotation: 'front',
+      };
+      expect(actualPetModel).toEqual(expectedPetModel);
+    });
+
+    it('Should not assign player a pet if reward min-max range does not exists', () => {
+      const game = testArea.getGame(newPlayer.id);
+      game.isOver(true); // Overide if the game is timeout
+      const newPetRule: PetRule = {
+        percentileRangeMin: 0,
+        percentileRangeMax: 20,
+        petSelection: [
+          {
+            id: nanoid(),
+            name: 'brown-cobra',
+            species: 'brown-cobra',
+            movementType: 'offsetPlayer',
+            x: 0,
+            y: 0,
+            rotation: 'front',
           },
         ],
       };
@@ -187,6 +207,8 @@ describe('CarnivalGameArea', () => {
       testArea.addPetRule(newPetRule);
       expect(testArea.petRule.length).toEqual(1);
       expect(testArea.petRule).toEqual([newPetRule]);
+      const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
+      expect(lastEmittedUpdate).toStrictEqual({ id: testArea.id, petRule: [newPetRule] });
     });
     it('Add multiple pet rule that does not overlaps with other rules', () => {
       expect(testArea.petRule.length).toEqual(0);
@@ -248,7 +270,7 @@ describe('CarnivalGameArea', () => {
       petRule: newPetRule,
     });
     expect(testArea.id).toBe(id);
-    expect(testArea.petRule).toBe(newPetRule);
+    expect(testArea.petRule).toStrictEqual(newPetRule);
   });
   describe('fromMapObject', () => {
     it('Throws an error if the width or height are missing', () => {
