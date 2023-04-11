@@ -1,20 +1,13 @@
 import {
-  Modal,
   ModalBody,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalOverlay,
   Center,
   CircularProgress,
   CircularProgressLabel,
   Box,
   Text,
   Progress,
-  Input,
-  Heading,
 } from '@chakra-ui/react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   useCarnivalGameAreaController,
   useSpaceBarGameController,
@@ -22,7 +15,7 @@ import {
 import useTownController from '../../../hooks/useTownController';
 import * as Phaser from 'phaser';
 import CarnivalGameAreaController from '../../../classes/CarnivalGameAreaController';
-import { PetPickerDialog } from './CarnivalGameArea/PetSelector';
+import { GameOverModal } from './CarnivalGameArea/GameOver';
 
 const SPRITE_SPWAN_X = 75;
 const SPRITE_SPWAN_Y = 150;
@@ -41,14 +34,7 @@ export default function SBGameModal({
   const sbGameController = useSpaceBarGameController(coveyTownController.ourPlayer.id);
   const [count, setCount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
-  const [petNameIsFilled, setPetNameIsFilled] = useState(true);
-  const [value, setValue] = React.useState('');
   const speed = 750 / sbGameController.scoreLimit;
-
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    setValue(event.target.value);
-    setPetNameIsFilled(false);
-  }
 
   useEffect(() => {
     if (isOpen) {
@@ -73,7 +59,7 @@ export default function SBGameModal({
       setTimeLeft(timeLeft - 1);
     }, 1000);
     return () => clearInterval(intervalId);
-  }, [carnivalGameController, coveyTownController, timeLeft]);
+  }, [carnivalGameController, coveyTownController, sbGameController, timeLeft]);
 
   // Game
   const gameRef = useRef<HTMLDivElement | undefined>();
@@ -152,14 +138,12 @@ export default function SBGameModal({
   }, []);
 
   useEffect(() => {
-    if (
-      sbGameController.score === sbGameController.scoreLimit ||
-      timeLeft === 0 ||
-      sbGameController.isOver
-    ) {
+    if (sbGameController.score === sbGameController.scoreLimit || timeLeft === 0) {
+      sbGameController.isOver = true;
       setShowPopup(true);
     }
   }, [
+    sbGameController,
     sbGameController.isOver,
     sbGameController.score,
     sbGameController.scoreLimit,
@@ -197,55 +181,12 @@ export default function SBGameModal({
       <Center color='black'>
         <Text>Score: {count}</Text>
       </Center>
-      <Modal isOpen={showPopup} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader fontSize='lg' fontWeight='bold'>
-            Game Over
-          </ModalHeader>
-
-          <ModalBody alignItems={'center'} justifyContent='center'>
-            <Box display='flex' alignContent={'center'} justifyContent='center'>
-              <Center>
-                <Heading fontSize={'xs'} fontWeight={'bold'}>
-                  Your Score
-                </Heading>
-              </Center>
-            </Box>
-            <Box display='flex' alignContent={'center'} justifyContent='center'>
-              <Center mb={'5'} mt={'2'}>
-                <CircularProgress
-                  value={(sbGameController.score / sbGameController.scoreLimit) * 100}
-                  color='gray'
-                  size={'100px'}>
-                  <CircularProgressLabel fontSize={'large'} fontWeight={'bold'}>
-                    {sbGameController.score}
-                  </CircularProgressLabel>
-                </CircularProgress>
-              </Center>
-            </Box>
-            <Text fontSize='sm' mb='3px'>
-              Pet Name:
-            </Text>
-            <Input
-              size={'sm'}
-              value={value}
-              onChange={handleChange}
-              variant='outline'
-              placeholder='Your Pet Name'
-            />
-          </ModalBody>
-
-          <ModalFooter>
-            <PetPickerDialog
-              isDisable={petNameIsFilled}
-              controller={controller}
-              petName={value}
-              onClick={onClose}
-            />
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <GameOverModal
+        controller={controller}
+        sbGameController={sbGameController}
+        showPopup={showPopup}
+        onClose={onClose}
+      />
     </ModalBody>
   );
 }

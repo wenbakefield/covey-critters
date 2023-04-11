@@ -1,11 +1,7 @@
 import React from 'react';
 import PetController from '../../../../classes/PetController';
 import PlayerController from '../../../../classes/PlayerController';
-import {
-  useCarnivalGameAreaController,
-  usePlayers,
-  useSpaceBarGameController,
-} from '../../../../classes/TownController';
+import { useCarnivalGameAreaController, usePlayers } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import { Button } from '@chakra-ui/react';
 import CarnivalGameAreaController from '../../../../classes/CarnivalGameAreaController';
@@ -18,7 +14,6 @@ export function PetPickerDialog(props: {
 }): JSX.Element {
   const townController = useTownController();
   const carnivalGameAreaController = useCarnivalGameAreaController(props.controller.id);
-  const sbGameController = useSpaceBarGameController(townController.ourPlayer.id);
   const playerControllers = usePlayers();
   const ourPlayerController = playerControllers.find(
     player => player.id === townController.ourPlayer.id,
@@ -29,7 +24,6 @@ export function PetPickerDialog(props: {
   }
 
   async function assignPlayerAPet(ourPlayer: PlayerController) {
-    await townController.addPlayerScore(sbGameController.score);
     const recievedPet = await townController.assignPetToPlayer(
       carnivalGameAreaController,
       props.petName,

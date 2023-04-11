@@ -11,7 +11,6 @@ import {
   ModalOverlay,
   useToast,
 } from '@chakra-ui/react';
-import { nanoid } from 'nanoid';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useInteractable } from '../../../classes/TownController';
 import { CarnivalGameArea, PetRule } from '../../../generated/client';
@@ -21,23 +20,7 @@ import { PetRuleExplainer } from './CarnivalGameArea/PetRuleExplainer';
 export default function NewCarnivalGameArea(): JSX.Element {
   const coveyTownController = useTownController();
   const newCarnivalGameArea = useInteractable('carnivalGameArea');
-  const [petRule, setPetRule] = useState<PetRule[]>([
-    {
-      percentileRangeMin: 0,
-      percentileRangeMax: 100,
-      petSelection: [
-        {
-          id: nanoid(),
-          name: 'undefined',
-          movementType: 'offsetPlayer',
-          species: 'black-bear',
-          x: 0,
-          y: 0,
-          rotation: 'front',
-        },
-      ],
-    },
-  ]);
+  const [petRule, setPetRule] = useState<PetRule[]>([]);
 
   const isOpen = newCarnivalGameArea !== undefined;
 
@@ -113,7 +96,11 @@ export default function NewCarnivalGameArea(): JSX.Element {
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme='blue' mr={3} onClick={createCarnivalGame}>
+            <Button
+              isDisabled={petRule.length == 0}
+              colorScheme='blue'
+              mr={3}
+              onClick={createCarnivalGame}>
               Create
             </Button>
             <Button onClick={closeModal}>Cancel</Button>
