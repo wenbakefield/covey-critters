@@ -1,4 +1,11 @@
-# Covey.Town
+# Covey Critters
+
+Covey Critters is a feature implementation for Covey.Town. We thought that players in the town should be able to compete in a carnival game, to earn a high score and a pet, which would follow them around. Thus, we implemented the following features, along with general improvements:
+- Carnival Game Area - where the user can play a game to win a critter based on their score
+- Leaderboard - where the user can see how their score compares against other players
+- Covey Critter - an animated sprite that follows the user, with unique characteristics
+
+## Covey.Town
 
 Covey.Town provides a virtual meeting space where different groups of people can have simultaneous video calls, allowing participants to drift between different conversations, just like in real life.
 Covey.Town was built for Northeastern's [Spring 2021 software engineering course](https://neu-se.github.io/CS4530-CS5500-Spring-2021/), and is designed to be reused across semesters.
