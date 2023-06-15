@@ -1,4 +1,8 @@
-# Covey Critters
+# Covey Critters [![Netlify Status](https://api.netlify.com/api/v1/badges/73fcfae7-3267-4090-8906-3cc875a184bc/deploy-status)](https://app.netlify.com/sites/clever-marigold-258b59/deploys)
+
+![brown-bear](https://github.com/wenbakefield/covey-critters/assets/8831999/9dcb5c70-b30c-435c-a737-fe929490179e) ![white-sheep](https://github.com/wenbakefield/covey-critters/assets/8831999/07d7aa51-0767-4572-b517-db52f2665622) ![green-cobra](https://github.com/wenbakefield/covey-critters/assets/8831999/9dd3d8a2-b90e-4e64-a84c-931718e1399f) ![red-snake](https://github.com/wenbakefield/covey-critters/assets/8831999/5c42bc70-7be1-4531-a519-9d2c32e0daea) ![gray-mouse](https://github.com/wenbakefield/covey-critters/assets/8831999/aa39e03f-fd18-4fd3-899b-14950b05f11a) ![gray-wolf](https://github.com/wenbakefield/covey-critters/assets/8831999/5b13cbb3-c9d0-42b5-b168-87ee7442119e) ![pigeon](https://github.com/wenbakefield/covey-critters/assets/8831999/1ba6c737-9c60-4bf5-a867-169ccf753fd1) ![seagull](https://github.com/wenbakefield/covey-critters/assets/8831999/3e21e2d7-1502-44d4-b5a8-bf95665d9146) 
+
+[Project Report](https://github.com/wenbakefield/covey-critters/blob/dfb9e2fb954eb0bab35a41f3c5786a528cab3fb1/docs/report.pdf)
 
 Covey Critters is a feature implementation for Covey.Town. We thought that players in the town should be able to compete in a carnival game, to earn a high score and a pet, which would follow them around. Thus, we implemented the following features, along with general improvements:
 - Carnival Game Area - where the user can play a game to win a critter based on their score
